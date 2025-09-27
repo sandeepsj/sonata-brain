@@ -45,7 +45,78 @@ public class Student {
     @Column(name = "status", nullable = false)
     private AdmissionStatus status = AdmissionStatus.active;
 
-    public Student() {
+    private Student() {
+    }
+
+    public static StudentBuilder builder() {
+        return new StudentBuilder();
+    }
+
+    public static class StudentBuilder {
+        private final Student student;
+
+        private StudentBuilder() {
+            student = new Student();
+        }
+
+        public StudentBuilder admissionNo(Long admissionNo) {
+            student.admissionNo = admissionNo;
+            return this;
+        }
+
+        public StudentBuilder admissionDate(LocalDate admissionDate) {
+            student.admissionDate = admissionDate;
+            return this;
+        }
+
+        public StudentBuilder studentName(String studentName) {
+            student.studentName = studentName;
+            return this;
+        }
+
+        public StudentBuilder contactNo(String contactNo) {
+            student.contactNo = contactNo;
+            return this;
+        }
+
+        public StudentBuilder dob(LocalDate dob) {
+            student.dob = dob;
+            return this;
+        }
+
+        public StudentBuilder className(String className) {
+            student.className = className;
+            return this;
+        }
+
+        public StudentBuilder school(String school) {
+            student.school = school;
+            return this;
+        }
+
+        public StudentBuilder address(String address) {
+            student.address = address;
+            return this;
+        }
+
+        public StudentBuilder pinCode(Integer pinCode) {
+            student.pinCode = pinCode;
+            return this;
+        }
+
+        public StudentBuilder remarks(String remarks) {
+            student.remarks = remarks;
+            return this;
+        }
+
+        public StudentBuilder status(AdmissionStatus status) {
+            student.status = status;
+            return this;
+        }
+
+        public Student build() {
+            return student;
+        }
     }
 
     // Minimal constructor for required fields
@@ -164,4 +235,3 @@ public class Student {
                 '}';
     }
 }
-
