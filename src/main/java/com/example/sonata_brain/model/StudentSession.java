@@ -1,30 +1,44 @@
 package com.example.sonata_brain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "student_sessions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class StudentSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "course_name", referencedColumnName = "name")
     private Course course;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id")
-    private Student student;
-
     @Column(name = "date_of_joining", nullable = false, updatable = false)
-    @CreationTimestamp
     private LocalDateTime dateOfJoining;
 
     @Column(name = "date_of_disjoining")
     private LocalDateTime dateOfDisjoining;
+
+    // Constructor for JPA
+    public StudentSession() {
+        this.dateOfJoining = LocalDateTime.now();
+    }
+
+    // Factory method for creating new sessions
+    public static StudentSession createSession(Student student, Course course) {
+        StudentSession session = new StudentSession();
+        session.setStudent(student);
+        session.setCourse(course);
+        return session;
+    }
 
     @PrePersist
     @PreUpdate

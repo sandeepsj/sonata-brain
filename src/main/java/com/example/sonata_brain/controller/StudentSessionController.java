@@ -43,10 +43,7 @@ public class StudentSessionController {
         Course course = courseRepository.findByName(request.getCourseName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
 
-        StudentSession session = new StudentSession();
-        session.setStudent(student);
-        session.setCourse(course);
-
+        StudentSession session = StudentSession.createSession(student, course);
         return ResponseEntity.ok(studentSessionRepository.save(session));
     }
 

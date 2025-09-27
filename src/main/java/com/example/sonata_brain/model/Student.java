@@ -1,11 +1,13 @@
 package com.example.sonata_brain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
 @Table(name = "student")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Student {
 
     @Id
@@ -45,7 +47,8 @@ public class Student {
     @Column(name = "status", nullable = false)
     private AdmissionStatus status = AdmissionStatus.active;
 
-    private Student() {
+    // Changed from private to protected for Hibernate
+    protected Student() {
     }
 
     public static StudentBuilder builder() {
