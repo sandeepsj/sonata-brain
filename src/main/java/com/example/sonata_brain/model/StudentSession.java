@@ -37,18 +37,18 @@ public class StudentSession {
         StudentSession session = new StudentSession();
         session.setStudent(student);
         session.setCourse(course);
-
+        
         if (joiningDate != null) {
             session.setDateOfJoining(joiningDate);
         }
-
+        
         if (disjoinDate != null) {
             if (disjoinDate.isBefore(session.getDateOfJoining())) {
                 throw new IllegalArgumentException("Date of disjoining must be after date of joining");
             }
             session.setDateOfDisjoining(disjoinDate);
         }
-
+        
         return session;
     }
 

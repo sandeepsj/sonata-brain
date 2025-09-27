@@ -50,8 +50,16 @@ public class StudentSessionController {
         LocalDateTime disjoinDate = request.getDateOfDisjoining();
         LocalDateTime now = LocalDateTime.now();
 
+        // Set defaults if not provided
+        if (joiningDate == null) {
+            joiningDate = now;
+        }
+
+        // If no disjoin date provided, set a future date for overlap checking
+        LocalDateTime endDateForCheck = disjoinDate != null ? disjoinDate : now.plusYears(100);
+
         // Validate joining date is not in future
-        if (joiningDate != null && joiningDate.isAfter(now)) {
+        if (joiningDate.isAfter(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Date of joining cannot be in the future");
         }
@@ -62,15 +70,27 @@ public class StudentSessionController {
                 "Date of disjoining cannot be in the future");
         }
 
-        // Check for existing active session
-        Optional<StudentSession> existingSession = studentSessionRepository.findActiveSession(student, course);
-        if (existingSession.isPresent()) {
-            StudentSession activeSession = existingSession.get();
-            String errorMessage = activeSession.getDateOfDisjoining() == null
-                ? "Student already has an active session for this course"
-                : String.format("Student has an active session for this course until %s",
-                    activeSession.getDateOfDisjoining().toString());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+        // Validate disjoining date is after joining date
+        if (disjoinDate != null && disjoinDate.isBefore(joiningDate)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Date of disjoining cannot be before date of joining");
+        }
+
+        // Check for overlapping sessions
+        List<StudentSession> overlappingSessions = studentSessionRepository.findOverlappingSessions(
+            student, course, joiningDate, endDateForCheck);
+
+        if (!overlappingSessions.isEmpty()) {
+            StudentSession conflictSession = overlappingSessions.get(0);
+            String conflictMessage = String.format(
+                "Session overlaps with existing session (ID: %d) from %s to %s",
+                conflictSession.getId(),
+                conflictSession.getDateOfJoining().toString(),
+                conflictSession.getDateOfDisjoining() != null
+                    ? conflictSession.getDateOfDisjoining().toString()
+                    : "ongoing"
+            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, conflictMessage);
         }
 
         try {

@@ -25,4 +25,13 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
     @Query("SELECT ss FROM StudentSession ss WHERE ss.course.name = :courseName " +
            "AND (ss.dateOfDisjoining IS NULL OR ss.dateOfDisjoining > CURRENT_TIMESTAMP)")
     List<StudentSession> findActiveSessionsByCourseName(@Param("courseName") String courseName);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student = :student AND ss.course = :course " +
+           "AND ((ss.dateOfDisjoining IS NULL) OR " +
+           "(:startDate < COALESCE(ss.dateOfDisjoining, CURRENT_TIMESTAMP) AND " +
+           ":endDate > ss.dateOfJoining))")
+    List<StudentSession> findOverlappingSessions(@Param("student") Student student,
+                                                @Param("course") Course course,
+                                                @Param("startDate") java.time.LocalDateTime startDate,
+                                                @Param("endDate") java.time.LocalDateTime endDate);
 }
