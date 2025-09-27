@@ -32,12 +32,29 @@ public class StudentSession {
         this.dateOfJoining = LocalDateTime.now();
     }
 
-    // Factory method for creating new sessions
-    public static StudentSession createSession(Student student, Course course) {
+    // Factory method for creating new sessions with optional dates
+    public static StudentSession createSession(Student student, Course course, LocalDateTime joiningDate, LocalDateTime disjoinDate) {
         StudentSession session = new StudentSession();
         session.setStudent(student);
         session.setCourse(course);
+
+        if (joiningDate != null) {
+            session.setDateOfJoining(joiningDate);
+        }
+
+        if (disjoinDate != null) {
+            if (disjoinDate.isBefore(session.getDateOfJoining())) {
+                throw new IllegalArgumentException("Date of disjoining must be after date of joining");
+            }
+            session.setDateOfDisjoining(disjoinDate);
+        }
+
         return session;
+    }
+
+    // Overloaded method for backward compatibility
+    public static StudentSession createSession(Student student, Course course) {
+        return createSession(student, course, null, null);
     }
 
     @PrePersist
