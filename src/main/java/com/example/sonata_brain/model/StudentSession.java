@@ -1,7 +1,6 @@
 package com.example.sonata_brain.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -12,15 +11,14 @@ public class StudentSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_name", referencedColumnName = "courseName", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "course_name", referencedColumnName = "name")
     private Course course;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "student_id")
     private Student student;
 
-    @NotNull
     @Column(name = "date_of_joining", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime dateOfJoining;
