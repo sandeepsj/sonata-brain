@@ -37,4 +37,10 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
 
     @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId AND ss.course.name = :courseName")
     List<StudentSession> findByStudentIdAndCourse_Name(@Param("studentId") Long studentId, @Param("courseName") String courseName);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE " +
+           "(ss.dateOfJoining <= :endDate) AND " +
+           "(ss.dateOfDisjoining IS NULL OR ss.dateOfDisjoining >= :startDate)")
+    List<StudentSession> findActiveSessionsInPeriod(@Param("startDate") java.time.LocalDateTime startDate,
+                                                   @Param("endDate") java.time.LocalDateTime endDate);
 }

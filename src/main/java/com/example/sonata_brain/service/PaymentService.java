@@ -9,6 +9,9 @@ import com.example.sonata_brain.repository.PaymentRepository;
 import com.example.sonata_brain.service.payment.AdditionalPaymentStrategy;
 import com.example.sonata_brain.service.payment.PaymentStrategy;
 import com.example.sonata_brain.service.payment.RegularPaymentStrategy;
+import com.example.sonata_brain.service.dues.events.DuesTrackerEventPublisher;
+import com.example.sonata_brain.service.dues.events.PaymentCreatedEvent;
+import com.example.sonata_brain.service.dues.events.PaymentDeactivatedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,9 @@ public class PaymentService {
 
     @Autowired
     private AdditionalPaymentStrategy additionalPaymentStrategy;
+
+    @Autowired
+    private DuesTrackerEventPublisher eventPublisher;
 
     // Using generic ApplicationLoggerFactory instead of payment-specific logger
     private final ApplicationLoggerFactory logger = ApplicationLoggerFactory.getInstance();
@@ -81,6 +87,12 @@ public class PaymentService {
                 payment.setDiscountAmount(totalDiscountAmount);
                 payment = paymentRepository.save(payment);
                 logger.logDatabaseOperation("UPDATE", "Payment", "Updated payment with discount amount: " + totalDiscountAmount);
+            }
+
+            // Publish event for dues tracking (only for regular payments)
+            if (payment.getPaymentType() == Payment.PaymentType.REGULAR) {
+                eventPublisher.publishEvent(new PaymentCreatedEvent(this, payment));
+                logger.logInfo("DUES_EVENT_PUBLISHED", "Published dues tracking event for payment ID: " + payment.getId());
             }
 
             logger.logOperationSuccess("PAYMENT_CREATION", "Student:" + request.getStudentId(), "Payment ID: " + payment.getId());
@@ -136,6 +148,12 @@ public class PaymentService {
         // Deactivate the payment
         payment.setIsActive(false);
         Payment savedPayment = paymentRepository.save(payment);
+
+        // Publish event for dues tracking (only for regular payments)
+        if (savedPayment.getPaymentType() == Payment.PaymentType.REGULAR) {
+            eventPublisher.publishEvent(new PaymentDeactivatedEvent(this, savedPayment));
+            logger.logInfo("DUES_EVENT_PUBLISHED", "Published dues tracking event for deactivated payment ID: " + savedPayment.getId());
+        }
 
         logger.logOperationSuccess("PAYMENT_DEACTIVATION", "Payment:" + paymentId, "Payment deactivated successfully");
         return savedPayment;
