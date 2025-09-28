@@ -34,4 +34,7 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
                                                 @Param("course") Course course,
                                                 @Param("startDate") java.time.LocalDateTime startDate,
                                                 @Param("endDate") java.time.LocalDateTime endDate);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId AND ss.course.name = :courseName")
+    List<StudentSession> findByStudentIdAndCourse_Name(@Param("studentId") Long studentId, @Param("courseName") String courseName);
 }
