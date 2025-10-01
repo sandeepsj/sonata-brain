@@ -3,6 +3,9 @@ package com.example.sonata_brain.controller;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,16 @@ public class StudentController {
     @Autowired
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Student>> getAllStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Student> students = studentService.getAllStudents(pageable);
+        return ResponseEntity.ok(students);
     }
 
     @PostMapping
@@ -39,14 +52,15 @@ public class StudentController {
     @GetMapping("/search")
     public ResponseEntity<List<Student>> searchStudents(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate admissionDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate admissionDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate admissionDateTo,
             @RequestParam(required = false) String school,
             @RequestParam(required = false) Integer pinCode,
             @RequestParam(required = false) String contactNo,
             @RequestParam(required = false) String className) {
 
         List<Student> students = studentService.searchStudents(
-                name, admissionDate, school, pinCode, contactNo, className
+                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className
         );
         return ResponseEntity.ok(students);
     }

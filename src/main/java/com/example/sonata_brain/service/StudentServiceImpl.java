@@ -5,6 +5,8 @@ import com.example.sonata_brain.exception.StudentNotFoundException;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.spec.StudentSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +33,12 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<Student> searchStudents(String name, LocalDate admissionDate,
+    public List<Student> searchStudents(String name, LocalDate admissionDateFrom, LocalDate admissionDateTo,
                                       String school, Integer pinCode,
                                       String contactNo, String className) {
         return studentRepository.findAll(
             StudentSpecifications.withDynamicQuery(
-                name, admissionDate, school, pinCode, contactNo, className
+                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className
             )
         );
     }
@@ -87,5 +89,10 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Optional<Student> findById(Long id) {
         return studentRepository.findById(id);
+    }
+
+    @Override
+    public Page<Student> getAllStudents(Pageable pageable) {
+        return studentRepository.findAll(pageable);
     }
 }

@@ -12,9 +12,9 @@ import java.util.List;
 
 public class StudentSpecifications {
 
-    public static Specification<Student> withDynamicQuery(String name, LocalDate admissionDate, 
-            String school, Integer pinCode, String contactNo, String className) {
-        
+    public static Specification<Student> withDynamicQuery(String name, LocalDate admissionDateFrom,
+            LocalDate admissionDateTo, String school, Integer pinCode, String contactNo, String className) {
+
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -25,14 +25,18 @@ public class StudentSpecifications {
                 ));
             }
 
-            if (admissionDate != null) {
-                predicates.add(criteriaBuilder.equal(root.get("admissionDate"), admissionDate));
+            if (admissionDateFrom != null && admissionDateTo != null) {
+                predicates.add(criteriaBuilder.between(root.get("admissionDate"), admissionDateFrom, admissionDateTo));
+            } else if (admissionDateFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("admissionDate"), admissionDateFrom));
+            } else if (admissionDateTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("admissionDate"), admissionDateTo));
             }
 
             if (school != null && !school.trim().isEmpty()) {
-                predicates.add(criteriaBuilder.equal(
+                predicates.add(criteriaBuilder.like(
                     criteriaBuilder.lower(root.get("school")),
-                    school.toLowerCase()
+                    "%" + school.toLowerCase() + "%"
                 ));
             }
 
@@ -41,7 +45,10 @@ public class StudentSpecifications {
             }
 
             if (contactNo != null && !contactNo.trim().isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("contactNo"), contactNo));
+                predicates.add(criteriaBuilder.like(
+                    root.get("contactNo"),
+                    "%" + contactNo + "%"
+                ));
             }
 
             if (className != null && !className.trim().isEmpty()) {
