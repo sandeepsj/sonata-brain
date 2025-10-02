@@ -5,29 +5,24 @@ import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-@Component
-@Scope("prototype")
 public class RecalculateDuesForDeactivatedPaymentCommand implements DuesTrackerCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(RecalculateDuesForDeactivatedPaymentCommand.class);
 
-    @Autowired
-    private FeeDuesTrackerService feeDuesTrackerService;
-
-    @Autowired
-    private DuesCalculationService duesCalculationService;
-
+    private final FeeDuesTrackerService feeDuesTrackerService;
+    private final DuesCalculationService duesCalculationService;
     private final Payment payment;
 
-    public RecalculateDuesForDeactivatedPaymentCommand(Payment payment) {
+    public RecalculateDuesForDeactivatedPaymentCommand(Payment payment,
+                                                     FeeDuesTrackerService feeDuesTrackerService,
+                                                     DuesCalculationService duesCalculationService) {
         this.payment = payment;
+        this.feeDuesTrackerService = feeDuesTrackerService;
+        this.duesCalculationService = duesCalculationService;
     }
 
     @Override
@@ -41,85 +36,33 @@ public class RecalculateDuesForDeactivatedPaymentCommand implements DuesTrackerC
             return;
         }
 
-        // Get the term information from fee structure
-        Term term = duesCalculationService.getTermFromFeeStructure(payment.getFeeStructure());
-        if (term == null) {
-            logger.warn("Could not determine term from fee structure for payment {}", payment.getId());
-            return;
-        }
-
-        // Find dues that were affected by this payment
+        // Find dues that were affected by this payment using the correct service method
         List<FeeDuesTracker> affectedDues = feeDuesTrackerService.findMatchingDuesForPayment(
             payment.getStudent().getAdmissionNo(),
-            payment.getCourseName(),
-            term.getYear(),
-            term.getTermNumber()
-        );
-
-        // Also check for paid dues that might have been paid by this payment
-        List<FeeDuesTracker> paidDues = feeDuesTrackerService.getDuesByStudentAndStatus(
-            payment.getStudent().getAdmissionNo(), FeeDuesTracker.DuesStatus.PAID);
-
-        // Filter paid dues for the same term and course
-        paidDues.removeIf(dues ->
-            !dues.getTermYear().equals(term.getYear()) ||
-            !dues.getTermNumber().equals(term.getTermNumber()) ||
-            !dues.getStudentSession().getCourse().getName().equals(payment.getCourseName())
-        );
-
-        affectedDues.addAll(paidDues);
+            payment.getFeeStructure().getCourse().getName(),
+            payment.getFeeStructure().getYear(),
+            payment.getFeeStructure().getTerm());
 
         if (affectedDues.isEmpty()) {
-            logger.warn("No affected dues found for deactivated payment {}", payment.getId());
+            logger.warn("No dues found for deactivated payment {} (Student: {}, Fee Structure: {})",
+                       payment.getId(), payment.getStudent().getAdmissionNo(), payment.getFeeStructure().getId());
             return;
         }
 
-        // Reverse the payment effect - add the payment amount back to dues
-        BigDecimal paymentToReverse = payment.getFinalAmount(); // Amount after discounts
-        int updatedCount = 0;
+        for (FeeDuesTracker dues : affectedDues) {
+            if (dues.getStatus() == FeeDuesTracker.DuesStatus.PAID ||
+                dues.getStatus() == FeeDuesTracker.DuesStatus.PARTIALLY_PAID) {
 
-        // Reverse in reverse order (LIFO - last applied first)
-        for (int i = affectedDues.size() - 1; i >= 0 && paymentToReverse.compareTo(BigDecimal.ZERO) > 0; i--) {
-            FeeDuesTracker dues = affectedDues.get(i);
-
-            // Calculate how much was originally paid on this dues entry
-            BigDecimal originalFeeAmount = dues.getFeeStructure().getAmount();
-            BigDecimal currentDueAmount = dues.getDueAmount();
-            BigDecimal paidAmount = originalFeeAmount.subtract(currentDueAmount);
-
-            if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
-                // Determine how much to reverse (minimum of what was paid or remaining reversal amount)
-                BigDecimal amountToReverse = paymentToReverse.min(paidAmount);
-
-                // Add back the reversed amount
-                BigDecimal newDueAmount = dues.getDueAmount().add(amountToReverse);
-                dues.setDueAmount(newDueAmount);
-
-                // Update status based on new due amount
-                if (newDueAmount.compareTo(originalFeeAmount) >= 0) {
-                    dues.setStatus(FeeDuesTracker.DuesStatus.DUE);
-                } else if (newDueAmount.compareTo(BigDecimal.ZERO) > 0) {
-                    dues.setStatus(FeeDuesTracker.DuesStatus.PARTIALLY_PAID);
-                }
-
-                dues.setRemarks("Payment reversed - Payment ID: " + payment.getId());
+                // Reactivate the dues to its original amount since payment is deactivated
+                dues.reactivate(payment.getFeeStructure().getAmount());
                 feeDuesTrackerService.save(dues);
 
-                paymentToReverse = paymentToReverse.subtract(amountToReverse);
-                updatedCount++;
-
-                logger.debug("Reversed {} from payment on dues ID: {}, remaining reversal: {}",
-                            amountToReverse, dues.getId(), paymentToReverse);
+                logger.debug("Recalculated dues ID: {} after payment deactivation", dues.getId());
+                break; // Assuming one payment maps to one dues entry
             }
         }
 
-        if (paymentToReverse.compareTo(BigDecimal.ZERO) > 0) {
-            logger.warn("Could not fully reverse payment amount {} for payment ID: {}",
-                       paymentToReverse, payment.getId());
-        }
-
-        logger.info("Recalculated {} dues entries for deactivated payment ID: {}",
-                   updatedCount, payment.getId());
+        logger.info("Successfully recalculated dues for deactivated payment ID: {}", payment.getId());
     }
 
     @Override

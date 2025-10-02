@@ -5,28 +5,23 @@ import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-@Scope("prototype")
 public class CreateDuesForNewSessionCommand implements DuesTrackerCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateDuesForNewSessionCommand.class);
 
-    @Autowired
-    private FeeDuesTrackerService feeDuesTrackerService;
-
-    @Autowired
-    private DuesCalculationService duesCalculationService;
-
+    private final FeeDuesTrackerService feeDuesTrackerService;
+    private final DuesCalculationService duesCalculationService;
     private final StudentSession studentSession;
 
-    public CreateDuesForNewSessionCommand(StudentSession studentSession) {
+    public CreateDuesForNewSessionCommand(StudentSession studentSession,
+                                        FeeDuesTrackerService feeDuesTrackerService,
+                                        DuesCalculationService duesCalculationService) {
         this.studentSession = studentSession;
+        this.feeDuesTrackerService = feeDuesTrackerService;
+        this.duesCalculationService = duesCalculationService;
     }
 
     @Override

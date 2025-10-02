@@ -7,6 +7,7 @@ import com.example.sonata_brain.model.StudentSession;
 import com.example.sonata_brain.repository.CourseRepository;
 import com.example.sonata_brain.Repository.StudentRepository;
 import com.example.sonata_brain.repository.StudentSessionRepository;
+import com.example.sonata_brain.service.StudentSessionService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/student-sessions")
@@ -26,15 +26,18 @@ public class StudentSessionController {
     private final StudentSessionRepository studentSessionRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final StudentSessionService studentSessionService;
 
     @Autowired
     public StudentSessionController(
             StudentSessionRepository studentSessionRepository,
             StudentRepository studentRepository,
-            CourseRepository courseRepository) {
+            CourseRepository courseRepository,
+            StudentSessionService studentSessionService) {
         this.studentSessionRepository = studentSessionRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
+        this.studentSessionService = studentSessionService;
     }
 
     @PostMapping
@@ -95,7 +98,8 @@ public class StudentSessionController {
 
         try {
             StudentSession session = StudentSession.createSession(student, course, joiningDate, disjoinDate);
-            return ResponseEntity.ok(studentSessionRepository.save(session));
+            // Use service instead of direct repository save to trigger events
+            return ResponseEntity.ok(studentSessionService.createStudentSession(session));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -110,8 +114,8 @@ public class StudentSessionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session is already disjoined");
         }
 
-        session.setDateOfDisjoining(LocalDateTime.now());
-        return ResponseEntity.ok(studentSessionRepository.save(session));
+        // Use service to trigger events for dues recalculation
+        return ResponseEntity.ok(studentSessionService.disjoinStudent(id, LocalDateTime.now()));
     }
 
     @GetMapping("/{id}")

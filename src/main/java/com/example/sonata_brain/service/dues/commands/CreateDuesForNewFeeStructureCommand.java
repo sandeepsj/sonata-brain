@@ -6,31 +6,26 @@ import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-@Scope("prototype")
 public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateDuesForNewFeeStructureCommand.class);
 
-    @Autowired
-    private FeeDuesTrackerService feeDuesTrackerService;
-
-    @Autowired
-    private DuesCalculationService duesCalculationService;
-
-    @Autowired
-    private FeeStructureRepository feeStructureRepository;
-
+    private final FeeDuesTrackerService feeDuesTrackerService;
+    private final DuesCalculationService duesCalculationService;
+    private final FeeStructureRepository feeStructureRepository;
     private final FeeStructure feeStructure;
 
-    public CreateDuesForNewFeeStructureCommand(FeeStructure feeStructure) {
+    public CreateDuesForNewFeeStructureCommand(FeeStructure feeStructure,
+                                             FeeDuesTrackerService feeDuesTrackerService,
+                                             DuesCalculationService duesCalculationService,
+                                             FeeStructureRepository feeStructureRepository) {
         this.feeStructure = feeStructure;
+        this.feeDuesTrackerService = feeDuesTrackerService;
+        this.duesCalculationService = duesCalculationService;
+        this.feeStructureRepository = feeStructureRepository;
     }
 
     /**
@@ -52,52 +47,49 @@ public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
                    feeStructure.getId(), feeStructure.getCourse().getName(),
                    feeStructure.getYear(), feeStructure.getTerm());
 
-        // Get all active student sessions for the fee structure's year
+        if (!feeStructure.getIsActive()) {
+            logger.debug("Fee structure is not active, skipping dues creation");
+            return;
+        }
+
+        // Get all active sessions for the specific term and course
         List<StudentSession> activeSessions = duesCalculationService.getActiveSessionsForYear(feeStructure.getYear());
 
         int createdCount = 0;
+
         for (StudentSession session : activeSessions) {
-            // Only create dues for sessions with the same course
-            if (session.getCourse().getId().equals(feeStructure.getCourse().getId())) {
-                // Check if student was active during this term
-                int termsPerYear = getTermsPerYearFromFeeStructure(session.getCourse(), feeStructure.getYear());
-                Term term = new Term(feeStructure.getYear(), feeStructure.getTerm(), termsPerYear);
+            // Only create dues for sessions in the same course
+            if (!session.getCourse().getId().equals(feeStructure.getCourse().getId())) {
+                continue;
+            }
 
-                if (isStudentActiveInTerm(session, term)) {
-                    // Check if dues already exist
-                    if (!feeDuesTrackerService.duesExist(session, feeStructure)) {
-                        FeeDuesTracker duesTracker = feeDuesTrackerService.createDuesTracker(
-                            session, feeStructure, feeStructure.getAmount());
+            // Check if the session overlaps with this fee structure term
+            Term feeStructureTerm = new Term(feeStructure.getYear(), feeStructure.getTerm(),
+                                           getTermsPerYearFromFeeStructure(feeStructure.getCourse(), feeStructure.getYear()));
 
-                        createdCount++;
-                        logger.debug("Created dues tracker ID: {} for session {}",
-                                    duesTracker.getId(), session.getId());
-                    } else {
-                        logger.debug("Dues already exist for session {} and fee structure {}",
-                                    session.getId(), feeStructure.getId());
-                    }
+            List<Term> sessionTerms = duesCalculationService.calculateDueTermsForSession(session);
+
+            boolean sessionOverlapsWithTerm = sessionTerms.stream()
+                .anyMatch(term -> term.getYear() == feeStructureTerm.getYear() &&
+                                term.getTermNumber() == feeStructureTerm.getTermNumber());
+
+            if (sessionOverlapsWithTerm) {
+                // Check if dues already exist to avoid duplicates
+                if (!feeDuesTrackerService.duesExist(session, feeStructure)) {
+                    FeeDuesTracker duesTracker = feeDuesTrackerService.createDuesTracker(
+                        session, feeStructure, feeStructure.getAmount());
+
+                    createdCount++;
+                    logger.debug("Created dues tracker ID: {} for session {} and fee structure {}",
+                                duesTracker.getId(), session.getId(), feeStructure.getId());
+                } else {
+                    logger.debug("Dues already exist for session {} and fee structure {}",
+                                session.getId(), feeStructure.getId());
                 }
             }
         }
 
         logger.info("Created {} dues entries for new fee structure ID: {}", createdCount, feeStructure.getId());
-    }
-
-    private boolean isStudentActiveInTerm(StudentSession session, Term term) {
-        // Student is active in term if:
-        // 1. Join date is before or during the term
-        // 2. Disjoin date is null OR after the term starts
-
-        if (session.getDateOfJoining().isAfter(term.getTermEndDate())) {
-            return false; // Joined after term ended
-        }
-
-        if (session.getDateOfDisjoining() != null &&
-            session.getDateOfDisjoining().isBefore(term.convertToDate())) {
-            return false; // Left before term started
-        }
-
-        return true;
     }
 
     @Override

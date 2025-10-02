@@ -5,31 +5,26 @@ import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
-@Scope("prototype")
 public class CancelDuesForDisjoinCommand implements DuesTrackerCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(CancelDuesForDisjoinCommand.class);
 
-    @Autowired
-    private FeeDuesTrackerService feeDuesTrackerService;
-
-    @Autowired
-    private DuesCalculationService duesCalculationService;
-
+    private final FeeDuesTrackerService feeDuesTrackerService;
+    private final DuesCalculationService duesCalculationService;
     private final StudentSession studentSession;
     private final LocalDateTime disjoinDate;
 
-    public CancelDuesForDisjoinCommand(StudentSession studentSession, LocalDateTime disjoinDate) {
+    public CancelDuesForDisjoinCommand(StudentSession studentSession, LocalDateTime disjoinDate,
+                                     FeeDuesTrackerService feeDuesTrackerService,
+                                     DuesCalculationService duesCalculationService) {
         this.studentSession = studentSession;
         this.disjoinDate = disjoinDate;
+        this.feeDuesTrackerService = feeDuesTrackerService;
+        this.duesCalculationService = duesCalculationService;
     }
 
     @Override

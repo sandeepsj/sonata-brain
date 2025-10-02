@@ -1,6 +1,9 @@
 package com.example.sonata_brain.service.dues.events;
 
 import com.example.sonata_brain.service.dues.commands.*;
+import com.example.sonata_brain.service.FeeDuesTrackerService;
+import com.example.sonata_brain.service.dues.DuesCalculationService;
+import com.example.sonata_brain.repository.FeeStructureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -14,9 +17,18 @@ public class DuesEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(DuesEventHandler.class);
 
     private final DuesCommandProcessor commandProcessor;
+    private final FeeDuesTrackerService feeDuesTrackerService;
+    private final DuesCalculationService duesCalculationService;
+    private final FeeStructureRepository feeStructureRepository;
 
-    public DuesEventHandler(DuesCommandProcessor commandProcessor) {
+    public DuesEventHandler(DuesCommandProcessor commandProcessor,
+                           FeeDuesTrackerService feeDuesTrackerService,
+                           DuesCalculationService duesCalculationService,
+                           FeeStructureRepository feeStructureRepository) {
         this.commandProcessor = commandProcessor;
+        this.feeDuesTrackerService = feeDuesTrackerService;
+        this.duesCalculationService = duesCalculationService;
+        this.feeStructureRepository = feeStructureRepository;
     }
 
     @EventListener
@@ -27,7 +39,8 @@ public class DuesEventHandler {
                    event.getStudentSession().getId());
 
         try {
-            CreateDuesForNewSessionCommand command = new CreateDuesForNewSessionCommand(event.getStudentSession());
+            CreateDuesForNewSessionCommand command = new CreateDuesForNewSessionCommand(
+                event.getStudentSession(), feeDuesTrackerService, duesCalculationService);
             commandProcessor.process(command);
             logger.info("Successfully created dues for new session ID: {}",
                        event.getStudentSession().getId());
@@ -54,7 +67,8 @@ public class DuesEventHandler {
 
         try {
             CancelDuesForDisjoinCommand command = new CancelDuesForDisjoinCommand(
-                event.getStudentSession(), event.getNewDisjoinDate());
+                event.getStudentSession(), event.getNewDisjoinDate(),
+                feeDuesTrackerService, duesCalculationService);
             commandProcessor.process(command);
             logger.info("Successfully updated dues for session disjoin ID: {}",
                        event.getStudentSession().getId());
@@ -73,7 +87,8 @@ public class DuesEventHandler {
                    event.getFeeStructure().getId());
 
         try {
-            CreateDuesForNewFeeStructureCommand command = new CreateDuesForNewFeeStructureCommand(event.getFeeStructure());
+            CreateDuesForNewFeeStructureCommand command = new CreateDuesForNewFeeStructureCommand(
+                event.getFeeStructure(), feeDuesTrackerService, duesCalculationService, feeStructureRepository);
             commandProcessor.process(command);
             logger.info("Successfully created dues for new fee structure ID: {}",
                        event.getFeeStructure().getId());
@@ -92,7 +107,8 @@ public class DuesEventHandler {
                    event.getPayment().getId());
 
         try {
-            UpdateDuesForPaymentCommand command = new UpdateDuesForPaymentCommand(event.getPayment());
+            UpdateDuesForPaymentCommand command = new UpdateDuesForPaymentCommand(
+                event.getPayment(), feeDuesTrackerService, duesCalculationService);
             commandProcessor.process(command);
             logger.info("Successfully updated dues for new payment ID: {}",
                        event.getPayment().getId());
@@ -112,7 +128,8 @@ public class DuesEventHandler {
 
         try {
             RecalculateDuesForDeactivatedPaymentCommand command =
-                new RecalculateDuesForDeactivatedPaymentCommand(event.getPayment());
+                new RecalculateDuesForDeactivatedPaymentCommand(
+                    event.getPayment(), feeDuesTrackerService, duesCalculationService);
             commandProcessor.process(command);
             logger.info("Successfully recalculated dues for deactivated payment ID: {}",
                        event.getPayment().getId());
