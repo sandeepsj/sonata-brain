@@ -43,4 +43,39 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
            "(ss.dateOfDisjoining IS NULL OR ss.dateOfDisjoining >= :startDate)")
     List<StudentSession> findActiveSessionsInPeriod(@Param("startDate") java.time.LocalDateTime startDate,
                                                    @Param("endDate") java.time.LocalDateTime endDate);
+
+    // Methods for getting ALL sessions (active + inactive) - Historical data
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId")
+    List<StudentSession> findAllSessionsByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.course.name = :courseName")
+    List<StudentSession> findAllSessionsByCourseName(@Param("courseName") String courseName);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId AND ss.course.name = :courseName")
+    List<StudentSession> findAllSessionsByStudentIdAndCourseName(@Param("studentId") Long studentId, @Param("courseName") String courseName);
+
+    // Methods for getting only INACTIVE sessions
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId " +
+           "AND ss.dateOfDisjoining IS NOT NULL AND ss.dateOfDisjoining <= CURRENT_TIMESTAMP")
+    List<StudentSession> findInactiveSessionsByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.course.name = :courseName " +
+           "AND ss.dateOfDisjoining IS NOT NULL AND ss.dateOfDisjoining <= CURRENT_TIMESTAMP")
+    List<StudentSession> findInactiveSessionsByCourseName(@Param("courseName") String courseName);
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId AND ss.course.name = :courseName " +
+           "AND ss.dateOfDisjoining IS NOT NULL AND ss.dateOfDisjoining <= CURRENT_TIMESTAMP")
+    List<StudentSession> findInactiveSessionsByStudentIdAndCourseName(@Param("studentId") Long studentId, @Param("courseName") String courseName);
+
+    // Methods for getting ACTIVE sessions with specific filters
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.student.admissionNo = :studentId AND ss.course.name = :courseName " +
+           "AND (ss.dateOfDisjoining IS NULL OR ss.dateOfDisjoining > CURRENT_TIMESTAMP)")
+    List<StudentSession> findActiveSessionsByStudentIdAndCourseName(@Param("studentId") Long studentId, @Param("courseName") String courseName);
+
+    // Methods for getting ALL active/inactive sessions globally
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.dateOfDisjoining IS NULL OR ss.dateOfDisjoining > CURRENT_TIMESTAMP")
+    List<StudentSession> findAllActiveSessions();
+
+    @Query("SELECT ss FROM StudentSession ss WHERE ss.dateOfDisjoining IS NOT NULL AND ss.dateOfDisjoining <= CURRENT_TIMESTAMP")
+    List<StudentSession> findAllInactiveSessions();
 }

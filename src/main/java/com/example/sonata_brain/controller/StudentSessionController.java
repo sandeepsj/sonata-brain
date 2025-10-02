@@ -147,4 +147,92 @@ public class StudentSessionController {
         }
         return ResponseEntity.ok(sessions);
     }
+
+    @GetMapping("/all/student/{studentId}")
+    public ResponseEntity<List<StudentSession>> getAllSessionsByStudent(@PathVariable Long studentId) {
+        // Verify student exists first
+        studentRepository.findById(studentId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+
+        List<StudentSession> sessions = studentSessionRepository.findAllSessionsByStudentId(studentId);
+        if (sessions.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "No sessions found for student ID: " + studentId);
+        }
+        return ResponseEntity.ok(sessions);
+    }
+
+    @GetMapping("/all/course/{courseName}")
+    public ResponseEntity<List<StudentSession>> getAllSessionsByCourse(@PathVariable String courseName) {
+        // Verify course exists first
+        courseRepository.findByName(courseName)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+
+        List<StudentSession> sessions = studentSessionRepository.findAllSessionsByCourseName(courseName);
+        if (sessions.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "No sessions found for course: " + courseName);
+        }
+        return ResponseEntity.ok(sessions);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<StudentSession>> getAllSessions(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String courseName,
+            @RequestParam(required = false) Boolean active) {
+
+        List<StudentSession> sessions;
+
+        if (studentId != null && courseName != null) {
+            // Both student and course specified
+            studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+            courseRepository.findByName(courseName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+
+            if (active != null) {
+                sessions = active
+                    ? studentSessionRepository.findActiveSessionsByStudentIdAndCourseName(studentId, courseName)
+                    : studentSessionRepository.findInactiveSessionsByStudentIdAndCourseName(studentId, courseName);
+            } else {
+                sessions = studentSessionRepository.findAllSessionsByStudentIdAndCourseName(studentId, courseName);
+            }
+        } else if (studentId != null) {
+            // Only student specified
+            studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+
+            if (active != null) {
+                sessions = active
+                    ? studentSessionRepository.findActiveSessionsByStudentId(studentId)
+                    : studentSessionRepository.findInactiveSessionsByStudentId(studentId);
+            } else {
+                sessions = studentSessionRepository.findAllSessionsByStudentId(studentId);
+            }
+        } else if (courseName != null) {
+            // Only course specified
+            courseRepository.findByName(courseName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+
+            if (active != null) {
+                sessions = active
+                    ? studentSessionRepository.findActiveSessionsByCourseName(courseName)
+                    : studentSessionRepository.findInactiveSessionsByCourseName(courseName);
+            } else {
+                sessions = studentSessionRepository.findAllSessionsByCourseName(courseName);
+            }
+        } else {
+            // No specific filters, get all sessions
+            if (active != null) {
+                sessions = active
+                    ? studentSessionRepository.findAllActiveSessions()
+                    : studentSessionRepository.findAllInactiveSessions();
+            } else {
+                sessions = studentSessionRepository.findAll();
+            }
+        }
+
+        return ResponseEntity.ok(sessions);
+    }
 }
