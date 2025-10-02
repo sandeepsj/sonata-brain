@@ -1,6 +1,7 @@
 package com.example.sonata_brain.service.dues.commands;
 
 import com.example.sonata_brain.model.*;
+import com.example.sonata_brain.repository.FeeStructureRepository;
 import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import org.slf4j.Logger;
@@ -23,10 +24,26 @@ public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
     @Autowired
     private DuesCalculationService duesCalculationService;
 
+    @Autowired
+    private FeeStructureRepository feeStructureRepository;
+
     private final FeeStructure feeStructure;
 
     public CreateDuesForNewFeeStructureCommand(FeeStructure feeStructure) {
         this.feeStructure = feeStructure;
+    }
+
+    /**
+     * Get number of terms for a course in a specific year from fee structure
+     */
+    private int getTermsPerYearFromFeeStructure(Course course, int year) {
+        List<FeeStructure> feeStructures = feeStructureRepository.findByCourseAndYear(course, year);
+        if (feeStructures.isEmpty()) {
+            logger.warn("No fee structure found for course {} in year {}, defaulting to 4 terms",
+                       course.getName(), year);
+            return 4; // Default fallback
+        }
+        return feeStructures.size(); // Number of fee structure records = number of terms
     }
 
     @Override
@@ -43,8 +60,8 @@ public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
             // Only create dues for sessions with the same course
             if (session.getCourse().getId().equals(feeStructure.getCourse().getId())) {
                 // Check if student was active during this term
-                Term term = new Term(feeStructure.getYear(), feeStructure.getTerm(),
-                                   session.getCourse().getTermsPerYear());
+                int termsPerYear = getTermsPerYearFromFeeStructure(session.getCourse(), feeStructure.getYear());
+                Term term = new Term(feeStructure.getYear(), feeStructure.getTerm(), termsPerYear);
 
                 if (isStudentActiveInTerm(session, term)) {
                     // Check if dues already exist

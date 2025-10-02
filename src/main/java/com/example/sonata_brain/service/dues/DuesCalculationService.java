@@ -24,6 +24,19 @@ public class DuesCalculationService {
     private StudentSessionRepository studentSessionRepository;
 
     /**
+     * Get number of terms for a course in a specific year from fee structure
+     */
+    private int getTermsPerYearFromFeeStructure(Course course, int year) {
+        List<FeeStructure> feeStructures = feeStructureRepository.findByCourseAndYear(course, year);
+        if (feeStructures.isEmpty()) {
+            logger.warn("No fee structure found for course {} in year {}, defaulting to 4 terms",
+                       course.getName(), year);
+            return 4; // Default fallback
+        }
+        return feeStructures.size(); // Number of fee structure records = number of terms
+    }
+
+    /**
      * Calculate all terms that should have dues for a student session
      */
     public List<Term> calculateDueTermsForSession(StudentSession session) {
@@ -39,11 +52,11 @@ public class DuesCalculationService {
         logger.debug("Calculating due terms for session {} from {} to {}",
                     session.getId(), startYear, endYear);
 
-        // Get the course to determine terms per year
         Course course = session.getCourse();
-        int termsPerYear = course.getTermsPerYear() != null ? course.getTermsPerYear() : 4; // Default to 4 terms
 
         for (int year = startYear; year <= endYear; year++) {
+            int termsPerYear = getTermsPerYearFromFeeStructure(course, year);
+
             for (int termNumber = 1; termNumber <= termsPerYear; termNumber++) {
                 Term term = new Term(year, termNumber, termsPerYear);
                 LocalDateTime termStartDate = term.convertToDate();
@@ -97,13 +110,14 @@ public class DuesCalculationService {
 
         List<Term> termsToCancel = new ArrayList<>();
         Course course = session.getCourse();
-        int termsPerYear = course.getTermsPerYear() != null ? course.getTermsPerYear() : 4;
 
         // Start from disjoin year and check future terms
         int disjoinYear = disjoinDate.getYear();
         int currentYear = LocalDateTime.now().getYear();
 
         for (int year = disjoinYear; year <= currentYear + 1; year++) { // Check next year too
+            int termsPerYear = getTermsPerYearFromFeeStructure(course, year);
+
             for (int termNumber = 1; termNumber <= termsPerYear; termNumber++) {
                 Term term = new Term(year, termNumber, termsPerYear);
                 LocalDateTime termStartDate = term.convertToDate();
@@ -129,7 +143,8 @@ public class DuesCalculationService {
         }
 
         Course course = feeStructure.getCourse();
-        int termsPerYear = course.getTermsPerYear() != null ? course.getTermsPerYear() : 4;
+        int year = feeStructure.getYear();
+        int termsPerYear = getTermsPerYearFromFeeStructure(course, year);
 
         return new Term(feeStructure.getYear(), feeStructure.getTerm(), termsPerYear);
     }

@@ -18,9 +18,6 @@ public class Course {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "terms_per_year")
-    private Integer termsPerYear;
-
     // Getters and Setters
     public String getName() {
         return name;
@@ -28,14 +25,6 @@ public class Course {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Integer getTermsPerYear() {
-        return termsPerYear;
-    }
-
-    public void setTermsPerYear(Integer termsPerYear) {
-        this.termsPerYear = termsPerYear;
     }
 
     // For backward compatibility, return ID as name
