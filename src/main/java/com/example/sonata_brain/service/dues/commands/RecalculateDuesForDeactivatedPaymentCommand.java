@@ -53,11 +53,28 @@ public class RecalculateDuesForDeactivatedPaymentCommand implements DuesTrackerC
             if (dues.getStatus() == FeeDuesTracker.DuesStatus.PAID ||
                 dues.getStatus() == FeeDuesTracker.DuesStatus.PARTIALLY_PAID) {
 
-                // Reactivate the dues to its original amount since payment is deactivated
-                dues.reactivate(payment.getFeeStructure().getAmount());
+                // Calculate total effective amount that was previously deducted (amountPaid + discounts)
+                BigDecimal effectiveAmount = payment.getAmountPaid().add(payment.getDiscountAmount());
+
+                // Add back the effective amount to the dues since payment is now deactivated
+                BigDecimal newDueAmount = dues.getDueAmount().add(effectiveAmount);
+                dues.setDueAmount(newDueAmount);
+
+                // Update status based on new amount
+                BigDecimal totalFeeAmount = payment.getFeeStructure().getAmount();
+                if (newDueAmount.compareTo(totalFeeAmount) >= 0) {
+                    dues.setStatus(FeeDuesTracker.DuesStatus.DUE);
+                } else if (newDueAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    dues.setStatus(FeeDuesTracker.DuesStatus.PARTIALLY_PAID);
+                }
+
+                dues.setRemarks("Payment ID " + payment.getId() + " deactivated, added back effective amount: " + effectiveAmount);
+                dues.setUpdatedAt(java.time.LocalDateTime.now());
+
                 feeDuesTrackerService.save(dues);
 
-                logger.debug("Recalculated dues ID: {} after payment deactivation", dues.getId());
+                logger.debug("Recalculated dues ID: {} after payment deactivation. Added back effective amount: {} (paid: {}, discount: {})",
+                           dues.getId(), effectiveAmount, payment.getAmountPaid(), payment.getDiscountAmount());
                 break; // Assuming one payment maps to one dues entry
             }
         }

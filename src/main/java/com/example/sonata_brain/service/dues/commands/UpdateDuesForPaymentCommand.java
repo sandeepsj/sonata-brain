@@ -53,11 +53,15 @@ public class UpdateDuesForPaymentCommand implements DuesTrackerCommand {
             if (dues.getStatus() == FeeDuesTracker.DuesStatus.DUE ||
                 dues.getStatus() == FeeDuesTracker.DuesStatus.PARTIALLY_PAID) {
 
+                // Calculate total effective amount (amountPaid + discounts)
+                BigDecimal effectiveAmount = payment.getAmountPaid().add(payment.getDiscountAmount());
+
                 // Use the business method from FeeDuesTracker to update the payment
-                dues.updateDueAmount(payment.getAmountPaid(), "Payment ID: " + payment.getId());
+                dues.updateDueAmount(effectiveAmount, "Payment ID: " + payment.getId());
                 feeDuesTrackerService.save(dues);
 
-                logger.debug("Updated dues ID: {} for payment ID: {}", dues.getId(), payment.getId());
+                logger.debug("Updated dues ID: {} for payment ID: {} with effective amount: {} (paid: {}, discount: {})",
+                           dues.getId(), payment.getId(), effectiveAmount, payment.getAmountPaid(), payment.getDiscountAmount());
                 break; // Assuming one payment maps to one dues entry
             }
         }
