@@ -27,6 +27,14 @@ public class AdditionalPaymentStrategy implements PaymentStrategy {
         logger.logValidationStart("Student:" + request.getStudentId(), "ADDITIONAL_PAYMENT");
 
         try {
+            // Validate label is required for additional payments
+            if (request.getLabel() == null || request.getLabel().trim().isEmpty()) {
+                String error = "Label is required for additional payments to describe the purpose";
+                logger.logValidationFailure("Student:" + request.getStudentId(), "ADDITIONAL_PAYMENT", error);
+                throw new IllegalArgumentException(error);
+            }
+            logger.logDatabaseOperation("VALIDATION_SUCCESS", "Label", "Label validation passed");
+
             // Validate zero amount payments are only allowed with discounts
             if (!request.isValidZeroPayment()) {
                 String error = "Zero amount payments are only allowed when discounts are provided";

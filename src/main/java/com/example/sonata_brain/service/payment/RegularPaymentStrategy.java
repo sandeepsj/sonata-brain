@@ -97,6 +97,17 @@ public class RegularPaymentStrategy implements PaymentStrategy {
                     feeStructure.get().getTerm(),
                     feeStructure.get().getAmount()));
 
+            // Validate that the course name matches the fee structure's course
+            String feeStructureCourseName = feeStructure.get().getCourse().getName();
+            if (!feeStructureCourseName.equals(request.getCourseName())) {
+                String error = String.format("Course name mismatch: Fee structure ID %d is for course '%s' but request specified course '%s'",
+                    request.getTermId(), feeStructureCourseName, request.getCourseName());
+                logger.logValidationFailure("Student:" + request.getStudentId(), "REGULAR_PAYMENT", error);
+                throw new IllegalArgumentException(error);
+            }
+            logger.logDatabaseOperation("VALIDATION_SUCCESS", "CourseName",
+                String.format("Course name matches fee structure: %s", feeStructureCourseName));
+
             // Validate total payment amount (amountPaid + discounts) doesn't exceed fee structure amount
             validatePaymentAmountLimit(request.getStudentId(), request.getTermId(), request.getAmountPaid(), request.getDiscounts(), feeStructure.get());
 
@@ -136,8 +147,21 @@ public class RegularPaymentStrategy implements PaymentStrategy {
         logger.logDatabaseOperation("TERM_CONVERSION", "Term",
             String.format("Converting term to date - Year: %d, Term: %d", feeStructure.getYear(), feeStructure.getTerm()));
 
-        // Convert term to date range
-        Term term = new Term(feeStructure.getYear(), feeStructure.getTerm(), 4); // Assuming 4 terms per year
+        // Dynamically determine the number of terms per year for this course and year
+        List<FeeStructure> feeStructuresForYear = feeStructureRepository.findByCourseAndYear(
+            feeStructure.getCourse(), feeStructure.getYear());
+
+        int termsInYear = feeStructuresForYear.stream()
+            .mapToInt(FeeStructure::getTerm)
+            .max()
+            .orElse(4); // Default to 4 if no terms found
+
+        logger.logDatabaseOperation("TERM_CALCULATION", "FeeStructure",
+            String.format("Found %d fee structures for course %s in year %d. Terms per year: %d",
+                feeStructuresForYear.size(), courseName, feeStructure.getYear(), termsInYear));
+
+        // Convert term to date range with actual terms per year
+        Term term = new Term(feeStructure.getYear(), feeStructure.getTerm(), termsInYear);
         LocalDateTime termStartDate = term.convertToDate();
         LocalDateTime termEndDate = term.getTermEndDate();
 
@@ -168,17 +192,26 @@ public class RegularPaymentStrategy implements PaymentStrategy {
                         String.format("Checking session ID %d - Joining: %s, Disjoining: %s",
                             session.getId(), joiningDate, disjoinDate));
 
-                    // Check if term period overlaps with session period
-                    boolean termStartsAfterJoining = termStartDate.isAfter(joiningDate) || termStartDate.isEqual(joiningDate);
-                    boolean termEndsBeforeDisjoining = disjoinDate == null || termEndDate.isBefore(disjoinDate) || termEndDate.isEqual(disjoinDate);
+                    // Check if there's ANY overlap between term period and session period
+                    // Student should pay for a term if they were enrolled for ANY part of it
+                    // Overlap exists if: session starts before term ends AND session ends after term starts
 
-                    boolean isValid = termStartsAfterJoining && termEndsBeforeDisjoining;
+                    // Session starts before or during the term (joining <= termEnd)
+                    boolean sessionStartsBeforeTermEnds = joiningDate.isBefore(termEndDate) || joiningDate.isEqual(termEndDate);
+
+                    // Session ends after or during the term start (disjoining >= termStart OR still enrolled)
+                    boolean sessionEndsAfterTermStarts = disjoinDate == null ||
+                                                          disjoinDate.isAfter(termStartDate) ||
+                                                          disjoinDate.isEqual(termStartDate);
+
+                    // There's overlap if both conditions are true
+                    boolean hasOverlap = sessionStartsBeforeTermEnds && sessionEndsAfterTermStarts;
 
                     logger.logDatabaseOperation("SESSION_CHECK_RESULT", "StudentSession",
-                        String.format("Session ID %d validity: %s (starts after joining: %s, ends before disjoining: %s)",
-                            session.getId(), isValid, termStartsAfterJoining, termEndsBeforeDisjoining));
+                        String.format("Session ID %d - Overlap check: %s (session starts before term ends: %s, session ends after term starts: %s)",
+                            session.getId(), hasOverlap, sessionStartsBeforeTermEnds, sessionEndsAfterTermStarts));
 
-                    return isValid;
+                    return hasOverlap;
                 });
 
         if (!hasValidSession) {

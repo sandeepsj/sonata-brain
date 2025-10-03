@@ -17,7 +17,7 @@ public class PaymentCreateRequest {
 
     private String remarks;
 
-    @NotEmpty(message = "Label is required")
+    // Label is optional for regular payments but required for additional payments
     private String label;
 
     @NotNull(message = "Amount paid is required")
