@@ -92,24 +92,24 @@ public class FeeDuesTrackerService {
     }
 
     // Update dues amount (typically called when payment is made)
-    public FeeDuesTracker updateDuesAmount(Long duesId, BigDecimal paidAmount, String remarks) {
+    public FeeDuesTracker updateDuesAmount(Long duesId, BigDecimal paidAmount) {
         Optional<FeeDuesTracker> optionalDues = feeDuesTrackerRepository.findById(duesId);
         if (optionalDues.isEmpty()) {
             throw new IllegalArgumentException("Dues not found with ID: " + duesId);
         }
 
         FeeDuesTracker dues = optionalDues.get();
-        dues.updateDueAmount(paidAmount, remarks);
+        dues.updateDueAmount(paidAmount);
         return feeDuesTrackerRepository.save(dues);
     }
 
     // Cancel dues (typically called when student disjoins)
-    public List<FeeDuesTracker> cancelDuesAfterTerm(StudentSession session, Integer year, Integer termNumber, String reason) {
+    public List<FeeDuesTracker> cancelDuesAfterTerm(StudentSession session, Integer year, Integer termNumber) {
         List<FeeDuesTracker> duesToCancel = feeDuesTrackerRepository.findByStudentSessionAfterTerm(session, year, termNumber);
 
         for (FeeDuesTracker dues : duesToCancel) {
             if (dues.isActive()) {
-                dues.cancel(reason);
+                dues.cancel();
             }
         }
 

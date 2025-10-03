@@ -68,7 +68,6 @@ public class RecalculateDuesForDeactivatedPaymentCommand implements DuesTrackerC
                     dues.setStatus(FeeDuesTracker.DuesStatus.PARTIALLY_PAID);
                 }
 
-                dues.setRemarks("Payment ID " + payment.getId() + " deactivated, added back effective amount: " + effectiveAmount);
                 dues.setUpdatedAt(java.time.LocalDateTime.now());
 
                 feeDuesTrackerService.save(dues);

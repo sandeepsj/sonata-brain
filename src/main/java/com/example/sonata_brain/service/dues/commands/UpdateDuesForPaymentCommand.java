@@ -57,7 +57,7 @@ public class UpdateDuesForPaymentCommand implements DuesTrackerCommand {
                 BigDecimal effectiveAmount = payment.getAmountPaid().add(payment.getDiscountAmount());
 
                 // Use the business method from FeeDuesTracker to update the payment
-                dues.updateDueAmount(effectiveAmount, "Payment ID: " + payment.getId());
+                dues.updateDueAmount(effectiveAmount);
                 feeDuesTrackerService.save(dues);
 
                 logger.debug("Updated dues ID: {} for payment ID: {} with effective amount: {} (paid: {}, discount: {})",

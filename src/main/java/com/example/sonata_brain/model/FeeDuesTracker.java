@@ -43,9 +43,6 @@ public class FeeDuesTracker {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "remarks")
-    private String remarks;
-
     public enum DuesStatus {
         DUE,
         CANCELLED,
@@ -94,7 +91,7 @@ public class FeeDuesTracker {
     }
 
     // Business methods
-    public void updateDueAmount(BigDecimal paidAmount, String remarks) {
+    public void updateDueAmount(BigDecimal paidAmount) {
         if (paidAmount == null || paidAmount.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Paid amount cannot be null or negative");
         }
@@ -109,13 +106,11 @@ public class FeeDuesTracker {
             this.status = DuesStatus.PARTIALLY_PAID;
         }
 
-        this.remarks = remarks;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void cancel(String reason) {
+    public void cancel() {
         this.status = DuesStatus.CANCELLED;
-        this.remarks = reason;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -123,7 +118,6 @@ public class FeeDuesTracker {
         if (this.status == DuesStatus.CANCELLED) {
             this.dueAmount = originalAmount;
             this.status = DuesStatus.DUE;
-            this.remarks = "Reactivated";
             this.updatedAt = LocalDateTime.now();
         }
     }
@@ -191,14 +185,6 @@ public class FeeDuesTracker {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     @Override

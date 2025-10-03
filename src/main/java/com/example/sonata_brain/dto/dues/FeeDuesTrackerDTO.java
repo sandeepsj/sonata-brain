@@ -16,7 +16,6 @@ public class FeeDuesTrackerDTO {
     private Integer termNumber;
     private BigDecimal dueAmount;
     private FeeDuesTracker.DuesStatus status;
-    private String remarks;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -34,7 +33,6 @@ public class FeeDuesTrackerDTO {
         this.termNumber = duesTracker.getTermNumber();
         this.dueAmount = duesTracker.getDueAmount();
         this.status = duesTracker.getStatus();
-        this.remarks = duesTracker.getRemarks();
         this.createdAt = duesTracker.getCreatedAt();
         this.updatedAt = duesTracker.getUpdatedAt();
     }
@@ -118,14 +116,6 @@ public class FeeDuesTrackerDTO {
 
     public void setStatus(FeeDuesTracker.DuesStatus status) {
         this.status = status;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     public LocalDateTime getCreatedAt() {

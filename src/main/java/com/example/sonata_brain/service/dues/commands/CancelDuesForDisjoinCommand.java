@@ -55,7 +55,7 @@ public class CancelDuesForDisjoinCommand implements DuesTrackerCommand {
                     if (dues.getStatus() != FeeDuesTracker.DuesStatus.PAID &&
                         dues.getStatus() != FeeDuesTracker.DuesStatus.CANCELLED) {
 
-                        dues.cancel("Student disjoined on " + disjoinDate);
+                        dues.cancel();
                         feeDuesTrackerService.save(dues);
                         cancelledCount++;
 
