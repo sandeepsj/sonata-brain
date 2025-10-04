@@ -180,5 +180,27 @@ public class PaymentService {
         return paymentRepository.findByStudentAdmissionNoAndPaymentTypeAndIsActive(studentId, paymentType, isActive);
     }
 
+    // Get payments by date range
+    public List<Payment> getPaymentsByDateRange(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate) {
+        return paymentRepository.findByDateBetween(startDate, endDate);
+    }
+
+    public List<Payment> getPaymentsByStudentAndDateRange(Long studentId, java.time.LocalDateTime startDate, java.time.LocalDateTime endDate) {
+        return paymentRepository.findByStudentAdmissionNoAndDateBetween(studentId, startDate, endDate);
+    }
+
+    // Get payments by date range with filters
+    public List<Payment> getPaymentsByDateRangeAndCourse(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, String courseName) {
+        return paymentRepository.findByDateBetweenAndCourseName(startDate, endDate, courseName);
+    }
+
+    public List<Payment> getPaymentsByDateRangeAndType(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, Payment.PaymentType paymentType) {
+        return paymentRepository.findByDateBetweenAndPaymentType(startDate, endDate, paymentType);
+    }
+
+    public List<Payment> getPaymentsByDateRangeAndTerm(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, Long termId) {
+        return paymentRepository.findByDateBetweenAndTermId(startDate, endDate, termId);
+    }
+
     // Delete and update methods removed - payments are immutable once created except for deactivation
 }

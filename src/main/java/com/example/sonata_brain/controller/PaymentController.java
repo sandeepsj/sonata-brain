@@ -180,4 +180,78 @@ public class PaymentController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/date-range")
+    public ResponseEntity<List<Payment>> getPaymentsByDateRange(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate);
+            LocalDateTime end = LocalDateTime.parse(endDate);
+            List<Payment> payments = paymentService.getPaymentsByDateRange(start, end);
+            return new ResponseEntity<>(payments, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/student/{studentId}/date-range")
+    public ResponseEntity<List<Payment>> getPaymentsByStudentAndDateRange(
+            @PathVariable Long studentId,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate);
+            LocalDateTime end = LocalDateTime.parse(endDate);
+            List<Payment> payments = paymentService.getPaymentsByStudentAndDateRange(studentId, start, end);
+            return new ResponseEntity<>(payments, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/date-range/course/{courseName}")
+    public ResponseEntity<List<Payment>> getPaymentsByDateRangeAndCourse(
+            @PathVariable String courseName,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate);
+            LocalDateTime end = LocalDateTime.parse(endDate);
+            List<Payment> payments = paymentService.getPaymentsByDateRangeAndCourse(start, end, courseName);
+            return new ResponseEntity<>(payments, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/date-range/type/{paymentType}")
+    public ResponseEntity<List<Payment>> getPaymentsByDateRangeAndType(
+            @PathVariable Payment.PaymentType paymentType,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate);
+            LocalDateTime end = LocalDateTime.parse(endDate);
+            List<Payment> payments = paymentService.getPaymentsByDateRangeAndType(start, end, paymentType);
+            return new ResponseEntity<>(payments, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/date-range/term/{termId}")
+    public ResponseEntity<List<Payment>> getPaymentsByDateRangeAndTerm(
+            @PathVariable Long termId,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        try {
+            LocalDateTime start = LocalDateTime.parse(startDate);
+            LocalDateTime end = LocalDateTime.parse(endDate);
+            List<Payment> payments = paymentService.getPaymentsByDateRangeAndTerm(start, end, termId);
+            return new ResponseEntity<>(payments, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
