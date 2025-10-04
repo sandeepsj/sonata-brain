@@ -123,6 +123,12 @@ public class FeeDuesTrackerService {
         return feeDuesTrackerRepository.findMatchingDuesForPayment(studentId, courseName, termYear, termNumber);
     }
 
+    // Find dues by student ID and fee structure ID (simpler method for payment deactivation)
+    @Transactional(readOnly = true)
+    public List<FeeDuesTracker> findByStudentIdAndFeeStructureId(Long studentId, Long feeStructureId) {
+        return feeDuesTrackerRepository.findByStudentIdAndFeeStructureId(studentId, feeStructureId);
+    }
+
     // Get active dues only
     @Transactional(readOnly = true)
     public List<FeeDuesTracker> getActiveDues() {

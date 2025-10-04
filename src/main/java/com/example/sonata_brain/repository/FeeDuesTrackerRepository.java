@@ -74,6 +74,12 @@ public interface FeeDuesTrackerRepository extends JpaRepository<FeeDuesTracker, 
                                                     @Param("termYear") Integer termYear,
                                                     @Param("termNumber") Integer termNumber);
 
+    // Find dues by student ID and fee structure ID (for payment deactivation)
+    @Query("SELECT fdt FROM FeeDuesTracker fdt WHERE fdt.studentSession.student.admissionNo = :studentId " +
+           "AND fdt.feeStructure.id = :feeStructureId")
+    List<FeeDuesTracker> findByStudentIdAndFeeStructureId(@Param("studentId") Long studentId,
+                                                          @Param("feeStructureId") Long feeStructureId);
+
     // Find all active student sessions that should have dues for a new fee structure
     @Query("SELECT DISTINCT fdt.studentSession FROM FeeDuesTracker fdt WHERE fdt.feeStructure.year = :year")
     List<StudentSession> findActiveSessionsForYear(@Param("year") Integer year);
