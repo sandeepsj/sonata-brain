@@ -4,6 +4,7 @@ import com.example.sonata_brain.service.dues.commands.*;
 import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import com.example.sonata_brain.repository.FeeStructureRepository;
+import com.example.sonata_brain.repository.StudentSessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -20,15 +21,18 @@ public class DuesEventHandler {
     private final FeeDuesTrackerService feeDuesTrackerService;
     private final DuesCalculationService duesCalculationService;
     private final FeeStructureRepository feeStructureRepository;
+    private final StudentSessionRepository studentSessionRepository;
 
     public DuesEventHandler(DuesCommandProcessor commandProcessor,
                            FeeDuesTrackerService feeDuesTrackerService,
                            DuesCalculationService duesCalculationService,
-                           FeeStructureRepository feeStructureRepository) {
+                           FeeStructureRepository feeStructureRepository,
+                           StudentSessionRepository studentSessionRepository) {
         this.commandProcessor = commandProcessor;
         this.feeDuesTrackerService = feeDuesTrackerService;
         this.duesCalculationService = duesCalculationService;
         this.feeStructureRepository = feeStructureRepository;
+        this.studentSessionRepository = studentSessionRepository;
     }
 
     @EventListener
@@ -88,7 +92,8 @@ public class DuesEventHandler {
 
         try {
             CreateDuesForNewFeeStructureCommand command = new CreateDuesForNewFeeStructureCommand(
-                event.getFeeStructure(), feeDuesTrackerService, duesCalculationService, feeStructureRepository);
+                event.getFeeStructure(), feeDuesTrackerService, duesCalculationService,
+                feeStructureRepository, studentSessionRepository);
             commandProcessor.process(command);
             logger.info("Successfully created dues for new fee structure ID: {}",
                        event.getFeeStructure().getId());

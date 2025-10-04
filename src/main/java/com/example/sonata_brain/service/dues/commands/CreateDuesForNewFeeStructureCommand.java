@@ -2,11 +2,13 @@ package com.example.sonata_brain.service.dues.commands;
 
 import com.example.sonata_brain.model.*;
 import com.example.sonata_brain.repository.FeeStructureRepository;
+import com.example.sonata_brain.repository.StudentSessionRepository;
 import com.example.sonata_brain.service.FeeDuesTrackerService;
 import com.example.sonata_brain.service.dues.DuesCalculationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
@@ -16,16 +18,19 @@ public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
     private final FeeDuesTrackerService feeDuesTrackerService;
     private final DuesCalculationService duesCalculationService;
     private final FeeStructureRepository feeStructureRepository;
+    private final StudentSessionRepository studentSessionRepository;
     private final FeeStructure feeStructure;
 
     public CreateDuesForNewFeeStructureCommand(FeeStructure feeStructure,
                                              FeeDuesTrackerService feeDuesTrackerService,
                                              DuesCalculationService duesCalculationService,
-                                             FeeStructureRepository feeStructureRepository) {
+                                             FeeStructureRepository feeStructureRepository,
+                                             StudentSessionRepository studentSessionRepository) {
         this.feeStructure = feeStructure;
         this.feeDuesTrackerService = feeDuesTrackerService;
         this.duesCalculationService = duesCalculationService;
         this.feeStructureRepository = feeStructureRepository;
+        this.studentSessionRepository = studentSessionRepository;
     }
 
     /**
@@ -43,53 +48,87 @@ public class CreateDuesForNewFeeStructureCommand implements DuesTrackerCommand {
 
     @Override
     public void execute() {
-        logger.info("Creating dues for new fee structure ID: {} (Course: {}, Year: {}, Term: {})",
+        logger.info("Creating dues for the new fee structure ID: {} (Course: {}, Year: {}, Term: {})",
                    feeStructure.getId(), feeStructure.getCourse().getName(),
                    feeStructure.getYear(), feeStructure.getTerm());
 
+        logger.info("Fee structure isActive status: {}", feeStructure.getIsActive());
+
         if (!feeStructure.getIsActive()) {
-            logger.debug("Fee structure is not active, skipping dues creation");
+            logger.warn("Fee structure ID {} is not active, skipping dues creation", feeStructure.getId());
             return;
         }
 
-        // Get all active sessions for the specific term and course
-        List<StudentSession> activeSessions = duesCalculationService.getActiveSessionsForYear(feeStructure.getYear());
+        // Get ALL currently active sessions (not limited to specific year)
+        List<StudentSession> allActiveSessions = studentSessionRepository.findAllActiveSessions();
+
+        logger.info("Found {} total active sessions to evaluate", allActiveSessions.size());
 
         int createdCount = 0;
+        int evaluatedCount = 0;
 
-        for (StudentSession session : activeSessions) {
-            // Only create dues for sessions in the same course
-            if (!session.getCourse().getId().equals(feeStructure.getCourse().getId())) {
-                continue;
-            }
-
-            // Check if the session overlaps with this fee structure term
-            Term feeStructureTerm = new Term(feeStructure.getYear(), feeStructure.getTerm(),
-                                           getTermsPerYearFromFeeStructure(feeStructure.getCourse(), feeStructure.getYear()));
-
-            List<Term> sessionTerms = duesCalculationService.calculateDueTermsForSession(session);
-
-            boolean sessionOverlapsWithTerm = sessionTerms.stream()
-                .anyMatch(term -> term.getYear() == feeStructureTerm.getYear() &&
-                                term.getTermNumber() == feeStructureTerm.getTermNumber());
-
-            if (sessionOverlapsWithTerm) {
-                // Check if dues already exist to avoid duplicates
-                if (!feeDuesTrackerService.duesExist(session, feeStructure)) {
-                    FeeDuesTracker duesTracker = feeDuesTrackerService.createDuesTracker(
-                        session, feeStructure, feeStructure.getAmount());
-
-                    createdCount++;
-                    logger.debug("Created dues tracker ID: {} for session {} and fee structure {}",
-                                duesTracker.getId(), session.getId(), feeStructure.getId());
-                } else {
-                    logger.debug("Dues already exist for session {} and fee structure {}",
-                                session.getId(), feeStructure.getId());
+        for (StudentSession session : allActiveSessions) {
+            try {
+                // Only create dues for sessions in the same course
+                if (!session.getCourse().getId().equals(feeStructure.getCourse().getId())) {
+                    continue;
                 }
+
+                evaluatedCount++;
+                logger.info("Evaluating session ID {} for course {}", session.getId(), session.getCourse().getName());
+
+                // For NEW fee structures, create dues for ALL currently active sessions
+                // The assumption is: if a student is currently active, they will continue unless they disjoin
+                // If they disjoin before the term, the dues will be cancelled automatically
+
+                // Check if session started before or during this fee structure's term
+                int termsPerYear = getTermsPerYearFromFeeStructure(feeStructure.getCourse(), feeStructure.getYear());
+                Term feeStructureTerm = new Term(feeStructure.getYear(), feeStructure.getTerm(), termsPerYear);
+                LocalDateTime termStartDate = feeStructureTerm.convertToDate();
+
+                logger.info("Fee structure term {}/{} starts on: {}",
+                           feeStructure.getYear(), feeStructure.getTerm(), termStartDate);
+                logger.info("Session {} joined on: {}, disjoined on: {}",
+                           session.getId(), session.getDateOfJoining(), session.getDateOfDisjoining());
+
+                // Only create dues if:
+                // 1. Student joined before or during the term start
+                // 2. Student hasn't disjoined, OR disjoined after the term start
+                boolean joinedBeforeTerm = session.getDateOfJoining().isBefore(termStartDate) ||
+                                          session.getDateOfJoining().isEqual(termStartDate);
+                boolean stillActiveForTerm = session.getDateOfDisjoining() == null ||
+                                             session.getDateOfDisjoining().isAfter(termStartDate);
+
+                boolean shouldCreateDues = joinedBeforeTerm && stillActiveForTerm;
+
+                logger.info("Session {} - joinedBeforeTerm: {}, stillActiveForTerm: {}, shouldCreateDues: {}",
+                           session.getId(), joinedBeforeTerm, stillActiveForTerm, shouldCreateDues);
+
+                if (shouldCreateDues) {
+                    // Check if dues already exist to avoid duplicates
+                    if (!feeDuesTrackerService.duesExist(session, feeStructure)) {
+                        FeeDuesTracker duesTracker = feeDuesTrackerService.createDuesTracker(
+                            session, feeStructure, feeStructure.getAmount());
+
+                        createdCount++;
+                        logger.info("Created dues tracker ID: {} for session {} and fee structure {}",
+                                    duesTracker.getId(), session.getId(), feeStructure.getId());
+                    } else {
+                        logger.info("Dues already exist for session {} and fee structure {}",
+                                    session.getId(), feeStructure.getId());
+                    }
+                } else {
+                    logger.info("Session {} does not qualify for dues creation for term {}/{}",
+                               session.getId(), feeStructure.getYear(), feeStructure.getTerm());
+                }
+            } catch (Exception e) {
+                logger.error("Error processing session ID {}: {}", session.getId(), e.getMessage(), e);
+                // Continue with next session instead of failing completely
             }
         }
 
-        logger.info("Created {} dues entries for new fee structure ID: {}", createdCount, feeStructure.getId());
+        logger.info("Created {} dues entries for new fee structure ID: {} (evaluated {} sessions in course)",
+                   createdCount, feeStructure.getId(), evaluatedCount);
     }
 
     @Override

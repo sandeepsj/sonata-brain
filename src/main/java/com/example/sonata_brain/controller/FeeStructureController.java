@@ -4,7 +4,7 @@ import com.example.sonata_brain.dto.FeeStructureCreateRequest;
 import com.example.sonata_brain.model.Course;
 import com.example.sonata_brain.model.FeeStructure;
 import com.example.sonata_brain.repository.CourseRepository;
-import com.example.sonata_brain.repository.FeeStructureRepository;
+import com.example.sonata_brain.service.FeeStructureService;
 import com.example.sonata_brain.exception.FeeStructureValidationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +21,13 @@ import java.util.stream.IntStream;
 @RequestMapping("/api/fee-structures")
 public class FeeStructureController {
 
-    private final FeeStructureRepository feeStructureRepository;
+    private final FeeStructureService feeStructureService;
     private final CourseRepository courseRepository;
 
     @Autowired
-    public FeeStructureController(FeeStructureRepository feeStructureRepository,
+    public FeeStructureController(FeeStructureService feeStructureService,
                                 CourseRepository courseRepository) {
-        this.feeStructureRepository = feeStructureRepository;
+        this.feeStructureService = feeStructureService;
         this.courseRepository = courseRepository;
     }
 
@@ -41,7 +41,7 @@ public class FeeStructureController {
             ));
 
         // Check if fee structure already exists for this course and year
-        if (feeStructureRepository.existsByCourseAndYear(course, request.getYear())) {
+        if (!feeStructureService.getFeeStructuresByCourseAndYear(course, request.getYear()).isEmpty()) {
             throw new FeeStructureValidationException(
                 String.format("Fee structure already exists for course '%s' and year %d. Multiple fee structures for the same course and year are not allowed.", 
                     course.getName(), request.getYear())
@@ -79,7 +79,7 @@ public class FeeStructureController {
             }
         });
 
-        // Create fee structures for each term
+        // Create fee structures for each term using service
         List<FeeStructure> createdStructures = request.getTermFees().stream()
             .map(termFee -> {
                 FeeStructure feeStructure = new FeeStructure();
@@ -87,7 +87,7 @@ public class FeeStructureController {
                 feeStructure.setYear(request.getYear());
                 feeStructure.setTerm(termFee.getTerm());
                 feeStructure.setAmount(termFee.getAmount());
-                return feeStructureRepository.save(feeStructure);
+                return feeStructureService.createFeeStructure(feeStructure);
             })
             .toList();
 
@@ -96,7 +96,7 @@ public class FeeStructureController {
 
     @GetMapping("/by-year/{year}")
     public ResponseEntity<List<FeeStructure>> getFeeStructuresByYear(@PathVariable Integer year) {
-        List<FeeStructure> feeStructures = feeStructureRepository.findByYear(year);
+        List<FeeStructure> feeStructures = feeStructureService.getFeeStructuresByYear(year);
         if (feeStructures.isEmpty()) {
             throw new FeeStructureValidationException(
                 String.format("No fee structures found for year %d", year)
@@ -112,7 +112,7 @@ public class FeeStructureController {
                 String.format("Course with ID '%s' not found", courseId)
             ));
         
-        List<FeeStructure> feeStructures = feeStructureRepository.findByCourse(course);
+        List<FeeStructure> feeStructures = feeStructureService.getFeeStructuresByCourse(course);
         if (feeStructures.isEmpty()) {
             throw new FeeStructureValidationException(
                 String.format("No fee structures found for course '%s'", course.getName())
@@ -130,14 +130,14 @@ public class FeeStructureController {
                 String.format("Course with ID '%s' not found", courseId)
             ));
         
-        List<FeeStructure> feeStructures = feeStructureRepository.findByCourseAndYear(course, year);
+        List<FeeStructure> feeStructures = feeStructureService.getFeeStructuresByCourseAndYear(course, year);
         if (feeStructures.isEmpty()) {
             throw new FeeStructureValidationException(
                 String.format("No fee structures found for course '%s' and year %d", 
                     course.getName(), year)
             );
         }
-        return ResponseEntity.ok(feeStructureRepository.findByCourseAndYear(course, year));
+        return ResponseEntity.ok(feeStructures);
     }
 
     @GetMapping("/by-course/{courseId}/year/{year}/term/{term}")
@@ -150,7 +150,7 @@ public class FeeStructureController {
                 String.format("Course with ID '%s' not found", courseId)
             ));
 
-        return ResponseEntity.ok(feeStructureRepository.findByCourseAndYearAndTerm(course, year, term)
+        return ResponseEntity.ok(feeStructureService.getFeeStructureByCourseYearAndTerm(course, year, term)
             .orElseThrow(() -> new FeeStructureValidationException(
                 String.format("Fee structure not found for course '%s', year %d, term %d", 
                     course.getName(), year, term)
