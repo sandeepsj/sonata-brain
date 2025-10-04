@@ -219,56 +219,546 @@ public class FeeDuesController {
     }
 
     /**
-     * Get all dues with filtering options
-     * GET /api/dues?status=DUE&year=2025&course=MATH
+     * Get all dues with comprehensive filtering options
+     * GET /api/dues?statuses=DUE,PARTIALLY_PAID&year=2025&course=MATH&termNumber=3
+     *
+     * Query Parameters:
+     * - statuses: Comma-separated list of statuses (DUE, PARTIALLY_PAID, PAID, CANCELLED)
+     * - year: Filter by term year
+     * - termNumber: Filter by term number
+     * - course: Filter by course name
+     *
+     * All parameters are optional and can be combined in any way
      */
     @GetMapping
     public ResponseEntity<List<FeeDuesTrackerDTO>> getAllDues(
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String statuses,
             @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer termNumber,
             @RequestParam(required = false) String course) {
-        logger.info("Fetching dues with filters - status: {}, year: {}, course: {}",
-                   status, year, course);
+        logger.info("Fetching dues with filters - statuses: {}, year: {}, termNumber: {}, course: {}",
+                   statuses, year, termNumber, course);
 
-        List<FeeDuesTracker> dues;
+        try {
+            // Start with all active dues if no filters provided
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
 
-        // Apply filters based on provided parameters
-        if (status != null && year != null) {
-            try {
-                FeeDuesTracker.DuesStatus duesStatus = FeeDuesTracker.DuesStatus.valueOf(status.toUpperCase());
-                dues = feeDuesTrackerService.getDuesByStatus(duesStatus).stream()
+            // Apply status filter
+            if (statuses != null && !statuses.trim().isEmpty()) {
+                String[] statusArray = statuses.split(",");
+                List<FeeDuesTracker.DuesStatus> statusList = new java.util.ArrayList<>();
+
+                for (String statusStr : statusArray) {
+                    try {
+                        statusList.add(FeeDuesTracker.DuesStatus.valueOf(statusStr.trim().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid status provided: {}", statusStr);
+                        return ResponseEntity.badRequest().build();
+                    }
+                }
+
+                dues = dues.stream()
+                        .filter(due -> statusList.contains(due.getStatus()))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply year filter
+            if (year != null) {
+                dues = dues.stream()
                         .filter(due -> due.getTermYear().equals(year))
                         .collect(Collectors.toList());
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().build();
             }
-        } else if (status != null) {
-            try {
-                FeeDuesTracker.DuesStatus duesStatus = FeeDuesTracker.DuesStatus.valueOf(status.toUpperCase());
-                dues = feeDuesTrackerService.getDuesByStatus(duesStatus);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().build();
-            }
-        } else if (year != null) {
-            dues = feeDuesTrackerService.getDuesByYear(year);
-        } else if (course != null) {
-            dues = feeDuesTrackerService.getDuesByCourse(course);
-        } else {
-            dues = feeDuesTrackerService.getActiveDues(); // Default to active dues
-        }
 
-        // Apply course filter if provided and not already used as primary filter
-        if (course != null && status != null || course != null && year != null) {
-            dues = dues.stream()
-                    .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+            // Apply term number filter
+            if (termNumber != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermNumber().equals(termNumber))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply course filter
+            if (course != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+                        .collect(Collectors.toList());
+            }
+
+            List<FeeDuesTrackerDTO> duesDTO = dues.stream()
+                    .map(FeeDuesTrackerDTO::new)
                     .collect(Collectors.toList());
+
+            logger.info("Found {} dues entries with applied filters", duesDTO.size());
+            return ResponseEntity.ok(duesDTO);
+        } catch (Exception e) {
+            logger.error("Error fetching dues with filters", e);
+            return ResponseEntity.internalServerError().build();
         }
+    }
 
-        List<FeeDuesTrackerDTO> duesDTO = dues.stream()
-                .map(FeeDuesTrackerDTO::new)
-                .collect(Collectors.toList());
+    /**
+     * Get dues that are either DUE or PARTIALLY_PAID (convenience endpoint)
+     * GET /api/dues/pending?year=2025&course=MATH&termNumber=3
+     */
+    @GetMapping("/pending")
+    public ResponseEntity<List<FeeDuesTrackerDTO>> getPendingDues(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer termNumber,
+            @RequestParam(required = false) String course) {
+        logger.info("Fetching pending dues with filters - year: {}, termNumber: {}, course: {}",
+                   year, termNumber, course);
 
-        logger.info("Found {} dues entries with applied filters", duesDTO.size());
-        return ResponseEntity.ok(duesDTO);
+        try {
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
+
+            // Filter for DUE or PARTIALLY_PAID status
+            dues = dues.stream()
+                    .filter(due -> due.getStatus() == FeeDuesTracker.DuesStatus.DUE ||
+                                 due.getStatus() == FeeDuesTracker.DuesStatus.PARTIALLY_PAID)
+                    .collect(Collectors.toList());
+
+            // Apply year filter
+            if (year != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermYear().equals(year))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply term number filter
+            if (termNumber != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermNumber().equals(termNumber))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply course filter
+            if (course != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+                        .collect(Collectors.toList());
+            }
+
+            List<FeeDuesTrackerDTO> duesDTO = dues.stream()
+                    .map(FeeDuesTrackerDTO::new)
+                    .collect(Collectors.toList());
+
+            logger.info("Found {} pending dues entries with applied filters", duesDTO.size());
+            return ResponseEntity.ok(duesDTO);
+        } catch (Exception e) {
+            logger.error("Error fetching pending dues with filters", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get aggregate statistics for dues (count and total amount)
+     * GET /api/dues/aggregate?statuses=DUE,PARTIALLY_PAID&year=2024&course=VOCAL&termNumber=3
+     *
+     * Query Parameters:
+     * - statuses: Comma-separated list of statuses (DUE, PARTIALLY_PAID, PAID, CANCELLED)
+     * - year: Filter by term year
+     * - termNumber: Filter by term number
+     * - course: Filter by course name
+     *
+     * Returns: { "count": 5, "totalDue": 1250.00, "filters": {...} }
+     */
+    @GetMapping("/aggregate")
+    public ResponseEntity<Map<String, Object>> getDuesAggregate(
+            @RequestParam(required = false) String statuses,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer termNumber,
+            @RequestParam(required = false) String course) {
+        logger.info("Fetching dues aggregate with filters - statuses: {}, year: {}, termNumber: {}, course: {}",
+                   statuses, year, termNumber, course);
+
+        try {
+            // Start with all active dues
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
+
+            // Apply status filter
+            if (statuses != null && !statuses.trim().isEmpty()) {
+                String[] statusArray = statuses.split(",");
+                List<FeeDuesTracker.DuesStatus> statusList = new java.util.ArrayList<>();
+
+                for (String statusStr : statusArray) {
+                    try {
+                        statusList.add(FeeDuesTracker.DuesStatus.valueOf(statusStr.trim().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid status provided: {}", statusStr);
+                        return ResponseEntity.badRequest().build();
+                    }
+                }
+
+                dues = dues.stream()
+                        .filter(due -> statusList.contains(due.getStatus()))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply year filter
+            if (year != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermYear().equals(year))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply term number filter
+            if (termNumber != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermNumber().equals(termNumber))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply course filter
+            if (course != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+                        .collect(Collectors.toList());
+            }
+
+            // Calculate aggregates
+            long count = dues.size();
+            double totalDue = dues.stream()
+                    .mapToDouble(due -> due.getDueAmount().doubleValue())
+                    .sum();
+
+            // Build response
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("count", count);
+            response.put("totalDue", totalDue);
+
+            Map<String, Object> filters = new java.util.HashMap<>();
+            if (statuses != null) filters.put("statuses", statuses);
+            if (year != null) filters.put("year", year);
+            if (termNumber != null) filters.put("termNumber", termNumber);
+            if (course != null) filters.put("course", course);
+            response.put("filters", filters);
+
+            logger.info("Aggregate result: {} dues with total amount due: {}", count, totalDue);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error fetching dues aggregate", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get aggregate statistics for pending dues (DUE or PARTIALLY_PAID)
+     * GET /api/dues/aggregate/pending?year=2024&course=VOCAL&termNumber=3
+     *
+     * Returns: { "count": 3, "totalDue": 750.00, "filters": {...} }
+     */
+    @GetMapping("/aggregate/pending")
+    public ResponseEntity<Map<String, Object>> getPendingDuesAggregate(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer termNumber,
+            @RequestParam(required = false) String course) {
+        logger.info("Fetching pending dues aggregate with filters - year: {}, termNumber: {}, course: {}",
+                   year, termNumber, course);
+
+        try {
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
+
+            // Filter for DUE or PARTIALLY_PAID status
+            dues = dues.stream()
+                    .filter(due -> due.getStatus() == FeeDuesTracker.DuesStatus.DUE ||
+                                 due.getStatus() == FeeDuesTracker.DuesStatus.PARTIALLY_PAID)
+                    .collect(Collectors.toList());
+
+            // Apply year filter
+            if (year != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermYear().equals(year))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply term number filter
+            if (termNumber != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermNumber().equals(termNumber))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply course filter
+            if (course != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+                        .collect(Collectors.toList());
+            }
+
+            // Calculate aggregates
+            long count = dues.size();
+            double totalDue = dues.stream()
+                    .mapToDouble(due -> due.getDueAmount().doubleValue())
+                    .sum();
+
+            // Build response
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("count", count);
+            response.put("totalDue", totalDue);
+
+            Map<String, Object> filters = new java.util.HashMap<>();
+            if (year != null) filters.put("year", year);
+            if (termNumber != null) filters.put("termNumber", termNumber);
+            if (course != null) filters.put("course", course);
+            response.put("filters", filters);
+
+            logger.info("Pending dues aggregate result: {} dues with total amount due: {}", count, totalDue);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error fetching pending dues aggregate", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get aggregate statistics grouped by course
+     * GET /api/dues/aggregate/by-course?year=2024&statuses=DUE,PARTIALLY_PAID
+     *
+     * Returns: [
+     *   { "course": "VOCAL", "count": 5, "totalDue": 1250.00 },
+     *   { "course": "PIANO", "count": 3, "totalDue": 900.00 }
+     * ]
+     */
+    @GetMapping("/aggregate/by-course")
+    public ResponseEntity<List<Map<String, Object>>> getDuesAggregateGroupedByCourse(
+            @RequestParam(required = false) String statuses,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer termNumber) {
+        logger.info("Fetching dues aggregate grouped by course - statuses: {}, year: {}, termNumber: {}",
+                   statuses, year, termNumber);
+
+        try {
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
+
+            // Apply status filter
+            if (statuses != null && !statuses.trim().isEmpty()) {
+                String[] statusArray = statuses.split(",");
+                List<FeeDuesTracker.DuesStatus> statusList = new java.util.ArrayList<>();
+
+                for (String statusStr : statusArray) {
+                    try {
+                        statusList.add(FeeDuesTracker.DuesStatus.valueOf(statusStr.trim().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid status provided: {}", statusStr);
+                        return ResponseEntity.badRequest().build();
+                    }
+                }
+
+                dues = dues.stream()
+                        .filter(due -> statusList.contains(due.getStatus()))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply year filter
+            if (year != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermYear().equals(year))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply term number filter
+            if (termNumber != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermNumber().equals(termNumber))
+                        .collect(Collectors.toList());
+            }
+
+            // Group by course and calculate aggregates
+            Map<String, List<FeeDuesTracker>> groupedByCourse = dues.stream()
+                    .collect(Collectors.groupingBy(due -> due.getStudentSession().getCourse().getName()));
+
+            List<Map<String, Object>> results = groupedByCourse.entrySet().stream()
+                    .map(entry -> {
+                        String courseName = entry.getKey();
+                        List<FeeDuesTracker> courseDues = entry.getValue();
+
+                        long count = courseDues.size();
+                        double totalDue = courseDues.stream()
+                                .mapToDouble(due -> due.getDueAmount().doubleValue())
+                                .sum();
+
+                        Map<String, Object> courseAggregate = new java.util.HashMap<>();
+                        courseAggregate.put("course", courseName);
+                        courseAggregate.put("count", count);
+                        courseAggregate.put("totalDue", totalDue);
+
+                        return courseAggregate;
+                    })
+                    .collect(Collectors.toList());
+
+            logger.info("Grouped by course: {} courses found", results.size());
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            logger.error("Error fetching dues aggregate grouped by course", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get aggregate statistics grouped by year
+     * GET /api/dues/aggregate/by-year?statuses=DUE,PARTIALLY_PAID&course=VOCAL
+     *
+     * Returns: [
+     *   { "year": 2024, "count": 8, "totalDue": 2000.00 },
+     *   { "year": 2025, "count": 4, "totalDue": 1200.00 }
+     * ]
+     */
+    @GetMapping("/aggregate/by-year")
+    public ResponseEntity<List<Map<String, Object>>> getDuesAggregateGroupedByYear(
+            @RequestParam(required = false) String statuses,
+            @RequestParam(required = false) String course,
+            @RequestParam(required = false) Integer termNumber) {
+        logger.info("Fetching dues aggregate grouped by year - statuses: {}, course: {}, termNumber: {}",
+                   statuses, course, termNumber);
+
+        try {
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
+
+            // Apply status filter
+            if (statuses != null && !statuses.trim().isEmpty()) {
+                String[] statusArray = statuses.split(",");
+                List<FeeDuesTracker.DuesStatus> statusList = new java.util.ArrayList<>();
+
+                for (String statusStr : statusArray) {
+                    try {
+                        statusList.add(FeeDuesTracker.DuesStatus.valueOf(statusStr.trim().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid status provided: {}", statusStr);
+                        return ResponseEntity.badRequest().build();
+                    }
+                }
+
+                dues = dues.stream()
+                        .filter(due -> statusList.contains(due.getStatus()))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply course filter
+            if (course != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply term number filter
+            if (termNumber != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getTermNumber().equals(termNumber))
+                        .collect(Collectors.toList());
+            }
+
+            // Group by year and calculate aggregates
+            Map<Integer, List<FeeDuesTracker>> groupedByYear = dues.stream()
+                    .collect(Collectors.groupingBy(FeeDuesTracker::getTermYear));
+
+            List<Map<String, Object>> results = groupedByYear.entrySet().stream()
+                    .map(entry -> {
+                        Integer year = entry.getKey();
+                        List<FeeDuesTracker> yearDues = entry.getValue();
+
+                        long count = yearDues.size();
+                        double totalDue = yearDues.stream()
+                                .mapToDouble(due -> due.getDueAmount().doubleValue())
+                                .sum();
+
+                        Map<String, Object> yearAggregate = new java.util.HashMap<>();
+                        yearAggregate.put("year", year);
+                        yearAggregate.put("count", count);
+                        yearAggregate.put("totalDue", totalDue);
+
+                        return yearAggregate;
+                    })
+                    .sorted((a, b) -> ((Integer)a.get("year")).compareTo((Integer)b.get("year")))
+                    .collect(Collectors.toList());
+
+            logger.info("Grouped by year: {} years found", results.size());
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            logger.error("Error fetching dues aggregate grouped by year", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get aggregate statistics grouped by term (year + term number)
+     * GET /api/dues/aggregate/by-term?statuses=DUE,PARTIALLY_PAID&course=VOCAL
+     *
+     * Returns: [
+     *   { "year": 2024, "termNumber": 1, "count": 3, "totalDue": 675.00 },
+     *   { "year": 2024, "termNumber": 2, "count": 5, "totalDue": 1125.00 }
+     * ]
+     */
+    @GetMapping("/aggregate/by-term")
+    public ResponseEntity<List<Map<String, Object>>> getDuesAggregateGroupedByTerm(
+            @RequestParam(required = false) String statuses,
+            @RequestParam(required = false) String course) {
+        logger.info("Fetching dues aggregate grouped by term - statuses: {}, course: {}",
+                   statuses, course);
+
+        try {
+            List<FeeDuesTracker> dues = feeDuesTrackerService.getActiveDues();
+
+            // Apply status filter
+            if (statuses != null && !statuses.trim().isEmpty()) {
+                String[] statusArray = statuses.split(",");
+                List<FeeDuesTracker.DuesStatus> statusList = new java.util.ArrayList<>();
+
+                for (String statusStr : statusArray) {
+                    try {
+                        statusList.add(FeeDuesTracker.DuesStatus.valueOf(statusStr.trim().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid status provided: {}", statusStr);
+                        return ResponseEntity.badRequest().build();
+                    }
+                }
+
+                dues = dues.stream()
+                        .filter(due -> statusList.contains(due.getStatus()))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply course filter
+            if (course != null) {
+                dues = dues.stream()
+                        .filter(due -> due.getStudentSession().getCourse().getName().equalsIgnoreCase(course))
+                        .collect(Collectors.toList());
+            }
+
+            // Group by year and term number
+            Map<String, List<FeeDuesTracker>> groupedByTerm = dues.stream()
+                    .collect(Collectors.groupingBy(due -> due.getTermYear() + "-" + due.getTermNumber()));
+
+            List<Map<String, Object>> results = groupedByTerm.entrySet().stream()
+                    .map(entry -> {
+                        String[] parts = entry.getKey().split("-");
+                        Integer year = Integer.parseInt(parts[0]);
+                        Integer termNumber = Integer.parseInt(parts[1]);
+                        List<FeeDuesTracker> termDues = entry.getValue();
+
+                        long count = termDues.size();
+                        double totalDue = termDues.stream()
+                                .mapToDouble(due -> due.getDueAmount().doubleValue())
+                                .sum();
+
+                        Map<String, Object> termAggregate = new java.util.HashMap<>();
+                        termAggregate.put("year", year);
+                        termAggregate.put("termNumber", termNumber);
+                        termAggregate.put("count", count);
+                        termAggregate.put("totalDue", totalDue);
+
+                        return termAggregate;
+                    })
+                    .sorted((a, b) -> {
+                        int yearCompare = ((Integer)a.get("year")).compareTo((Integer)b.get("year"));
+                        if (yearCompare != 0) return yearCompare;
+                        return ((Integer)a.get("termNumber")).compareTo((Integer)b.get("termNumber"));
+                    })
+                    .collect(Collectors.toList());
+
+            logger.info("Grouped by term: {} terms found", results.size());
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            logger.error("Error fetching dues aggregate grouped by term", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
