@@ -46,6 +46,7 @@ public class Payment {
     private String courseName;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("payment")
     private List<Discount> discounts = new ArrayList<>();
 
     @Column(name = "is_active", nullable = false)
