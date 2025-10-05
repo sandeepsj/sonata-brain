@@ -4,6 +4,7 @@ import com.example.sonata_brain.model.FeeDuesTracker;
 import com.example.sonata_brain.model.StudentSession;
 import com.example.sonata_brain.model.FeeStructure;
 import com.example.sonata_brain.repository.FeeDuesTrackerRepository;
+import com.example.sonata_brain.repository.StudentSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,9 @@ public class FeeDuesTrackerService {
 
     @Autowired
     private FeeDuesTrackerRepository feeDuesTrackerRepository;
+
+    @Autowired
+    private StudentSessionRepository studentSessionRepository;
 
     // Create new dues tracker entry
     public FeeDuesTracker createDuesTracker(StudentSession studentSession, FeeStructure feeStructure, BigDecimal dueAmount) {
@@ -114,6 +118,47 @@ public class FeeDuesTrackerService {
         }
 
         return feeDuesTrackerRepository.saveAll(duesToCancel);
+    }
+
+    // Mark a due as STUDENT_LEFT_DUE_CANCELLED
+    public FeeDuesTracker markDueAsStudentLeftCancelled(Long duesId) {
+        Optional<FeeDuesTracker> optionalDues = feeDuesTrackerRepository.findById(duesId);
+        if (optionalDues.isEmpty()) {
+            throw new IllegalArgumentException("Dues not found with ID: " + duesId);
+        }
+
+        FeeDuesTracker dues = optionalDues.get();
+
+        // Validation 1: Check if the due is in PARTIALLY_PAID or DUE state
+        if (dues.getStatus() != FeeDuesTracker.DuesStatus.DUE &&
+            dues.getStatus() != FeeDuesTracker.DuesStatus.PARTIALLY_PAID) {
+            throw new IllegalArgumentException(
+                "Can only mark dues as STUDENT_LEFT_DUE_CANCELLED if they are in DUE or PARTIALLY_PAID status. " +
+                "Current status: " + dues.getStatus()
+            );
+        }
+
+        // Validation 2: Check if the student has a disjoined session for the same course
+        StudentSession session = dues.getStudentSession();
+        Long studentId = session.getStudent().getAdmissionNo();
+        String courseName = session.getCourse().getName();
+
+        List<StudentSession> studentCourseSessions = studentSessionRepository
+            .findAllSessionsByStudentIdAndCourseName(studentId, courseName);
+
+        boolean hasDisjoinedSession = studentCourseSessions.stream()
+            .anyMatch(s -> s.getDateOfDisjoining() != null);
+
+        if (!hasDisjoinedSession) {
+            throw new IllegalArgumentException(
+                "Cannot mark due as STUDENT_LEFT_DUE_CANCELLED. " +
+                "Student (ID: " + studentId + ") does not have any disjoined session for course: " + courseName
+            );
+        }
+
+        // If all validations pass, mark the due as STUDENT_LEFT_DUE_CANCELLED
+        dues.markAsStudentLeftCancelled();
+        return feeDuesTrackerRepository.save(dues);
     }
 
     // Find matching dues for a payment

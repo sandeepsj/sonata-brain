@@ -47,7 +47,8 @@ public class FeeDuesTracker {
         DUE,
         CANCELLED,
         PAID,
-        PARTIALLY_PAID
+        PARTIALLY_PAID,
+        STUDENT_LEFT_DUE_CANCELLED
     }
 
     // Constructors
@@ -114,6 +115,11 @@ public class FeeDuesTracker {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void markAsStudentLeftCancelled() {
+        this.status = DuesStatus.STUDENT_LEFT_DUE_CANCELLED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public void reactivate(BigDecimal originalAmount) {
         if (this.status == DuesStatus.CANCELLED) {
             this.dueAmount = originalAmount;
@@ -127,7 +133,7 @@ public class FeeDuesTracker {
     }
 
     public boolean isActive() {
-        return status != DuesStatus.CANCELLED;
+        return status != DuesStatus.CANCELLED && status != DuesStatus.STUDENT_LEFT_DUE_CANCELLED;
     }
 
     // Getters and Setters

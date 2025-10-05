@@ -761,4 +761,36 @@ public class FeeDuesController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    /**
+     * Mark a due as STUDENT_LEFT_DUE_CANCELLED
+     * PATCH /api/dues/{duesId}/mark-student-left-cancelled
+     *
+     * This API is used when a student has left and their remaining dues should be marked as cancelled
+     * due to student departure. This is different from regular cancellation.
+     */
+    @PatchMapping("/{duesId}/mark-student-left-cancelled")
+    public ResponseEntity<?> markDueAsStudentLeftCancelled(@PathVariable Long duesId) {
+        logger.info("Marking due ID {} as STUDENT_LEFT_DUE_CANCELLED", duesId);
+
+        try {
+            FeeDuesTracker updatedDue = feeDuesTrackerService.markDueAsStudentLeftCancelled(duesId);
+            FeeDuesTrackerDTO dueDTO = new FeeDuesTrackerDTO(updatedDue);
+
+            logger.info("Successfully marked due ID {} as STUDENT_LEFT_DUE_CANCELLED", duesId);
+            return ResponseEntity.ok(dueDTO);
+        } catch (IllegalArgumentException e) {
+            logger.error("Error marking due as student left cancelled: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "Invalid Request",
+                "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            logger.error("Error marking due ID {} as student left cancelled", duesId, e);
+            return ResponseEntity.internalServerError().body(Map.of(
+                "error", "Internal Server Error",
+                "message", "An error occurred while marking the due as student left cancelled"
+            ));
+        }
+    }
 }
