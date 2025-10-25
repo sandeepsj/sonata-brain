@@ -1,5 +1,8 @@
 package com.example.sonata_brain.config;
 
+import com.example.sonata_brain.model.Scope;
+import com.example.sonata_brain.model.User;
+import com.example.sonata_brain.repository.UserRepository;
 import com.example.sonata_brain.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,16 +17,19 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.Optional;
 
 @Component // Tell Spring to manage this as a bean
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -51,13 +57,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 4. Check if email exists and if user is already authenticated
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // 5. Load the user from the database
+                // 5. Verify the user still exists in the database and has scope ANY
+                Optional<User> userOptional = userRepository.findByEmail(userEmail);
+                
+                if (userOptional.isEmpty()) {
+                    // User no longer exists in database
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+                    return;
+                }
+                
+                User user = userOptional.get();
+                
+                // Verify user has scope ANY
+                if (user.getScope() != Scope.ANY) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "User does not have required scope");
+                    return;
+                }
+
+                // 6. Load the user from the database
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                // 6. Check if the token is valid
+                // 7. Check if the token is valid
                 if (jwtService.isTokenValid(jwt, userDetails)) {
 
-                    // 7. THIS IS THE KEY: Create an auth token and set it in the SecurityContext
+                    // 8. THIS IS THE KEY: Create an auth token and set it in the SecurityContext
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null, // No credentials (password)
@@ -65,7 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    // 8. Update the SecurityContext
+                    // 9. Update the SecurityContext
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
