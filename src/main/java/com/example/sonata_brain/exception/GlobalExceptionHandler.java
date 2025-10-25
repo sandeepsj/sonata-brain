@@ -56,4 +56,24 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.badRequest().body(body);
     }
+
+    @ExceptionHandler(InvalidPassword.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidPasswordException(InvalidPassword ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.FORBIDDEN.value());
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(NotHavingEnoughPermission.class)
+    public ResponseEntity<Map<String, Object>> handleNotHavingEnoughPermission(NotHavingEnoughPermission ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.FORBIDDEN.value());
+
+        return ResponseEntity.badRequest().body(body);
+    }
 }

@@ -1,10 +1,16 @@
 package com.example.sonata_brain.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "account")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -21,6 +27,18 @@ public class User {
     private String password;
 
     public User() {
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // This is what links your "scope" to Spring's permissions
+        return List.of(new SimpleGrantedAuthority(scope.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        // Spring calls this "username," but for us, it's the email.
+        return this.email;
     }
 
     public long getId(){
