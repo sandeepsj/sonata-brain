@@ -11,7 +11,6 @@ import java.util.Objects;
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "admission_no")
     private Long admissionNo;
 

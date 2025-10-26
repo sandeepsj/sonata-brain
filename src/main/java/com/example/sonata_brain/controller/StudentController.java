@@ -45,8 +45,12 @@ public class StudentController {
             student.setAdmissionDate(LocalDate.now());
         }
 
-        Student createdStudent = studentService.createStudent(student);
-        return ResponseEntity.ok(createdStudent);
+        try {
+            Student createdStudent = studentService.createStudent(student);
+            return ResponseEntity.ok(createdStudent);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/search")

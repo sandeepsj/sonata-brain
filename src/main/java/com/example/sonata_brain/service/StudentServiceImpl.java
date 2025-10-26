@@ -29,6 +29,19 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public Student createStudent(Student student) {
         Objects.requireNonNull(student.getStudentName(), "Student name cannot be null");
+        
+        // Handle admission number - either validate if provided or auto-generate
+        if (student.getAdmissionNo() != null) {
+            // User provided admission number - check if it's already used
+            if (studentRepository.existsByAdmissionNo(student.getAdmissionNo())) {
+                throw new IllegalArgumentException("Admission number " + student.getAdmissionNo() + " is already in use");
+            }
+        } else {
+            // Auto-generate admission number
+            Long maxAdmissionNo = studentRepository.findMaxAdmissionNo().orElse(0L);
+            student.setAdmissionNo(maxAdmissionNo + 1);
+        }
+        
         return studentRepository.save(student);
     }
 
