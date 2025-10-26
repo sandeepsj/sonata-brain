@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface StudentService {
     Student createStudent(Student student);
     List<Student> searchStudents(String name, LocalDate admissionDateFrom, LocalDate admissionDateTo, String school,
-                               Integer pinCode, String contactNo, String className);
+                               Integer pinCode, String contactNo, String className, Long admissionNo);
     Student updateStudent(Long id, Student student);
     Student getStudentById(Long id);
     Optional<Student> findById(Long id);

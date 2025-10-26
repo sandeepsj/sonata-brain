@@ -61,10 +61,11 @@ public class StudentController {
             @RequestParam(required = false) String school,
             @RequestParam(required = false) Integer pinCode,
             @RequestParam(required = false) String contactNo,
-            @RequestParam(required = false) String className) {
+            @RequestParam(required = false) String className,
+            @RequestParam(required = false) Long admissionNo) {
 
         List<Student> students = studentService.searchStudents(
-                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className
+                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className, admissionNo
         );
         return ResponseEntity.ok(students);
     }

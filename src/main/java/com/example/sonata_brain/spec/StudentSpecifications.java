@@ -13,10 +13,14 @@ import java.util.List;
 public class StudentSpecifications {
 
     public static Specification<Student> withDynamicQuery(String name, LocalDate admissionDateFrom,
-            LocalDate admissionDateTo, String school, Integer pinCode, String contactNo, String className) {
+            LocalDate admissionDateTo, String school, Integer pinCode, String contactNo, String className, Long admissionNo) {
 
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (admissionNo != null) {
+                predicates.add(criteriaBuilder.equal(root.get("admissionNo"), admissionNo));
+            }
 
             if (name != null && !name.trim().isEmpty()) {
                 predicates.add(criteriaBuilder.like(

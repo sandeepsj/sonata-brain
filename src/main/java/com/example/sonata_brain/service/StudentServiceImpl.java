@@ -48,10 +48,10 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<Student> searchStudents(String name, LocalDate admissionDateFrom, LocalDate admissionDateTo,
                                       String school, Integer pinCode,
-                                      String contactNo, String className) {
+                                      String contactNo, String className, Long admissionNo) {
         return studentRepository.findAll(
             StudentSpecifications.withDynamicQuery(
-                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className
+                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className, admissionNo
             )
         );
     }
