@@ -48,3 +48,20 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - REQ-064.AC6 added: race between payment deactivation and the background dues job (shared lazy `discounts`
   collection), giving an intermittent 500 or an unrestored due. Reproduced in 5 of 6 runs. Fix specified as
   REQ-064.AC7. The affected baseline cases moved to a new `quarantine` suite.
+
+## 2026-10-04: Target contract written
+
+- Target specs added for access, platform, students, courses, sessions, fee structures, fee timeline and billing,
+  payments, dues and the migration (seeded legacy database and a local production rehearsal).
+- REQ-054.AC3/AC4 made consistent: billing starts on `effectiveFrom`, and any partial term (start of timeline,
+  after a switch or after a gap) is billed at the full term amount. AC4 is still proposed.
+- REQ-071.AC2 clarified: a payment fills its own period first, then the oldest unpaid dues, in payment-date order.
+- REQ-012.AC2: roles list `?name=` filter, `builtIn` flag, all resources listed (NONE where not granted).
+- REQ-066.AC4: filter semantics defined (`from`/`to` on payment date; `periodDate` = the billing period containing
+  that date).
+- REQ-074.AC6: nightly schedule readable at `GET /api/dues/rebuild/schedule`.
+- REQ-081.AC1: legacy comparison endpoint and its definitions of billed and outstanding.
+- REQ-015.AC1 changed: the bootstrap admin is created if its email doesn't exist, rather than only when no admin
+  exists, so it also works on a migrated production copy.
+- Criteria about scripts, history and test format are tagged `[process]` and are not counted for API coverage.
+

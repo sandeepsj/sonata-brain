@@ -20,13 +20,14 @@ from runner.templating import SpecError  # noqa: E402
 
 def main():
     p = argparse.ArgumentParser(description="Run the Sonata API contract")
-    p.add_argument("--suite", default="baseline", choices=["baseline", "target", "quarantine", "all"])
+    p.add_argument("--suite", default="baseline", choices=["baseline", "target", "quarantine", "migration", "all"])
     p.add_argument("--only", help="case id or id prefix")
     p.add_argument("--file", help="spec file name (substring)")
     p.add_argument("--no-build", action="store_true", help="don't rebuild the backend")
     p.add_argument("--no-server", action="store_true", help="use an already running server")
     p.add_argument("--base-url", help="override baseUrl from contract.yaml")
     p.add_argument("--strict-trace", action="store_true", help="fail if any acceptance criterion has no case")
+    p.add_argument("--trace-only", action="store_true", help="only check requirement coverage; run nothing")
     args = p.parse_args()
 
     cfg = yaml.safe_load((HERE / "contract.yaml").read_text())
@@ -41,22 +42,27 @@ def main():
                 and (not args.only or c.id.startswith(args.only))
                 and (not args.file or args.file in c.file)]
     print(f"{len(selected)} of {len(all_cases)} cases selected (suite={args.suite})")
+    if args.trace_only:
+        selected = []
 
     db = Database(cfg["database"])
-    server = None
-    if not args.no_server:
-        server = Server(cfg["server"], base_url, HERE.parent, out / "server.log")
-        if not args.no_build:
-            server.build()
-        db.recreate()
-        server.start()
+    plain = [c for c in selected if not c.database]
+    seeded = {}
+    for c in selected:
+        if c.database:
+            seeded.setdefault(c.file, []).append(c)
+
+    server = Server(cfg["server"], base_url, HERE.parent, out / "server.log")
+    if not args.no_server and not args.no_build and selected:
+        server.build()
 
     engine = Engine(base_url, db, HERE)
     results = []
     started = time.time()
-    try:
+
+    def run_group(cases):
         current_area = None
-        for case in selected:
+        for case in cases:
             if case.area != current_area:
                 current_area = case.area
                 print(f"\n{case.area}  ({case.file})")
@@ -69,8 +75,33 @@ def main():
                 error = f"SPEC ERROR: {e}"
             print_result(case, error)
             results.append((case, error))
-    finally:
-        if server:
+
+    # Cases on an empty database share one server.
+    if plain:
+        if not args.no_server:
+            db.recreate()
+            server.start()
+        try:
+            run_group(plain)
+        finally:
+            if not args.no_server:
+                server.stop()
+
+    # Each seeded file gets its own database and server start (migrations run at startup).
+    for file, cases in seeded.items():
+        spec = cases[0].database
+        if args.no_server:
+            print(f"\n{YELLOW}Skipping {file}: needs its own seeded database (don't use --no-server){RESET}")
+            continue
+        if "template" in spec and not db.exists(spec["template"]):
+            print(f"\n{YELLOW}Skipping {file}: local database '{spec['template']}' not found "
+                  f"(see scripts/db/reset-local-from-prod.sh){RESET}")
+            continue
+        db.recreate_from(spec)
+        server.start()
+        try:
+            run_group(cases)
+        finally:
             server.stop()
 
     unknown, uncovered = write_report(out / "report.md", results, all_cases, criteria)

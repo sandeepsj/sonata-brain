@@ -11,6 +11,7 @@ specs is a valid Sonata backend.
 contract/
   contract.yaml      how to start the server and reach its database
   shapes.yaml        named, reusable expectations (e.g. the standard error body)
+  specs/migration/   cases that start from a seeded legacy database (see "Migration specs")
   fixtures/          reusable setup flows (e.g. "log in as admin")
   specs/<area>.yaml  the test cases, grouped by area
   runner/            the executor (Python 3 + PyYAML)
@@ -31,6 +32,7 @@ python3 contract/run.py --only STU-003     # one case (or a prefix: --only STU-)
 python3 contract/run.py --file students    # one spec file
 python3 contract/run.py --no-build         # skip rebuilding the backend
 python3 contract/run.py --base-url http://localhost:8080 --no-server   # use a server you started yourself
+python3 contract/run.py --trace-only --strict-trace   # only check that every acceptance criterion has a case
 ```
 
 The run writes `contract/.out/report.md` (results and requirement coverage) and `contract/.out/server.log`.
@@ -41,6 +43,19 @@ What a run does:
    see each other's data. ID sequences are not reset, so don't hard-code generated IDs. Save them instead.
 3. Runs the file's `background` steps, then the case's `steps`, in order. The first failing expectation fails the
    case and its message shows exactly what differed.
+
+## Migration specs
+
+A spec file can start from a prepared database instead of an empty one. The runner then creates the database,
+starts the backend on it (so migrations run), and runs that file's cases in order without resetting data in between:
+
+```yaml
+database:
+  seed: small-legacy.sql        # SQL file next to the spec (legacy schema + known data)
+# or
+database:
+  template: sonata-prod-copy    # copy of a local database; the file is skipped if it doesn't exist
+```
 
 ## Spec file layout
 
@@ -101,6 +116,12 @@ Used for setup that the API can't do (today's scope-ANY admin), and to prove dat
 - sql: INSERT INTO payments (...) VALUES (...)
   expect:
     error: { $contains: check constraint }   # statement must FAIL with a matching message
+```
+
+### Setting variables
+
+```yaml
+- set: { reader: "{{_token}}", course: Violin }   # copy or define variables for later steps
 ```
 
 ### Reuse, repetition, waiting

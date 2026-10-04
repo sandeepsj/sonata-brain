@@ -1,0 +1,29 @@
+# NEW access model: create a staff user holding one new role with the given permissions, and log in.
+# Needs {{root}} (use: root first).
+#
+#   - use: staff
+#     with: { as: reader, permissions: { STUDENT: READ } }
+#
+# Saves: {{<as>}} = access token, {{<as>Id}} = user id, {{<as>RoleId}} = role id.
+params:
+  as: staff
+  permissions: {}
+steps:
+  - POST: /api/roles
+    auth: root
+    body: { name: "{{as}}-role-{{uniq}}", description: Role for a contract case, permissions: "{{permissions}}" }
+    expect: { status: 201 }
+    save: { _role: body.id }
+  - POST: /api/users/signup
+    body: { email: "{{as}}-{{uniq}}@sonata.test", password: staff-password-1 }
+    expect: { status: 201 }
+    save: { _uid: body.id, _email: body.email }
+  - PUT: /api/users/{{_uid}}/roles
+    auth: root
+    body: { roleIds: [ "{{_role}}" ] }
+    expect: { status: 200 }
+  - POST: /api/auth/login
+    body: { email: "{{_email}}", password: staff-password-1 }
+    expect: { status: 200 }
+    save: { _token: body.accessToken }
+  - set: { "{{as}}": "{{_token}}", "{{as}}Id": "{{_uid}}", "{{as}}RoleId": "{{_role}}" }

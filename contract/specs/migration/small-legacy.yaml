@@ -1,0 +1,198 @@
+area: Migration of a small legacy database with known content
+suite: migration
+# The runner loads small-legacy.sql (production's schema with hand-made data, described in that file) into a
+# fresh database, then starts the new backend on it. Migrations run at startup. Cases share that database and run
+# in order; nothing is reset between them.
+database:
+  seed: small-legacy.sql
+background:
+  - POST: /api/auth/login
+    body: { email: admin@sonata.local, password: legacy-admin-1 }
+    expect: { status: 200 }
+    save: { admin: body.accessToken }
+
+cases:
+  - id: MIG-001
+    title: The legacy admin keeps their password and becomes ADMIN; other accounts get no roles
+    req: [REQ-080.AC5]
+    steps:
+      - GET: /api/users/me
+        auth: admin
+        expect:
+          status: 200
+          body:
+            email: admin@sonata.local
+            roles: [ { name: ADMIN } ]
+            permissions: { $has: [STUDENT_WRITE, PAYMENT_WRITE, DUES_WRITE, USER_WRITE] }
+      - POST: /api/auth/login
+        body: { email: staff@sonata.local, password: legacy-staff-1 }
+        expect: { status: 200, body: { permissions: [] } }
+
+  - id: MIG-002
+    title: Each legacy course-year becomes a named fee structure with the same terms and amounts
+    req: [REQ-080.AC1]
+    steps:
+      - GET: /api/fee-structures
+        auth: admin
+        query: { courseName: VIOLIN }
+        expect:
+          status: 200
+          body:
+            $unordered:
+              - name: VIOLIN 2024
+                termsPerYear: 3
+                usedInTimeline: true
+                terms: [ { termNumber: 1, amount: 1400 }, { termNumber: 2, amount: 1400 }, { termNumber: 3, amount: 1400 } ]
+              - name: VIOLIN 2025
+                termsPerYear: 4
+                usedInTimeline: true
+                terms: [ { termNumber: 1, amount: 1000 }, { termNumber: 2, amount: 1000 },
+                         { termNumber: 3, amount: 1100 }, { termNumber: 4, amount: 1100 } ]
+      - GET: /api/fee-structures
+        auth: admin
+        query: { courseName: KEYBOARD }
+        expect:
+          status: 200
+          body: [ { name: KEYBOARD 2025, termsPerYear: 4, terms: { $every: { amount: 1050 } } } ]
+
+  - id: MIG-003
+    title: Each legacy course-year becomes a timeline entry covering that calendar year
+    req: [REQ-080.AC1]
+    steps:
+      - GET: /api/fee-timeline
+        auth: admin
+        query: { courseName: VIOLIN }
+        expect:
+          status: 200
+          body:
+            - { effectiveFrom: "2024-01-01", effectiveTo: "2024-12-31", feeStructureName: VIOLIN 2024 }
+            - { effectiveFrom: "2025-01-01", effectiveTo: "2025-12-31", feeStructureName: VIOLIN 2025 }
+      - GET: /api/fee-timeline
+        auth: admin
+        query: { courseName: KEYBOARD }
+        expect:
+          status: 200
+          body: [ { effectiveFrom: "2025-01-01", effectiveTo: "2025-12-31", feeStructureName: KEYBOARD 2025 } ]
+
+  - id: MIG-004
+    title: Course-fee payments get the start date of their legacy term; nothing else about any payment changes
+    req: [REQ-080.AC2]
+    steps:
+      - GET: /api/payments/1
+        auth: admin
+        expect:
+          status: 200
+          body: { paymentType: REGULAR, courseName: VIOLIN, periodDate: "2025-01-01", amountPaid: 1000,
+                  studentId: 1, date: "2025-01-15T10:00:00", isActive: true }
+      - GET: /api/payments/2
+        auth: admin
+        expect:
+          status: 200
+          body: { periodDate: "2025-04-01", amountPaid: 600, discountAmount: 100,
+                  discounts: [ { discountAmount: 100, label: Sibling } ], remarks: sibling discount }
+      - GET: /api/payments/3
+        auth: admin
+        expect: { status: 200, body: { periodDate: "2024-05-01", amountPaid: 1400 } }   # 2024 had 3 terms: T2 = May-Aug
+      - GET: /api/payments/4
+        auth: admin
+        expect: { status: 200, body: { paymentType: ADDITIONAL, periodDate: null, courseName: null, label: Admission fee } }
+      - GET: /api/payments/5
+        auth: admin
+        expect: { status: 200, body: { courseName: KEYBOARD, periodDate: "2025-01-01" } }
+      - GET: /api/payments/6
+        auth: admin
+        expect: { status: 200, body: { periodDate: "2025-04-01", isActive: false, remarks: entered twice } }
+      - GET: /api/payments/7
+        auth: admin
+        expect: { status: 200, body: { paymentType: ADDITIONAL, courseName: VIOLIN, periodDate: null, studentId: 3 } }
+
+  - id: MIG-005
+    title: Legacy "student left" dues become waivers
+    req: [REQ-080.AC3]
+    steps:
+      - GET: /api/dues/waivers
+        auth: admin
+        query: { studentId: 2 }
+        expect:
+          status: 200
+          body: [ { sessionId: 2, periodStart: "2025-07-01", reason: { $notBlank: true } } ]
+      - GET: /api/dues/waivers
+        auth: admin
+        query: { studentId: 1 }
+        expect: { status: 200, body: [] }
+
+  - id: MIG-006
+    title: Legacy tables are kept under legacy_ names; nothing else is lost
+    req: [REQ-080.AC4, REQ-080.AC6]
+    steps:
+      - sql: >
+          SELECT to_regclass('legacy_fee_dues_tracker') IS NOT NULL AS dues_kept,
+                 to_regclass('legacy_fee_structure') IS NOT NULL AS fees_kept,
+                 (SELECT count(*) FROM legacy_fee_dues_tracker) AS legacy_dues,
+                 (SELECT count(*) FROM student) AS students,
+                 (SELECT count(*) FROM student_sessions) AS sessions,
+                 (SELECT count(*) FROM course) AS courses,
+                 (SELECT count(*) FROM payments) AS payments,
+                 (SELECT count(*) FROM discounts) AS discounts
+        expect:
+          rows: [ { dues_kept: true, fees_kept: true, legacy_dues: 10, students: 3, sessions: 2, courses: 2,
+                    payments: 7, discounts: 1 } ]
+
+  - id: MIG-007
+    title: Dues rebuilt from the migrated data match what the legacy system showed
+    req: [REQ-081.AC2, REQ-081.AC1]
+    steps:
+      - POST: /api/dues/rebuild
+        auth: admin
+        query: { scope: ALL }
+        expect: { status: 202 }
+        save: { job: body.jobId }
+      - GET: /api/dues/rebuild/{{job}}
+        eventually: 30s
+        auth: admin
+        expect: { status: 200, body: { status: DONE, errors: [] } }
+      - GET: /api/dues
+        auth: admin
+        query: { studentId: 1 }
+        expect:
+          status: 200
+          body:
+            - { periodStart: "2024-05-01", periodEnd: "2024-08-31", amount: 1400, status: PAID }
+            - { periodStart: "2024-09-01", periodEnd: "2024-12-31", amount: 1400, balance: 1400, status: DUE }
+            - { periodStart: "2025-01-01", amount: 1000, status: PAID }
+            - { periodStart: "2025-04-01", amount: 1000, paidAmount: 600, discountAmount: 100, balance: 300, status: PARTIALLY_PAID }
+            - { periodStart: "2025-07-01", amount: 1100, balance: 1100, status: DUE }
+            - { periodStart: "2025-10-01", amount: 1100, balance: 1100, status: DUE }
+      - GET: /api/dues
+        auth: admin
+        query: { studentId: 2 }
+        expect:
+          status: 200
+          body:
+            - { periodStart: "2025-01-01", status: PAID }
+            - { periodStart: "2025-04-01", balance: 1050, status: DUE }
+            - { periodStart: "2025-07-01", status: WAIVED }
+      - GET: /api/dues/legacy-comparison
+        auth: admin
+        expect:
+          status: 200
+          body:
+            mismatches: 0
+            totals: { legacyBilled: 10150, newBilled: 10150, legacyOutstanding: 4950, newOutstanding: 4950 }
+            students:
+              $unordered:
+                - { studentId: 1, legacyBilled: 7000, newBilled: 7000, legacyOutstanding: 3900, newOutstanding: 3900, match: true }
+                - { studentId: 2, legacyBilled: 3150, newBilled: 3150, legacyOutstanding: 1050, newOutstanding: 1050, match: true }
+
+  - id: MIG-008
+    title: On an existing production-shaped database, Flyway baselines version 1 and applies the newer migrations
+    req: [REQ-006.AC2]
+    steps:
+      - sql: >
+          SELECT (SELECT type FROM flyway_schema_history WHERE version = '1') AS v1_type,
+                 count(*) FILTER (WHERE version <> '1' AND success) AS applied,
+                 count(*) FILTER (WHERE NOT success) AS failed
+          FROM flyway_schema_history
+        expect:
+          rows: [ { v1_type: BASELINE, applied: { $gte: 1 }, failed: 0 } ]
+

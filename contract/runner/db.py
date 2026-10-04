@@ -44,6 +44,23 @@ class Database:
         self._psql(f'DROP DATABASE IF EXISTS "{self.name}" WITH (FORCE)', database="postgres")
         self._psql(f'CREATE DATABASE "{self.name}"', database="postgres")
 
+    def exists(self, name):
+        out = self._psql(f"SELECT 1 FROM pg_database WHERE datname = '{name}'", database="postgres")
+        return "1" in out.split()
+
+    def recreate_from(self, spec):
+        """Fresh database from a seed SQL file, or as a copy of a local template database."""
+        self._psql(f'DROP DATABASE IF EXISTS "{self.name}" WITH (FORCE)', database="postgres")
+        if "template" in spec:
+            self._psql(f'CREATE DATABASE "{self.name}" TEMPLATE "{spec["template"]}"', database="postgres")
+            return
+        self._psql(f'CREATE DATABASE "{self.name}"', database="postgres")
+        cmd = ["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-h", self.host, "-p", self.port, "-U", self.user,
+               "-d", self.name, "-f", spec["seed"]]
+        result = subprocess.run(cmd, env=self.env, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise SqlError(f"seed {spec['seed']} failed: {result.stderr.strip()[:500]}")
+
     def clear(self):
         tables = [r["tablename"] for r in self.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")]
         doomed = [f'"{t}"' for t in tables if t not in self.preserve]

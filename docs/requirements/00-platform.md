@@ -6,7 +6,7 @@ Status: accepted · Source: user, 2026-10-04
 The work covers the backend and its HTTP API only. Existing endpoints may change shape. The frontend will be updated
 to the new contract later.
 
-- **REQ-001.AC1** [target] Every endpoint in the new contract is documented by at least one requirement in this log.
+- **REQ-001.AC1** [process] Every endpoint in the new contract is documented by at least one requirement in this log.
 
 ### REQ-002 Tests before code, written as a language-neutral contract
 Status: accepted · Source: user, 2026-10-04 (YAML format chosen the same day)
@@ -15,28 +15,28 @@ An exhaustive black-box test suite is written before feature code, and every cod
 suite is the API contract. It lives in `contract/` as YAML, so the backend could be rewritten in any language and
 checked against the same files.
 
-- **REQ-002.AC1** [target] Every test case is fully described in YAML: requests, data and expected results. The
+- **REQ-002.AC1** [process] Every test case is fully described in YAML: requests, data and expected results. The
   runner (`contract/runner/`) holds no case-specific logic or assertions. Its vocabulary is documented in
   `contract/README.md`.
-- **REQ-002.AC2** [target] `python3 contract/run.py` runs the `baseline` suite and must be green on every commit.
+- **REQ-002.AC2** [process] `python3 contract/run.py` runs the `baseline` suite and must be green on every commit.
   `--suite target` reports which parts of the new contract are still red.
-- **REQ-002.AC3** [target] The runner starts the backend against a freshly created database, and empties all
+- **REQ-002.AC3** [process] The runner starts the backend against a freshly created database, and empties all
   business tables before each case. Cases don't depend on each other or on their order.
 
 ### REQ-003 Requirements log with history
 Status: accepted · Source: user, 2026-10-04
 
-- **REQ-003.AC1** [target] Every acceptance criterion in `docs/requirements/*.md` is covered by at least one contract
+- **REQ-003.AC1** [process] Every acceptance criterion in `docs/requirements/*.md` is covered by at least one contract
   case (`req:`), and every `req:` refers to an existing criterion. The runner reports both and fails on unknown
   citations. `--strict-trace` also fails on uncovered criteria.
-- **REQ-003.AC2** [target] `HISTORY.md` has a dated entry for every requirement that is added, changed or dropped.
+- **REQ-003.AC2** [process] `HISTORY.md` has a dated entry for every requirement that is added, changed or dropped.
 
 ### REQ-004 Production data is preserved and rehearsed locally
 Status: accepted · Source: user, 2026-10-04
 
-- **REQ-004.AC1** [target] `scripts/db/dump-prod.sh` takes a read-only dump of the Neon production database over the
+- **REQ-004.AC1** [process] `scripts/db/dump-prod.sh` takes a read-only dump of the Neon production database over the
   direct (non-pooled) connection into `~/sonata-dumps/`. Dumps are never committed.
-- **REQ-004.AC2** [target] `scripts/db/reset-local-from-prod.sh` recreates `sonata-local` as an exact copy of the
+- **REQ-004.AC2** [process] `scripts/db/reset-local-from-prod.sh` recreates `sonata-local` as an exact copy of the
   newest dump, and refuses to run against a non-local host.
 
 ### REQ-005 One error format

@@ -14,16 +14,27 @@ Status: accepted · Source: design, 2026-10-04
   payment row is lost or changes amount, date, student, discounts or active flag.
 - **REQ-080.AC3** [target] Legacy dues with status `STUDENT_LEFT_DUE_CANCELLED` become waivers.
 - **REQ-080.AC4** [target] Legacy tables are renamed `legacy_*`, not dropped.
-- **REQ-080.AC5** [target] Accounts with scope `ANY` get the `ADMIN` role. Other accounts get no roles.
+- **REQ-080.AC5** [target] Accounts with scope `ANY` get the `ADMIN` role and keep their passwords. Other accounts
+  get no roles.
 - **REQ-080.AC6** [target] Row counts of students, sessions, courses, payments and discounts are identical before
   and after the migration.
 
 ### REQ-081 Check the migrated dues against the old ones
 Status: accepted · Source: user ("test everything including migration works properly"), 2026-10-04
 
-- **REQ-081.AC1** [target] A dry-run rebuild on the migrated prod copy produces a report comparing each student's
-  derived dues with `legacy_fee_dues_tracker` (period, amount, balance, status).
-- **REQ-081.AC2** [target] For the same students, total billed amounts and total collected amounts match legacy,
-  except for differences listed and explained in the report.
-- **REQ-081.AC3** [target] The full migration and rebuild runs on the local prod copy without errors before it is
-  run on production.
+- **REQ-081.AC1** [target] `GET /api/dues/legacy-comparison` (DUES_READ) compares, per student:
+  - **Legacy billed:** the term amounts of legacy dues not `CANCELLED`.
+  - **Legacy outstanding:** `due_amount` of legacy dues in `DUE` or `PARTIALLY_PAID`.
+  - **New billed:** `amount` of the derived dues.
+  - **New outstanding:** `balance` of the derived dues that are not `WAIVED`.
+
+  It returns `{students: [{studentId, legacyBilled, newBilled, legacyOutstanding, newOutstanding, match}],
+  totals: {legacyBilled, newBilled, legacyOutstanding, newOutstanding}, mismatches}`. → 404 once the legacy tables
+  are gone.
+- **REQ-081.AC2** [target] On the known legacy seed, every student matches, so `mismatches = 0` and the totals are
+  equal.
+- **REQ-081.AC3** [target] On the local copy of production:
+  - the migration and a full rebuild finish with no errors;
+  - every REGULAR payment has a `period_date`;
+  - the number of waivers equals the number of legacy `STUDENT_LEFT_DUE_CANCELLED` dues;
+  - the comparison report is produced, so its mismatches can be reviewed before production.

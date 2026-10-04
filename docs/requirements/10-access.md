@@ -43,7 +43,9 @@ Roles are named collections of resource permissions. Users get one or more roles
 
 - **REQ-012.AC1** [target] `POST /api/roles` `{name, description, permissions: {RESOURCE: READ|WRITE|NONE}}` → 201.
   A duplicate name → 409. An unknown resource or access value → 400.
-- **REQ-012.AC2** [target] `GET /api/roles` and `GET /api/roles/{id}` return the roles with their permissions.
+- **REQ-012.AC2** [target] `GET /api/roles` (optionally `?name=`, exact match) and `GET /api/roles/{id}` return
+  roles as `{id, name, description, builtIn, permissions: {RESOURCE: access}}`. Every resource is listed, with
+  `NONE` where no access is granted. An unknown id → 404.
 - **REQ-012.AC3** [target] `PUT /api/roles/{id}` replaces the name, description and permissions. Users holding the role
   are affected immediately (REQ-011.AC5).
 - **REQ-012.AC4** [target] `DELETE /api/roles/{id}` → 204 and removes the role from all users. Deleting the built-in
@@ -77,5 +79,6 @@ Status: proposed · Source: design, 2026-10-04
 
 A fresh database (tests, new environments) needs a first admin without editing SQL by hand.
 
-- **REQ-015.AC1** [target] If properties `sonata.bootstrap-admin.email` and `.password` are set and no user holds
-  `ADMIN`, that user is created (or found) at startup and given `ADMIN`. Otherwise nothing happens.
+- **REQ-015.AC1** [target] If properties `sonata.bootstrap-admin.email` and `.password` are set and no account with
+  that email exists, it is created at startup with the `ADMIN` role. An existing account with that email is left
+  unchanged. Without the properties nothing happens.

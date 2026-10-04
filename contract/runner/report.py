@@ -38,7 +38,8 @@ def trace(all_cases, criteria):
             if r not in criteria:
                 unknown.append(f"{c.id} ({c.file}) cites unknown {r}")
             coverage[r].append(c)
-    uncovered = [ac for ac in criteria if ac not in coverage]
+    # [process] criteria are about how the project is run (scripts, logs, test format), not about the API.
+    uncovered = [ac for ac, kind in criteria.items() if ac not in coverage and kind != "process"]
     return sorted(set(unknown)), uncovered, coverage
 
 

@@ -24,6 +24,7 @@ class Server:
         self.root = repo_root
         self.log_path = log_path
         self.proc = None
+        open(log_path, "w").close()   # one log per run; each server start appends
 
     def build(self):
         if self.cfg.get("build"):
@@ -32,7 +33,7 @@ class Server:
 
     def start(self):
         env = {**os.environ, **{k: str(v) for k, v in (self.cfg.get("env") or {}).items()}}
-        self.log = open(self.log_path, "w")
+        self.log = open(self.log_path, "a")
         print(f"Starting backend: {self.cfg['start']}", flush=True)
         self.proc = subprocess.Popen(self.cfg["start"], shell=True, cwd=self.root, env=env,
                                      stdout=self.log, stderr=subprocess.STDOUT, start_new_session=True)

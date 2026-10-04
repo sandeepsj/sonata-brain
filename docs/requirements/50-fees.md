@@ -61,7 +61,7 @@ Status: accepted · Source: user ("this fee structure is activated from this day
 - **REQ-054.AC2** [target] A period is billed by the timeline entry that is active on the period's **start date**,
   using that entry's structure. That structure decides the period length and amount.
 - **REQ-054.AC3** [target] Periods are generated with a cursor and never overlap or repeat:
-  1. Start at the first term boundary on or after the course's earliest `effectiveFrom`.
+  1. Start at the course's earliest `effectiveFrom`.
   2. Take the structure from the entry active on the cursor date.
   3. The period runs from the cursor to the end of that structure's term containing the cursor.
   4. The next cursor is the day after.
@@ -70,8 +70,9 @@ Status: accepted · Source: user ("this fee structure is activated from this day
   Example: quarterly from 1 Jan, monthly from 15 Feb. Q1 (Jan–Mar) is billed quarterly because quarterly is active on
   1 Jan. Then April, May and so on are billed monthly.
 - **REQ-054.AC4** [target] *(proposed, needs your confirmation)* If the cursor isn't on a term boundary of the active
-  structure, the short period up to that term's end is billed at the **full** term amount. That happens when
-  `effectiveFrom`, or the end of the previous period, falls mid-term in the new structure. Example: monthly until
+  structure, the short period up to that term's end is billed at the **full** term amount, the same "no proration"
+  rule that already applies to students who join mid-term. That happens when the timeline starts mid-term, when the
+  previous period ends mid-term in the new structure, or after a gap. Example: monthly until
   28 Feb, then a 2-term structure (Jan–Jun, Jul–Dec) from 1 Mar. The period 1 Mar–30 Jun is charged the full term-1
   amount. The alternatives are prorating by days, or not billing the partial period and starting at 1 Jul.
 
@@ -79,8 +80,8 @@ Status: accepted · Source: user ("this fee structure is activated from this day
 Status: accepted · Source: design, 2026-10-04
 
 - **REQ-055.AC1** [target] `GET /api/fee-timeline/preview?courseName=&from=&to=` returns the billing periods
-  `[{periodStart, periodEnd, termNumber, termsPerYear, amount, feeStructureId}]` that the current timeline produces in
-  that range. It doesn't write anything.
+  `[{periodStart, periodEnd, termNumber, termsPerYear, amount, feeStructureId}]` that the current timeline produces
+  and that overlap `[from, to]`, ordered by `periodStart`. It doesn't write anything. A missing `from` or `to` → 400.
 
 ### REQ-056 Timeline changes rebuild dues
 Status: accepted · Source: user ("every time this fee structure timeline changes, due recalculation triggers"), 2026-10-04

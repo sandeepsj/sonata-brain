@@ -1,0 +1,48 @@
+area: Migration rehearsal on the local copy of production
+suite: migration
+# Runs only on a machine that has the local database 'sonata-prod-copy' (scripts/db/reset-local-from-prod.sh);
+# skipped elsewhere. The runner clones it, starts the new backend on the clone (migrations run at startup), and
+# checks invariants. The real data is never committed.
+database:
+  template: sonata-prod-copy
+
+cases:
+  - id: MIG-P01
+    title: Migration on production data completes, keeps every row, and gives every course-fee payment a period
+    req: [REQ-081.AC3, REQ-080.AC2, REQ-080.AC3, REQ-080.AC6]
+    steps:
+      - sql: SELECT count(*) FILTER (WHERE NOT success) AS failed FROM flyway_schema_history
+        expect: { rows: [ { failed: 0 } ] }
+      - sql: SELECT count(*) AS missing FROM payments WHERE payment_type = 'REGULAR' AND period_date IS NULL
+        expect: { rows: [ { missing: 0 } ] }
+      - sql: >
+          SELECT (SELECT count(*) FROM due_waiver) =
+                 (SELECT count(*) FROM legacy_fee_dues_tracker WHERE status = 'STUDENT_LEFT_DUE_CANCELLED') AS same
+        expect: { rows: [ { same: true } ] }
+      - sql: >
+          SELECT (SELECT count(*) FROM payments p WHERE p.payment_type = 'REGULAR') =
+                 (SELECT count(*) FROM payments p WHERE p.payment_type = 'REGULAR' AND p.course_name IS NOT NULL) AS all_have_course
+        expect: { rows: [ { all_have_course: true } ] }
+
+  - id: MIG-P02
+    title: A full rebuild on production data finishes without errors and produces the comparison report
+    req: [REQ-081.AC3]
+    steps:
+      # Bootstrap admin (REQ-015) is configured in contract.yaml and exists on any database.
+      - use: root
+      - POST: /api/dues/rebuild
+        auth: root
+        query: { scope: ALL }
+        expect: { status: 202 }
+        save: { job: body.jobId }
+      - GET: /api/dues/rebuild/{{job}}
+        eventually: 120s
+        auth: root
+        expect: { status: 200, body: { status: DONE, errors: [] } }
+      - GET: /api/dues/legacy-comparison
+        auth: root
+        expect:
+          status: 200
+          body:
+            mismatches: { $type: integer }
+            students: { $len: { $gte: 1 } }

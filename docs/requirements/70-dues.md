@@ -22,8 +22,9 @@ Status: accepted · Source: design, 2026-10-04
 
 - **REQ-071.AC1** [target] An active REGULAR payment is applied to the due of the same student and course whose
   period contains `periodDate`.
-- **REQ-071.AC2** [target] If no such due exists, for example because the timeline changed shape, the payment is
-  applied to the oldest due of that course with a balance above 0. Any remainder moves to the next one.
+- **REQ-071.AC2** [target] A payment fills its own period's due first, up to that due's balance. Whatever is left,
+  or the whole payment if its period has no due (for example after a timeline change), goes to the oldest due of the
+  same course with a balance above 0, then the next, and so on. Payments are processed in payment-date order.
 - **REQ-071.AC3** [target] Money left after every due of that course is fully paid stays on the latest due as
   `OVERPAID`. It is never lost.
 - **REQ-071.AC4** [target] Several payments for one period add up. Discounts count towards the applied amount.
@@ -79,6 +80,8 @@ Status: accepted · Source: user + design, 2026-10-04
 - **REQ-074.AC4** [target] `dryRun=true` writes nothing and returns the differences it would make.
 - **REQ-074.AC5** [target] A failure for one student is recorded in `errors` and doesn't stop the others.
 - **REQ-074.AC6** [target] A nightly job rebuilds everything, so dues for new periods appear without anyone acting.
+  `GET /api/dues/rebuild/schedule` → `{cron, nextRunAt}`. The cron comes from configuration and defaults to 02:00
+  daily.
 
 ### REQ-075 How far ahead dues are created
 Status: accepted · Source: design (matches today: whole current year), 2026-10-04

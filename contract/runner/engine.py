@@ -49,6 +49,7 @@ class Case:
     file: str
     area: str
     variables: dict = field(default_factory=dict)
+    database: dict = None     # file-level: start from a seed or template database instead of an empty one
 
 
 class CaseFailed(Exception):
@@ -78,8 +79,18 @@ def load_cases(spec_dir):
                     id=raw["id"] + suffix, title=raw["title"], req=list(raw.get("req", [])),
                     suite=raw.get("suite", default_suite), steps=raw["steps"],
                     background=doc.get("background", []), file=rel, area=doc.get("area", rel),
-                    variables=dict(example or {})))
+                    variables=dict(example or {}),
+                    database=_database_spec(doc.get("database"), path.parent)))
     return cases
+
+
+def _database_spec(raw, folder):
+    if not raw:
+        return None
+    spec = dict(raw)
+    if "seed" in spec:
+        spec["seed"] = str((folder / spec["seed"]).resolve())
+    return spec
 
 
 class Engine:
@@ -93,7 +104,8 @@ class Engine:
     # ---- cases -----------------------------------------------------------------------------------------------
 
     def run_case(self, case):
-        self.db.clear()
+        if not case.database:      # cases on a seeded database share it, in file order
+            self.db.clear()
         variables = dict(case.variables)
         for i, step in enumerate(case.background, 1):
             self.run_step(step, variables, f"background step {i}")
@@ -103,9 +115,13 @@ class Engine:
     def run_step(self, step, variables, where):
         if not isinstance(step, dict):
             raise SpecError(f"{where}: a step must be a mapping, got {show(step, 80)}")
-        if "use" in step:
-            return self._use(step, variables, where)
         count = render(step.get("repeat", 1), variables)
+        if "use" in step:
+            for i in range(1, int(count) + 1):
+                if "repeat" in step:
+                    variables["i"] = i
+                self._use(step, variables, where + (f" (repeat {i}/{count})" if "repeat" in step else ""))
+            return
         for i in range(1, int(count) + 1):
             if "repeat" in step:
                 variables["i"] = i
@@ -142,6 +158,9 @@ class Engine:
                 time.sleep(0.3)
 
     def _once(self, step, variables, label):
+        if "set" in step:
+            variables.update(render(step["set"], variables))
+            return
         if "sql" in step:
             return self._sql(step, variables, label)
         methods = [m for m in METHODS if m in step]
@@ -183,6 +202,8 @@ class Engine:
                 status, text = r.status, r.read().decode()
         except urllib.error.HTTPError as e:
             status, text = e.code, e.read().decode()
+        except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
+            raise CaseFailed(f"{method} {path}", f"no response from {self.base_url}: {e}")
         try:
             body = json.loads(text) if text.strip() else MISSING
         except json.JSONDecodeError:
@@ -233,6 +254,7 @@ class Engine:
 
     def _save(self, save, source, variables, label):
         for name, dotted in (save or {}).items():
+            name = render(name, variables)
             try:
                 variables[name] = lookup(source, dotted)
             except SpecError:
