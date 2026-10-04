@@ -1,0 +1,386 @@
+area: Students - create, read, update, list, search (today)
+suite: baseline
+background:
+  - use: baseline-admin
+
+cases:
+  # ---------- create ----------
+
+  - id: STU-001
+    title: First student gets admission number 1, today's admission date and status active
+    req: [REQ-020.AC1, REQ-020.AC5]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Asha }
+        expect:
+          status: 200
+          body:
+            admissionNo: 1
+            studentName: Asha
+            admissionDate: "{{today}}"
+            status: active
+
+  - id: STU-002
+    title: Automatic admission number is the highest existing number + 1, even after a manual high number
+    req: [REQ-020.AC1]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: A }
+        expect: { status: 200, body: { admissionNo: 1 } }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: B, admissionNo: 500 }
+        expect: { status: 200, body: { admissionNo: 500 } }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: C }
+        expect: { status: 200, body: { admissionNo: 501 } }
+
+  - id: STU-003
+    title: An explicit, unused admission number is kept
+    req: [REQ-020.AC2]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Ravi, admissionNo: 1234 }
+        expect: { status: 200, body: { admissionNo: 1234, studentName: Ravi } }
+      - GET: /api/students/1234
+        auth: admin
+        expect: { status: 200, body: { studentName: Ravi } }
+
+  - id: STU-004
+    title: A duplicate admission number is rejected and the original student is unchanged
+    req: [REQ-020.AC3]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: First, admissionNo: 77 }
+        expect: { status: 200 }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Second, admissionNo: 77 }
+        expect: { status: 400 }
+      - GET: /api/students/77
+        auth: admin
+        expect: { status: 200, body: { studentName: First } }
+
+  - id: STU-005
+    title: A blank student name is rejected and nothing is stored
+    req: [REQ-020.AC4]
+    examples:
+      - { name: "" }
+      - { name: "   " }
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: "{{name}}" }
+        expect: { status: 400 }
+      - GET: /api/students
+        auth: admin
+        expect: { status: 200, body: { totalElements: 0 } }
+
+  - id: STU-006
+    title: A missing student name is rejected
+    req: [REQ-020.AC4]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { contactNo: "123" }
+        expect: { status: 400 }
+      - GET: /api/students
+        auth: admin
+        expect: { status: 200, body: { totalElements: 0 } }
+
+  - id: STU-007
+    title: Every provided field is stored and returned
+    req: [REQ-020.AC6]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body:
+          studentName: Kiran
+          contactNo: "9876543210"
+          dob: "2012-05-17"
+          className: 7B
+          school: St. Mary's High School
+          address: 12 Lake Road, Kochi
+          pinCode: 682001
+          remarks: Prefers evening batch
+          admissionDate: "2025-06-01"
+        expect: { status: 200 }
+        save: { id: body.admissionNo }
+      - GET: /api/students/{{id}}
+        auth: admin
+        expect:
+          status: 200
+          body:
+            admissionNo: "{{id}}"
+            studentName: Kiran
+            contactNo: "9876543210"
+            dob: "2012-05-17"
+            className: 7B
+            school: St. Mary's High School
+            address: 12 Lake Road, Kochi
+            pinCode: 682001
+            remarks: Prefers evening batch
+            admissionDate: "2025-06-01"
+            status: active
+
+  # ---------- read and update ----------
+
+  - id: STU-010
+    title: A student can be fetched by admission number
+    req: [REQ-021.AC1]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Nila }
+        expect: { status: 200 }
+        save: { id: body.admissionNo }
+      - GET: /api/students/{{id}}
+        auth: admin
+        expect: { status: 200, body: { admissionNo: "{{id}}", studentName: Nila } }
+
+  - id: STU-011
+    title: An unknown admission number gives 404
+    req: [REQ-021.AC2]
+    steps:
+      - GET: /api/students/999999
+        auth: admin
+        expect: { status: 404 }
+
+  - id: STU-012
+    title: Update changes only the fields that are sent
+    req: [REQ-021.AC3]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Old Name, contactNo: "111", school: Old School, className: 7B, pinCode: 682001 }
+        expect: { status: 200 }
+        save: { id: body.admissionNo }
+      - PUT: /api/students/{{id}}
+        auth: admin
+        body: { contactNo: "1112223334", school: New School }
+        expect: { status: 200 }
+      - GET: /api/students/{{id}}
+        auth: admin
+        expect:
+          status: 200
+          body:
+            contactNo: "1112223334"
+            school: New School
+            studentName: Old Name
+            className: 7B
+            pinCode: 682001
+
+  - id: STU-013
+    title: A blank name in an update is ignored
+    req: [REQ-021.AC3]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Keeps Name }
+        expect: { status: 200 }
+        save: { id: body.admissionNo }
+      - PUT: /api/students/{{id}}
+        auth: admin
+        body: { studentName: "  " }
+        expect: { status: 200 }
+      - GET: /api/students/{{id}}
+        auth: admin
+        expect: { status: 200, body: { studentName: Keeps Name } }
+
+  - id: STU-014
+    title: Admission number and admission date can't be changed by an update
+    req: [REQ-021.AC3]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Fixed, admissionDate: "2025-06-01" }
+        expect: { status: 200 }
+        save: { id: body.admissionNo }
+      - PUT: /api/students/{{id}}
+        auth: admin
+        body: { admissionNo: 4242, admissionDate: "2001-01-01" }
+        expect: { status: 200 }
+      - GET: /api/students/{{id}}
+        auth: admin
+        expect: { status: 200, body: { admissionNo: "{{id}}", admissionDate: "2025-06-01" } }
+      - GET: /api/students/4242
+        auth: admin
+        expect: { status: 404 }
+
+  - id: STU-015
+    title: Updating an unknown student gives 404
+    req: [REQ-021.AC4]
+    steps:
+      - PUT: /api/students/999999
+        auth: admin
+        body: { studentName: Ghost }
+        expect: { status: 404 }
+
+  - id: STU-016
+    title: Student status can be set to closed, suspended or active
+    req: [REQ-021.AC5]
+    examples:
+      - { status: closed }
+      - { status: suspended }
+      - { status: active }
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Status Test }
+        expect: { status: 200 }
+        save: { id: body.admissionNo }
+      - PUT: /api/students/{{id}}
+        auth: admin
+        body: { status: "{{status}}" }
+        expect: { status: 200 }
+      - GET: /api/students/{{id}}
+        auth: admin
+        expect: { status: 200, body: { status: "{{status}}" } }
+
+  # ---------- list and search ----------
+
+  - id: STU-020
+    title: The student list is paged, 10 per page by default
+    req: [REQ-022.AC1]
+    steps:
+      - POST: /api/students
+        repeat: 12
+        auth: admin
+        body: { studentName: "Student {{i}}" }
+        expect: { status: 200 }
+      - GET: /api/students
+        auth: admin
+        expect:
+          status: 200
+          body: { content: { $len: 10 }, totalElements: 12, totalPages: 2 }
+      - GET: /api/students
+        auth: admin
+        query: { page: 1, size: 10 }
+        expect: { status: 200, body: { content: { $len: 2 } } }
+      - GET: /api/students
+        auth: admin
+        query: { page: 0, size: 5 }
+        expect: { status: 200, body: { content: { $len: 5 }, totalPages: 3 } }
+
+  - id: STU-021
+    title: Search without filters returns every student
+    req: [REQ-023.AC1]
+    steps:
+      - POST: /api/students
+        repeat: 3
+        auth: admin
+        body: { studentName: "S{{i}}" }
+        expect: { status: 200 }
+      - GET: /api/students/search
+        auth: admin
+        expect: { status: 200, body: { $len: 3 } }
+
+  - id: STU-022
+    title: Name and school match any part of the text, ignoring case; contact number matches any part
+    req: [REQ-023.AC2]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Asha Menon, school: Bhavans Vidya Mandir, contactNo: "9847012345" }
+        expect: { status: 200 }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Rahul, school: Chinmaya, contactNo: "9000000000" }
+        expect: { status: 200 }
+      - GET: /api/students/search
+        auth: admin
+        query: { name: MENON }
+        expect: { status: 200, body: [ { studentName: Asha Menon } ] }
+      - GET: /api/students/search
+        auth: admin
+        query: { school: vidya }
+        expect: { status: 200, body: [ { studentName: Asha Menon } ] }
+      - GET: /api/students/search
+        auth: admin
+        query: { contactNo: "70123" }
+        expect: { status: 200, body: [ { studentName: Asha Menon } ] }
+
+  - id: STU-023
+    title: Class matches whole value ignoring case; pin code and admission number match exactly
+    req: [REQ-023.AC3]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: A, className: 10A, pinCode: 682001 }
+        expect: { status: 200 }
+        save: { a: body.admissionNo }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: B, className: 10AB, pinCode: 682002 }
+        expect: { status: 200 }
+      - GET: /api/students/search
+        auth: admin
+        query: { className: 10a }
+        expect: { status: 200, body: [ { studentName: A } ] }
+      - GET: /api/students/search
+        auth: admin
+        query: { pinCode: 682001 }
+        expect: { status: 200, body: [ { studentName: A } ] }
+      - GET: /api/students/search
+        auth: admin
+        query: { admissionNo: "{{a}}" }
+        expect: { status: 200, body: [ { studentName: A } ] }
+      - GET: /api/students/search
+        auth: admin
+        query: { pinCode: 68200 }
+        expect: { status: 200, body: [] }
+
+  - id: STU-024
+    title: Admission date range includes both ends, and either end can be used alone
+    req: [REQ-023.AC4]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Jan, admissionDate: "2025-01-15" }
+        expect: { status: 200 }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Feb, admissionDate: "2025-02-15" }
+        expect: { status: 200 }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Mar, admissionDate: "2025-03-15" }
+        expect: { status: 200 }
+      - GET: /api/students/search
+        auth: admin
+        query: { admissionDateFrom: "2025-01-15", admissionDateTo: "2025-02-15" }
+        expect: { status: 200, body: { $unordered: [ { studentName: Jan }, { studentName: Feb } ] } }
+      - GET: /api/students/search
+        auth: admin
+        query: { admissionDateFrom: "2025-02-15" }
+        expect: { status: 200, body: { $unordered: [ { studentName: Feb }, { studentName: Mar } ] } }
+      - GET: /api/students/search
+        auth: admin
+        query: { admissionDateTo: "2025-02-14" }
+        expect: { status: 200, body: [ { studentName: Jan } ] }
+
+  - id: STU-025
+    title: Several filters together must all match
+    req: [REQ-023.AC5]
+    steps:
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Anu, school: Global, className: "5", admissionNo: 10 }
+        expect: { status: 200 }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Anu, school: Other, className: "5", admissionNo: 11 }
+        expect: { status: 200 }
+      - POST: /api/students
+        auth: admin
+        body: { studentName: Binu, school: Global, className: "5", admissionNo: 12 }
+        expect: { status: 200 }
+      - GET: /api/students/search
+        auth: admin
+        query: { name: anu, school: glob, className: "5" }
+        expect: { status: 200, body: [ { admissionNo: 10 } ] }

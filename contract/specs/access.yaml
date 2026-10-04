@@ -1,0 +1,92 @@
+area: Access - login, tokens, sign-up (today)
+suite: baseline
+background:
+  - use: baseline-admin
+
+cases:
+  - id: ACC-001
+    title: Health check answers OK without a token
+    req: [REQ-007.AC1]
+    steps:
+      - GET: /heartbeat
+        expect: { status: 200, text: OK }
+
+  - id: ACC-002
+    title: Login returns two different tokens
+    req: [REQ-010.AC1]
+    steps:
+      - POST: /api/auth/login
+        body: { email: baseline-admin@sonata.test, password: baseline-password-1 }
+        expect:
+          status: 200
+          body:
+            accessToken: { $notBlank: true }
+            refreshToken: { $notBlank: true, $ne: "{{admin}}" }
+
+  - id: ACC-003
+    title: Refresh issues a working access token and returns the same refresh token
+    req: [REQ-010.AC2]
+    steps:
+      - POST: /api/auth/refresh
+        auth: adminRefresh
+        expect:
+          status: 200
+          body:
+            accessToken: { $notBlank: true }
+            refreshToken: "{{adminRefresh}}"
+        save: { fresh: body.accessToken }
+      - GET: /api/courses
+        auth: fresh
+        expect: { status: 200 }
+
+  - id: ACC-004
+    title: A scope-ANY user's token is accepted on protected endpoints
+    req: [REQ-010.AC3]
+    steps:
+      - GET: /api/courses
+        auth: admin
+        expect: { status: 200 }
+      - GET: /api/students
+        auth: admin
+        expect: { status: 200 }
+      - GET: /api/payments
+        auth: admin
+        expect: { status: 200 }
+
+  - id: ACC-005
+    title: Wrong password is rejected with HTTP 400 (body says 403) - known defect
+    req: [REQ-010.AC4]
+    steps:
+      - POST: /api/auth/login
+        body: { email: baseline-admin@sonata.test, password: wrong }
+        expect:
+          status: 400
+          body: { status: 403, message: Invalid password }
+
+  - id: ACC-006
+    title: Sign-up is public and creates a user with scope NONE, without exposing the password
+    req: [REQ-014.AC1]
+    steps:
+      - POST: /api/users/signup
+        body: { email: "{{uniq}}@sonata.test", password: pw-123456 }
+        expect:
+          status: 201
+          body:
+            id: { $type: integer, $gt: 0 }
+            email: { $regex: "@sonata\\.test$" }
+            scope: NONE
+            password: { $absent: true }
+
+  - id: ACC-007
+    title: A scope-NONE user cannot log in
+    req: [REQ-014.AC2]
+    steps:
+      - POST: /api/users/signup
+        body: { email: "none-{{uniq}}@sonata.test", password: pw-123456 }
+        expect: { status: 201 }
+        save: { email: body.email }
+      - POST: /api/auth/login
+        body: { email: "{{email}}", password: pw-123456 }
+        expect:
+          status: { $gte: 400, $lt: 500 }
+          body: { accessToken: { $absent: true } }

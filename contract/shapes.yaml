@@ -1,0 +1,18 @@
+# Named expectations, used in specs as { $shape: <name> }.
+# Keep each shape small and documented: these are part of the contract.
+
+# Standard error body of the new contract (REQ-005.AC1).
+# Every 4xx/5xx response looks like this. No stack traces or SQL are leaked.
+error:
+  status: { $type: integer }
+  error: { $type: string }
+  message: { $notBlank: true }
+  details: { $type: array }
+  timestamp: { $type: string }
+  trace: { $absent: true }
+  exception: { $absent: true }
+
+# One validation problem inside error.details (REQ-005.AC2).
+fieldError:
+  field: { $notBlank: true }
+  message: { $notBlank: true }

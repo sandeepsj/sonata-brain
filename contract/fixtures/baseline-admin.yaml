@@ -1,0 +1,19 @@
+# Log in as an administrator under TODAY's access model.
+# Today only an account with scope ANY may log in or call the API, and the API has no way to grant
+# that scope, so the fixture sets it in the database.
+# Saves: {{admin}} = access token, {{adminRefresh}} = refresh token.
+params:
+  email: baseline-admin@sonata.test
+  password: baseline-password-1
+steps:
+  - sql: DELETE FROM account WHERE email = '{{email}}'
+  - POST: /api/users/signup
+    body: { email: "{{email}}", password: "{{password}}" }
+    expect: { status: 201 }
+  - sql: UPDATE account SET scope = 'ANY' WHERE email = '{{email}}'
+  - POST: /api/auth/login
+    body: { email: "{{email}}", password: "{{password}}" }
+    expect: { status: 200 }
+    save:
+      admin: body.accessToken
+      adminRefresh: body.refreshToken

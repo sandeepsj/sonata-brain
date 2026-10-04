@@ -1,0 +1,37 @@
+# Requirements history
+
+Append-only. Newest entries at the bottom. Each entry gives the date, the source and the requirements it touched.
+
+## 2026-10-04: Initial requirements (conversation with the user)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Users can add new courses ("subjects"), mark some as closed, update fees and start a new fee structure. | User | REQ-040, REQ-042, REQ-050, REQ-051 |
+| 2 | Only some users may do these things: route-based access with separate read and write rights. | User | REQ-011 |
+| 3 | Fee structures change mid-year, but existing dues must stay intact. | User | REQ-073 |
+| 4 | Fee structures are set up independently and assigned to date ranges on a timeline. Every timeline change recalculates dues. | User | REQ-050, REQ-053, REQ-056 |
+| 5 | Staff sometimes record a course-fee payment as "additional". It must be possible to convert it later. | User | REQ-065 |
+| 6 | Scope is the backend and API only. No backward compatibility is needed; the frontend follows the new contract. | User | REQ-001 |
+| 7 | A timeline boundary that falls mid-term is resolved by "the structure active on the term's start date bills the whole term". | User (option chosen) | REQ-054.AC2 |
+| 8 | Payments, sessions and structures are independent facts. Dues are recalculated from them for the whole institute whenever needed, and fee structures stay editable. | User | REQ-051, REQ-070 |
+| 9 | Permissions are per resource. Named roles group them. | User | REQ-011, REQ-012 |
+| 10 | Existing production data is migrated, not discarded. | User | REQ-080, REQ-081 |
+| 11 | ADDITIONAL payments may have no course. Only REGULAR payments need a course and period. | User question, design answer | REQ-061.AC3, REQ-061.AC5, REQ-065.AC2 |
+| 12 | Rewrite in place rather than start a new repository. | User | — |
+| 13 | Write an exhaustive test suite and keep this requirements log before writing feature code. Test today's behaviour first, then refine it. | User | REQ-002, REQ-003 |
+| 14 | Download production into a local copy, keep the local DB resettable to an exact prod copy, and test the migration on it. | User | REQ-004, REQ-081.AC3 |
+| 15 | The test suite must not be tied to Java. Test cases are YAML files: requests, data and expected results all written there, readable without reading any code, with a Python runner that holds no assertions. The database may be accessed for setup and resets. | User | REQ-002, REQ-003.AC1 |
+
+### Design decisions recorded the same day (open to change)
+
+- Dues are a derived projection with a nightly rebuild, and the horizon is the end of the current year (REQ-074,
+  REQ-075).
+- Payments link to a term by `periodDate` and no longer by a fee-structure ID (REQ-060.AC5, REQ-071).
+- Waivers replace `STUDENT_LEFT_DUE_CANCELLED` (REQ-072).
+- One error format across the API (REQ-005), Flyway migrations (REQ-006), bootstrap admin (REQ-015).
+
+### Open questions
+
+- **REQ-054.AC4:** how to bill a partial term left after a structure switch. Options are full amount (proposed),
+  prorate by days, or skip to the next boundary.
+- **REQ-005, REQ-015:** proposed by design and awaiting the user's confirmation.
