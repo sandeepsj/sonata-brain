@@ -34,6 +34,8 @@ Status: accepted · Source: user, 2026-10-04 · Since: v2
   - `[baseline]` describes how the API behaves today. Its contract case must pass on the current code. It protects
     behaviour during the rewrite.
   - `[target]` describes the new contract. Its contract case fails until the feature is built.
+  - `[retired]` was `[baseline]` until the new contract replaced it. The criterion stays for history and names its
+    replacement. Its case was deleted, and coverage doesn't count it.
   - `[process]` describes how the project is run (scripts, logs, test format). It can't be verified through the
     API, so contract coverage doesn't count it.
   - A criterion that exists only to record a current defect is tagged `[baseline-defect]`. Its case documents the

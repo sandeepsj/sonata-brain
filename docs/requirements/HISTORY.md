@@ -65,3 +65,10 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
   exists, so it also works on a migrated production copy.
 - Criteria about scripts, history and test format are tagged `[process]` and are not counted for API coverage.
 
+## 2026-10-04: Roles and permissions implemented (Task 1)
+
+- Retired REQ-010.AC4 and REQ-014.AC1/AC2 (old scope model), replaced by REQ-010.AC6 and REQ-014.AC3. Their baseline
+  cases ACC-005..007 were deleted. The baseline fixture now logs in as the bootstrap admin instead of setting scope
+  ANY in SQL.
+- New criterion tag `[retired]`.
+

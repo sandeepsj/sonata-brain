@@ -16,7 +16,7 @@ cases:
     req: [REQ-010.AC1]
     steps:
       - POST: /api/auth/login
-        body: { email: baseline-admin@sonata.test, password: baseline-password-1 }
+        body: { email: root@sonata.test, password: root-password-1 }
         expect:
           status: 200
           body:
@@ -40,7 +40,7 @@ cases:
         expect: { status: 200 }
 
   - id: ACC-004
-    title: A scope-ANY user's token is accepted on protected endpoints
+    title: An administrator's token is accepted on protected endpoints
     req: [REQ-010.AC3]
     steps:
       - GET: /api/courses
@@ -52,41 +52,3 @@ cases:
       - GET: /api/payments
         auth: admin
         expect: { status: 200 }
-
-  - id: ACC-005
-    title: Wrong password is rejected with HTTP 400 (body says 403) - known defect
-    req: [REQ-010.AC4]
-    steps:
-      - POST: /api/auth/login
-        body: { email: baseline-admin@sonata.test, password: wrong }
-        expect:
-          status: 400
-          body: { status: 403, message: Invalid password }
-
-  - id: ACC-006
-    title: Sign-up is public and creates a user with scope NONE, without exposing the password
-    req: [REQ-014.AC1]
-    steps:
-      - POST: /api/users/signup
-        body: { email: "{{uniq}}@sonata.test", password: pw-123456 }
-        expect:
-          status: 201
-          body:
-            id: { $type: integer, $gt: 0 }
-            email: { $regex: "@sonata\\.test$" }
-            scope: NONE
-            password: { $absent: true }
-
-  - id: ACC-007
-    title: A scope-NONE user cannot log in
-    req: [REQ-014.AC2]
-    steps:
-      - POST: /api/users/signup
-        body: { email: "none-{{uniq}}@sonata.test", password: pw-123456 }
-        expect: { status: 201 }
-        save: { email: body.email }
-      - POST: /api/auth/login
-        body: { email: "{{email}}", password: pw-123456 }
-        expect:
-          status: { $gte: 400, $lt: 500 }
-          body: { accessToken: { $absent: true } }

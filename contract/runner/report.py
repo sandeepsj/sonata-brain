@@ -38,8 +38,9 @@ def trace(all_cases, criteria):
             if r not in criteria:
                 unknown.append(f"{c.id} ({c.file}) cites unknown {r}")
             coverage[r].append(c)
-    # [process] criteria are about how the project is run (scripts, logs, test format), not about the API.
-    uncovered = [ac for ac, kind in criteria.items() if ac not in coverage and kind != "process"]
+    # [process] criteria are about how the project is run (scripts, logs, test format), not about the API;
+    # [retired] criteria were replaced by the new contract and their cases deleted.
+    uncovered = [ac for ac, kind in criteria.items() if ac not in coverage and kind not in ("process", "retired")]
     return sorted(set(unknown)), uncovered, coverage
 
 

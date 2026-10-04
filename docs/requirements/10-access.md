@@ -6,16 +6,16 @@ Path mapping: `/api/students/**`→STUDENT, `/api/student-sessions/**`→SESSION
 `/api/dues/**`→DUES, `/api/users/**`, `/api/roles/**` and `/api/logging/**`→USER.
 
 ### REQ-010 Login and token refresh
-Status: accepted · Source: existing code, 2026-10-04
+Status: implemented · Source: existing code, 2026-10-04
 
-- **REQ-010.AC1** [baseline] `POST /api/auth/login` `{email, password}` with valid credentials for a user with scope
-  `ANY` → 200 `{accessToken, refreshToken}`.
+- **REQ-010.AC1** [baseline] `POST /api/auth/login` `{email, password}` with valid credentials of an administrator →
+  200 `{accessToken, refreshToken}`.
 - **REQ-010.AC2** [baseline] `POST /api/auth/refresh` with `Authorization: Bearer <refreshToken>` → 200 with a new
   `accessToken` and the same `refreshToken`.
-- **REQ-010.AC3** [baseline] A request to a protected endpoint with a valid access token of a scope-`ANY` user is
+- **REQ-010.AC3** [baseline] A request to a protected endpoint with a valid access token of an administrator is
   allowed.
-- **REQ-010.AC4** [baseline-defect] A wrong password currently returns HTTP 400 (with `"status": 403` inside the body).
-  Fixed by REQ-010.AC6.
+- **REQ-010.AC4** [retired] *(was baseline-defect)* A wrong password returned HTTP 400 (with `"status": 403` inside
+  the body). Replaced by REQ-010.AC6.
 - **REQ-010.AC5** [target] `POST /api/auth/login` with valid credentials → 200 `{accessToken, refreshToken,
   permissions}`. `permissions` lists the user's effective authorities, for example `["PAYMENT_READ", "PAYMENT_WRITE"]`.
 - **REQ-010.AC6** [target] An unknown email or a wrong password → 401 with the same message for both, so the API
@@ -25,7 +25,7 @@ Status: accepted · Source: existing code, 2026-10-04
   invalid token → 401.
 
 ### REQ-011 Per-resource read and write permissions
-Status: accepted · Source: user, 2026-10-04
+Status: implemented · Source: user, 2026-10-04
 
 - **REQ-011.AC1** [target] `GET` on a resource path requires `<RESOURCE>_READ`. `POST`, `PUT`, `PATCH` and `DELETE`
   require `<RESOURCE>_WRITE`.
@@ -37,7 +37,7 @@ Status: accepted · Source: user, 2026-10-04
 - **REQ-011.AC5** [target] Permission changes take effect on the user's next request, without logging in again.
 
 ### REQ-012 Named roles
-Status: accepted · Source: user, 2026-10-04
+Status: implemented · Source: user, 2026-10-04
 
 Roles are named collections of resource permissions. Users get one or more roles. Effective permissions are the union.
 
@@ -55,7 +55,7 @@ Roles are named collections of resource permissions. Users get one or more roles
 - **REQ-012.AC6** [target] A built-in `ADMIN` role exists with WRITE on every resource.
 
 ### REQ-013 User administration
-Status: accepted · Source: user, 2026-10-04
+Status: implemented · Source: user, 2026-10-04
 
 - **REQ-013.AC1** [target] `GET /api/users` lists users `{id, email, roles}`. Password hashes are never returned.
 - **REQ-013.AC2** [target] `PUT /api/users/{id}/roles` `{roleIds: [..]}` replaces the user's roles. An unknown role
@@ -65,17 +65,18 @@ Status: accepted · Source: user, 2026-10-04
 - **REQ-013.AC4** [target] An admin cannot remove `ADMIN` from themselves if they are the last admin → 409.
 
 ### REQ-014 Self sign-up gives no access
-Status: accepted · Source: existing code, 2026-10-04
+Status: implemented · Source: existing code, 2026-10-04
 
-- **REQ-014.AC1** [baseline] `POST /api/users/signup` `{email, password}` without a token → 201 `{id, email,
-  scope: "NONE"}`.
-- **REQ-014.AC2** [baseline] A signed-up user with scope `NONE` cannot log in (login is rejected).
+- **REQ-014.AC1** [retired] *(was baseline)* `POST /api/users/signup` returned `{id, email, scope: "NONE"}`.
+  Replaced by REQ-014.AC3.
+- **REQ-014.AC2** [retired] *(was baseline)* A signed-up user with scope `NONE` could not log in. Replaced by
+  REQ-014.AC3: they can log in but have no permissions.
 - **REQ-014.AC3** [target] `POST /api/users/signup` → 201 `{id, email, roles: []}`. The user can log in but gets 403 on
   every resource until an admin assigns a role.
 - **REQ-014.AC4** [target] Signing up with an email that already exists → 409. A missing email or password → 400.
 
 ### REQ-015 Bootstrap administrator
-Status: proposed · Source: design, 2026-10-04
+Status: implemented (proposed) · Source: design, 2026-10-04
 
 A fresh database (tests, new environments) needs a first admin without editing SQL by hand.
 

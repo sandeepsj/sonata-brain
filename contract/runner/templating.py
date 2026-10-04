@@ -4,7 +4,7 @@ import itertools
 import re
 from datetime import date, datetime, timedelta
 
-TOKEN = re.compile(r"\{\{\s*(.+?)\s*\}\}")
+TOKEN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
 OFFSET = re.compile(r"^([+-]\d+)([dwmy])$")
 _uniq = itertools.count(1000)
 
