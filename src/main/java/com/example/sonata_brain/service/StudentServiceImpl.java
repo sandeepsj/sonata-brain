@@ -1,6 +1,7 @@
 package com.example.sonata_brain.service;
 
 import com.example.sonata_brain.Repository.StudentRepository;
+import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.exception.StudentNotFoundException;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.spec.StudentSpecifications;
@@ -34,7 +35,7 @@ public class StudentServiceImpl implements StudentService {
         if (student.getAdmissionNo() != null) {
             // User provided admission number - check if it's already used
             if (studentRepository.existsByAdmissionNo(student.getAdmissionNo())) {
-                throw new IllegalArgumentException("Admission number " + student.getAdmissionNo() + " is already in use");
+                throw ApiException.conflict("Admission number " + student.getAdmissionNo() + " is already in use");
             }
         } else {
             // Auto-generate admission number

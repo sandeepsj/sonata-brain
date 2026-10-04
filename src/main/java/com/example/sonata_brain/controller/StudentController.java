@@ -1,5 +1,6 @@
 package com.example.sonata_brain.controller;
 
+import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,22 +37,15 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Student createStudent(@RequestBody Student student) {
         if (student.getStudentName() == null || student.getStudentName().trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            throw ApiException.invalidField("studentName", "Student name is required");
         }
-
-        // Set admission date to current date if not provided
         if (student.getAdmissionDate() == null) {
             student.setAdmissionDate(LocalDate.now());
         }
-
-        try {
-            Student createdStudent = studentService.createStudent(student);
-            return ResponseEntity.ok(createdStudent);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return studentService.createStudent(student);
     }
 
     @GetMapping("/search")
@@ -71,22 +66,12 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student student) {
-        try {
-            Student updatedStudent = studentService.updateStudent(id, student);
-            return ResponseEntity.ok(updatedStudent);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public Student updateStudent(@PathVariable Long id, @RequestBody Student student) {
+        return studentService.updateStudent(id, student);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudent(@PathVariable Long id) {
-        try {
-            Student student = studentService.getStudentById(id);
-            return ResponseEntity.ok(student);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public Student getStudent(@PathVariable Long id) {
+        return studentService.getStudentById(id);
     }
 }

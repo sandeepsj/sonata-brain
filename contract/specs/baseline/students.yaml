@@ -14,7 +14,7 @@ cases:
         auth: admin
         body: { studentName: Asha }
         expect:
-          status: 200
+          status: 201
           body:
             admissionNo: 1
             studentName: Asha
@@ -28,15 +28,15 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: A }
-        expect: { status: 200, body: { admissionNo: 1 } }
+        expect: { status: 201, body: { admissionNo: 1 } }
       - POST: /api/students
         auth: admin
         body: { studentName: B, admissionNo: 500 }
-        expect: { status: 200, body: { admissionNo: 500 } }
+        expect: { status: 201, body: { admissionNo: 500 } }
       - POST: /api/students
         auth: admin
         body: { studentName: C }
-        expect: { status: 200, body: { admissionNo: 501 } }
+        expect: { status: 201, body: { admissionNo: 501 } }
 
   - id: STU-003
     title: An explicit, unused admission number is kept
@@ -45,7 +45,7 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Ravi, admissionNo: 1234 }
-        expect: { status: 200, body: { admissionNo: 1234, studentName: Ravi } }
+        expect: { status: 201, body: { admissionNo: 1234, studentName: Ravi } }
       - GET: /api/students/1234
         auth: admin
         expect: { status: 200, body: { studentName: Ravi } }
@@ -57,11 +57,11 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: First, admissionNo: 77 }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/students
         auth: admin
         body: { studentName: Second, admissionNo: 77 }
-        expect: { status: 400 }
+        expect: { status: 409 }
       - GET: /api/students/77
         auth: admin
         expect: { status: 200, body: { studentName: First } }
@@ -109,7 +109,7 @@ cases:
           pinCode: 682001
           remarks: Prefers evening batch
           admissionDate: "2025-06-01"
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { id: body.admissionNo }
       - GET: /api/students/{{id}}
         auth: admin
@@ -137,7 +137,7 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Nila }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { id: body.admissionNo }
       - GET: /api/students/{{id}}
         auth: admin
@@ -158,7 +158,7 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Old Name, contactNo: "111", school: Old School, className: 7B, pinCode: 682001 }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { id: body.admissionNo }
       - PUT: /api/students/{{id}}
         auth: admin
@@ -182,7 +182,7 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Keeps Name }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { id: body.admissionNo }
       - PUT: /api/students/{{id}}
         auth: admin
@@ -199,7 +199,7 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Fixed, admissionDate: "2025-06-01" }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { id: body.admissionNo }
       - PUT: /api/students/{{id}}
         auth: admin
@@ -232,7 +232,7 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Status Test }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { id: body.admissionNo }
       - PUT: /api/students/{{id}}
         auth: admin
@@ -252,7 +252,7 @@ cases:
         repeat: 12
         auth: admin
         body: { studentName: "Student {{i}}" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/students
         auth: admin
         expect:
@@ -275,7 +275,7 @@ cases:
         repeat: 3
         auth: admin
         body: { studentName: "S{{i}}" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/students/search
         auth: admin
         expect: { status: 200, body: { $len: 3 } }
@@ -287,11 +287,11 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Asha Menon, school: Bhavans Vidya Mandir, contactNo: "9847012345" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/students
         auth: admin
         body: { studentName: Rahul, school: Chinmaya, contactNo: "9000000000" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/students/search
         auth: admin
         query: { name: MENON }
@@ -312,12 +312,12 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: A, className: 10A, pinCode: 682001 }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { a: body.admissionNo }
       - POST: /api/students
         auth: admin
         body: { studentName: B, className: 10AB, pinCode: 682002 }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/students/search
         auth: admin
         query: { className: 10a }
@@ -342,15 +342,15 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Jan, admissionDate: "2025-01-15" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/students
         auth: admin
         body: { studentName: Feb, admissionDate: "2025-02-15" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/students
         auth: admin
         body: { studentName: Mar, admissionDate: "2025-03-15" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/students/search
         auth: admin
         query: { admissionDateFrom: "2025-01-15", admissionDateTo: "2025-02-15" }
@@ -371,15 +371,15 @@ cases:
       - POST: /api/students
         auth: admin
         body: { studentName: Anu, school: Global, className: "5", admissionNo: 10 }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/students
         auth: admin
         body: { studentName: Anu, school: Other, className: "5", admissionNo: 11 }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/students
         auth: admin
         body: { studentName: Binu, school: Global, className: "5", admissionNo: 12 }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/students/search
         auth: admin
         query: { name: anu, school: glob, className: "5" }

@@ -6,7 +6,7 @@ background:
   - POST: /api/students          # Ravi: a student with no session at all
     auth: admin
     body: { studentName: Ravi }
-    expect: { status: 200 }
+    expect: { status: 201 }
     save: { ravi: body.admissionNo }
 
 cases:
@@ -41,7 +41,7 @@ cases:
       - POST: /api/courses
         auth: admin
         body: { name: Keyboard }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/payments
         auth: admin
         body: { studentId: 999999, termId: "{{t1}}", courseName: Violin, amountPaid: 100, label: Course fee }

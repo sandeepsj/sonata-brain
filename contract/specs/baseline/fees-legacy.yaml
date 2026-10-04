@@ -5,7 +5,7 @@ background:
   - POST: /api/courses
     auth: admin
     body: { name: Violin }
-    expect: { status: 200 }
+    expect: { status: 201 }
 
 cases:
   - id: FEE-L01

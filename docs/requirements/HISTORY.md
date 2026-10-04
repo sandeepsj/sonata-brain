@@ -72,3 +72,11 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
   ANY in SQL.
 - New criterion tag `[retired]`.
 
+## 2026-10-04: Courses, students and sessions (Task 2)
+
+- Status codes moved to the new contract, and the baseline criteria and cases were updated to match: create → 201
+  (REQ-020.AC1/AC2, REQ-030.AC1); duplicate admission number and session overlap → 409 (REQ-020.AC3, REQ-030.AC5);
+  disjoining twice → 409 (REQ-031.AC2).
+- Retired REQ-040.AC1 (old course response) and REQ-032.AC2–AC5 (old session query endpoints, including `/search` and
+  `/students/*`, which depended on legacy fee rows). Replaced by REQ-040.AC3 and REQ-032.AC6/AC7.
+

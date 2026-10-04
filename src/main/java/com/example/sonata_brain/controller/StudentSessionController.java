@@ -1,359 +1,157 @@
 package com.example.sonata_brain.controller;
 
+import com.example.sonata_brain.Repository.StudentRepository;
+import com.example.sonata_brain.common.error.ApiException;
+import com.example.sonata_brain.course.CourseService;
 import com.example.sonata_brain.dto.StudentSessionCreateRequest;
 import com.example.sonata_brain.model.Course;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.model.StudentSession;
 import com.example.sonata_brain.repository.CourseRepository;
-import com.example.sonata_brain.Repository.StudentRepository;
 import com.example.sonata_brain.repository.StudentSessionRepository;
 import com.example.sonata_brain.service.StudentSessionService;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
+/** Enrolment of a student in a course (REQ-030 to REQ-033). */
 @RestController
 @RequestMapping("/api/student-sessions")
 @Validated
 public class StudentSessionController {
 
-    private final StudentSessionRepository studentSessionRepository;
-    private final StudentRepository studentRepository;
-    private final CourseRepository courseRepository;
-    private final StudentSessionService studentSessionService;
+    public record DisjoinRequest(LocalDateTime date) {
+    }
 
-    @Autowired
-    public StudentSessionController(
-            StudentSessionRepository studentSessionRepository,
-            StudentRepository studentRepository,
-            CourseRepository courseRepository,
-            StudentSessionService studentSessionService) {
-        this.studentSessionRepository = studentSessionRepository;
-        this.studentRepository = studentRepository;
-        this.courseRepository = courseRepository;
-        this.studentSessionService = studentSessionService;
+    private final StudentSessionRepository sessions;
+    private final StudentRepository students;
+    private final CourseRepository courses;
+    private final CourseService courseService;
+    private final StudentSessionService sessionService;
+
+    public StudentSessionController(StudentSessionRepository sessions, StudentRepository students,
+                                    CourseRepository courses, CourseService courseService,
+                                    StudentSessionService sessionService) {
+        this.sessions = sessions;
+        this.students = students;
+        this.courses = courses;
+        this.courseService = courseService;
+        this.sessionService = sessionService;
     }
 
     @PostMapping
-    public ResponseEntity<StudentSession> createSession(@Validated @RequestBody StudentSessionCreateRequest request) {
-        Student student = studentRepository.findById(request.getStudentId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+    @ResponseStatus(HttpStatus.CREATED)
+    public StudentSession createSession(@Validated @RequestBody StudentSessionCreateRequest request) {
+        Student student = students.findById(request.getStudentId())
+                .orElseThrow(() -> ApiException.notFound("Student " + request.getStudentId() + " not found"));
+        Course course = courseService.requireActive(request.getCourseName());
 
-        Course course = courseRepository.findByName(request.getCourseName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        // Validate dates if provided
-        LocalDateTime joiningDate = request.getDateOfJoining();
-        LocalDateTime disjoinDate = request.getDateOfDisjoining();
         LocalDateTime now = LocalDateTime.now();
-
-        // Set defaults if not provided
-        if (joiningDate == null) {
-            joiningDate = now;
+        LocalDateTime joined = request.getDateOfJoining() != null ? request.getDateOfJoining() : now;
+        LocalDateTime left = request.getDateOfDisjoining();
+        if (joined.isAfter(now)) {
+            throw ApiException.invalidField("dateOfJoining", "Date of joining cannot be in the future");
+        }
+        if (left != null && left.isAfter(now)) {
+            throw ApiException.invalidField("dateOfDisjoining", "Date of disjoining cannot be in the future");
+        }
+        if (left != null && left.isBefore(joined)) {
+            throw ApiException.invalidField("dateOfDisjoining", "Date of disjoining cannot be before date of joining");
         }
 
-        // If no disjoin date provided, set a future date for overlap checking
-        LocalDateTime endDateForCheck = disjoinDate != null ? disjoinDate : now.plusYears(100);
-
-        // Validate joining date is not in future
-        if (joiningDate.isAfter(now)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Date of joining cannot be in the future");
+        List<StudentSession> overlapping = sessions.findOverlappingSessions(
+                student, course, joined, left != null ? left : now.plusYears(100));
+        if (!overlapping.isEmpty()) {
+            StudentSession other = overlapping.get(0);
+            throw ApiException.conflict(String.format("Session overlaps with existing session (ID: %d) from %s to %s",
+                    other.getId(), other.getDateOfJoining(),
+                    other.getDateOfDisjoining() != null ? other.getDateOfDisjoining() : "ongoing"));
         }
-
-        // Validate disjoining date is not in future
-        if (disjoinDate != null && disjoinDate.isAfter(now)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Date of disjoining cannot be in the future");
-        }
-
-        // Validate disjoining date is after joining date
-        if (disjoinDate != null && disjoinDate.isBefore(joiningDate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Date of disjoining cannot be before date of joining");
-        }
-
-        // Check for overlapping sessions
-        List<StudentSession> overlappingSessions = studentSessionRepository.findOverlappingSessions(
-            student, course, joiningDate, endDateForCheck);
-
-        if (!overlappingSessions.isEmpty()) {
-            StudentSession conflictSession = overlappingSessions.get(0);
-            String conflictMessage = String.format(
-                "Session overlaps with existing session (ID: %d) from %s to %s",
-                conflictSession.getId(),
-                conflictSession.getDateOfJoining().toString(),
-                conflictSession.getDateOfDisjoining() != null
-                    ? conflictSession.getDateOfDisjoining().toString()
-                    : "ongoing"
-            );
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, conflictMessage);
-        }
-
-        try {
-            StudentSession session = StudentSession.createSession(student, course, joiningDate, disjoinDate);
-            // Use service instead of direct repository save to trigger events
-            return ResponseEntity.ok(studentSessionService.createStudentSession(session));
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        return sessionService.createStudentSession(StudentSession.createSession(student, course, joined, left));
     }
 
+    /** Ends a session now, or at a given past date (REQ-031). */
     @PatchMapping("/{id}/disjoin")
-    public ResponseEntity<StudentSession> updateDisjoiningDate(@PathVariable Long id) {
-        StudentSession session = studentSessionRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
-
+    public StudentSession disjoin(@PathVariable Long id, @RequestBody(required = false) DisjoinRequest request) {
+        StudentSession session = find(id);
         if (session.getDateOfDisjoining() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session is already disjoined");
+            throw ApiException.conflict("Session " + id + " is already disjoined");
         }
-
-        // Use service to trigger events for dues recalculation
-        return ResponseEntity.ok(studentSessionService.disjoinStudent(id, LocalDateTime.now()));
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime date = request != null && request.date() != null ? request.date() : now;
+        if (date.isAfter(now)) {
+            throw ApiException.invalidField("date", "Disjoining date cannot be in the future");
+        }
+        if (date.isBefore(session.getDateOfJoining())) {
+            throw ApiException.invalidField("date", "Disjoining date cannot be before the date of joining");
+        }
+        return sessionService.disjoinStudent(id, date);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StudentSession> getSession(@PathVariable Long id) {
-        return ResponseEntity.ok(studentSessionRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found")));
-    }
-
-    @GetMapping("/active/student/{studentId}")
-    public ResponseEntity<List<StudentSession>> getActiveSessionsByStudent(@PathVariable Long studentId) {
-        // Verify student exists first
-        studentRepository.findById(studentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findActiveSessionsByStudentId(studentId);
-        if (sessions.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No active sessions found for student ID: " + studentId);
-        }
-        return ResponseEntity.ok(sessions);
-    }
-
-    @GetMapping("/active/course/{courseName}")
-    public ResponseEntity<List<StudentSession>> getActiveSessionsByCourse(@PathVariable String courseName) {
-        // Verify course exists first
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findActiveSessionsByCourseName(courseName);
-        if (sessions.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No active sessions found for course: " + courseName);
-        }
-        return ResponseEntity.ok(sessions);
-    }
-
-    @GetMapping("/all/student/{studentId}")
-    public ResponseEntity<List<StudentSession>> getAllSessionsByStudent(@PathVariable Long studentId) {
-        // Verify student exists first
-        studentRepository.findById(studentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findAllSessionsByStudentId(studentId);
-        if (sessions.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No sessions found for student ID: " + studentId);
-        }
-        return ResponseEntity.ok(sessions);
-    }
-
-    @GetMapping("/all/course/{courseName}")
-    public ResponseEntity<List<StudentSession>> getAllSessionsByCourse(@PathVariable String courseName) {
-        // Verify course exists first
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findAllSessionsByCourseName(courseName);
-        if (sessions.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No sessions found for course: " + courseName);
-        }
-        return ResponseEntity.ok(sessions);
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<StudentSession>> getAllSessions(
-            @RequestParam(required = false) Long studentId,
-            @RequestParam(required = false) String courseName,
-            @RequestParam(required = false) Boolean active) {
-
-        List<StudentSession> sessions;
-
-        if (studentId != null && courseName != null) {
-            // Both student and course specified
-            studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-            courseRepository.findByName(courseName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-            if (active != null) {
-                sessions = active
-                    ? studentSessionRepository.findActiveSessionsByStudentIdAndCourseName(studentId, courseName)
-                    : studentSessionRepository.findInactiveSessionsByStudentIdAndCourseName(studentId, courseName);
-            } else {
-                sessions = studentSessionRepository.findAllSessionsByStudentIdAndCourseName(studentId, courseName);
-            }
-        } else if (studentId != null) {
-            // Only student specified
-            studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-
-            if (active != null) {
-                sessions = active
-                    ? studentSessionRepository.findActiveSessionsByStudentId(studentId)
-                    : studentSessionRepository.findInactiveSessionsByStudentId(studentId);
-            } else {
-                sessions = studentSessionRepository.findAllSessionsByStudentId(studentId);
-            }
-        } else if (courseName != null) {
-            // Only course specified
-            courseRepository.findByName(courseName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-            if (active != null) {
-                sessions = active
-                    ? studentSessionRepository.findActiveSessionsByCourseName(courseName)
-                    : studentSessionRepository.findInactiveSessionsByCourseName(courseName);
-            } else {
-                sessions = studentSessionRepository.findAllSessionsByCourseName(courseName);
-            }
-        } else {
-            // No specific filters, get all sessions
-            if (active != null) {
-                sessions = active
-                    ? studentSessionRepository.findAllActiveSessions()
-                    : studentSessionRepository.findAllInactiveSessions();
-            } else {
-                sessions = studentSessionRepository.findAll();
-            }
-        }
-
-        return ResponseEntity.ok(sessions);
+    public StudentSession getSession(@PathVariable Long id) {
+        return find(id);
     }
 
     /**
-     * Search student sessions with advanced filters
-     * GET /api/student-sessions/search?course=VOCAL&year=2024&termNumber=3
-     *
-     * Query Parameters (all optional):
-     * - course: Filter by course name
-     * - year: Filter by term year
-     * - termNumber: Filter by term number
-     *
-     * Returns both active and inactive sessions with joining and disjoining dates
+     * Sessions filtered by any combination of student, course, active flag and a date they cover (REQ-032.AC7).
+     * An unknown student or course is 404; otherwise an empty list when nothing matches.
      */
-    @GetMapping("/search")
-    public ResponseEntity<List<StudentSession>> searchSessions(
-            @RequestParam(required = false) String course,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer termNumber) {
-
-        List<StudentSession> sessions;
-
-        // Validate required combinations
-        if (year != null && termNumber != null && course != null) {
-            // Course + Year + Term
-            courseRepository.findByName(course)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-            sessions = studentSessionRepository.findSessionsByCourseYearAndTerm(course, year, termNumber);
-        } else if (year != null && termNumber != null) {
-            // Year + Term (all courses)
-            sessions = studentSessionRepository.findSessionsByYearAndTerm(year, termNumber);
-        } else if (course != null && year != null) {
-            // Course + Year (all terms)
-            courseRepository.findByName(course)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-            sessions = studentSessionRepository.findSessionsByCourseAndYear(course, year);
-        } else if (course != null) {
-            // Only course
-            courseRepository.findByName(course)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-            sessions = studentSessionRepository.findAllSessionsByCourseName(course);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "At least one filter parameter (course, year, or termNumber) is required");
+    @GetMapping
+    public List<StudentSession> list(@RequestParam(required = false) Long studentId,
+                                     @RequestParam(required = false) String courseName,
+                                     @RequestParam(required = false) Boolean active,
+                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                     LocalDate activeOn) {
+        if (studentId != null && !students.existsById(studentId)) {
+            throw ApiException.notFound("Student " + studentId + " not found");
         }
-
-        return ResponseEntity.ok(sessions);
+        if (courseName != null && !courses.existsById(courseName)) {
+            throw ApiException.notFound("Course '" + courseName + "' not found");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        Stream<StudentSession> found = sessions.findAll().stream();
+        if (studentId != null) {
+            found = found.filter(s -> s.getStudent().getAdmissionNo().equals(studentId));
+        }
+        if (courseName != null) {
+            found = found.filter(s -> s.getCourse().getName().equals(courseName));
+        }
+        if (active != null) {
+            found = found.filter(s -> isActive(s, now) == active);
+        }
+        if (activeOn != null) {
+            found = found.filter(s -> covers(s, activeOn));
+        }
+        return found.sorted(Comparator.comparing(StudentSession::getId)).toList();
     }
 
-    /**
-     * Get students enrolled in a specific course
-     * GET /api/student-sessions/students/course/{courseName}
-     *
-     * Returns all sessions (active and inactive) for a course with student details
-     */
-    @GetMapping("/students/course/{courseName}")
-    public ResponseEntity<List<StudentSession>> getStudentsByCourse(@PathVariable String courseName) {
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findAllSessionsByCourseName(courseName);
-        return ResponseEntity.ok(sessions);
+    private StudentSession find(Long id) {
+        return sessions.findById(id).orElseThrow(() -> ApiException.notFound("Session " + id + " not found"));
     }
 
-    /**
-     * Get students enrolled in a specific course during a specific year and term
-     * GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber}
-     *
-     * Returns sessions that were active during the specified term period
-     */
-    @GetMapping("/students/course/{courseName}/year/{year}/term/{termNumber}")
-    public ResponseEntity<List<StudentSession>> getStudentsByCourseYearTerm(
-            @PathVariable String courseName,
-            @PathVariable Integer year,
-            @PathVariable Integer termNumber) {
-
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findSessionsByCourseYearAndTerm(
-            courseName, year, termNumber);
-
-        return ResponseEntity.ok(sessions);
+    private static boolean isActive(StudentSession s, LocalDateTime now) {
+        return s.getDateOfDisjoining() == null || s.getDateOfDisjoining().isAfter(now);
     }
 
-    /**
-     * Get students enrolled in a specific course during a specific year (all terms)
-     * GET /api/student-sessions/students/course/{courseName}/year/{year}
-     *
-     * Returns sessions that were active during any term in the specified year
-     */
-    @GetMapping("/students/course/{courseName}/year/{year}")
-    public ResponseEntity<List<StudentSession>> getStudentsByCourseYear(
-            @PathVariable String courseName,
-            @PathVariable Integer year) {
-
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findSessionsByCourseAndYear(courseName, year);
-
-        return ResponseEntity.ok(sessions);
-    }
-
-    /**
-     * Get all students enrolled during a specific year and term (all courses)
-     * GET /api/student-sessions/students/year/{year}/term/{termNumber}
-     *
-     * Returns sessions from all courses that were active during the specified term
-     */
-    @GetMapping("/students/year/{year}/term/{termNumber}")
-    public ResponseEntity<List<StudentSession>> getStudentsByYearTerm(
-            @PathVariable Integer year,
-            @PathVariable Integer termNumber) {
-
-        List<StudentSession> sessions = studentSessionRepository.findSessionsByYearAndTerm(year, termNumber);
-
-        return ResponseEntity.ok(sessions);
+    private static boolean covers(StudentSession s, LocalDate day) {
+        boolean started = !s.getDateOfJoining().toLocalDate().isAfter(day);
+        boolean notEnded = s.getDateOfDisjoining() == null || !s.getDateOfDisjoining().toLocalDate().isBefore(day);
+        return started && notEnded;
     }
 }

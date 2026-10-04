@@ -4,17 +4,6 @@ background:
   - use: baseline-admin
 
 cases:
-  - id: CRS-001
-    title: A course is created from its name; its id is the name
-    req: [REQ-040.AC1]
-    steps:
-      - POST: /api/courses
-        auth: admin
-        body: { name: Violin }
-        expect:
-          status: 200
-          body: { name: Violin, id: Violin }
-
   - id: CRS-002
     title: All courses are listed
     req: [REQ-040.AC2]
@@ -22,11 +11,11 @@ cases:
       - POST: /api/courses
         auth: admin
         body: { name: Violin }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/courses
         auth: admin
         body: { name: Keyboard }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - GET: /api/courses
         auth: admin
         expect:

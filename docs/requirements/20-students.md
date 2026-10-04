@@ -1,12 +1,13 @@
 # Students
 
 ### REQ-020 Create a student
-Status: accepted · Source: existing code; admission-number override added in commit bdcd6ff
+Status: implemented · Source: existing code; admission-number override added in commit bdcd6ff
 
-- **REQ-020.AC1** [baseline] `POST /api/students` with `studentName` and no `admissionNo` → 200, with
+- **REQ-020.AC1** [baseline] `POST /api/students` with `studentName` and no `admissionNo` → 201 (200 before REQ-020.AC7), with
   `admissionNo` = current maximum + 1 (1 on an empty table).
-- **REQ-020.AC2** [baseline] With an explicit `admissionNo` that is not taken → 200, and that number is used.
-- **REQ-020.AC3** [baseline] With an `admissionNo` that already exists → 400.
+- **REQ-020.AC2** [baseline] With an explicit `admissionNo` that is not taken → 201, and that number is used.
+- **REQ-020.AC3** [baseline] With an `admissionNo` that already exists → 409 (400 before REQ-020.AC7), and the
+  existing student is unchanged.
 - **REQ-020.AC4** [baseline] A missing or blank `studentName` → 400.
 - **REQ-020.AC5** [baseline] A missing `admissionDate` defaults to today. `status` defaults to `active`.
 - **REQ-020.AC6** [baseline] All provided fields are stored and returned: `contactNo`, `dob`, `className`,

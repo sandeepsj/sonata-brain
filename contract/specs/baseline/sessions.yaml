@@ -7,20 +7,20 @@ background:
   - POST: /api/courses
     auth: admin
     body: { name: Violin }
-    expect: { status: 200 }
+    expect: { status: 201 }
   - POST: /api/courses
     auth: admin
     body: { name: Keyboard }
-    expect: { status: 200 }
+    expect: { status: 201 }
   - POST: /api/students
     auth: admin
     body: { studentName: Asha }
-    expect: { status: 200 }
+    expect: { status: 201 }
     save: { asha: body.admissionNo }
   - POST: /api/students
     auth: admin
     body: { studentName: Ravi }
-    expect: { status: 200 }
+    expect: { status: 201 }
     save: { ravi: body.admissionNo }
 
 cases:
@@ -37,7 +37,7 @@ cases:
           courseName: Violin
           dateOfJoining: "{{today -60d}}T10:00:00"
         expect:
-          status: 200
+          status: 201
           body:
             id: { $type: integer }
             student: { admissionNo: "{{asha}}", studentName: Asha }
@@ -53,7 +53,7 @@ cases:
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin }
         expect:
-          status: 200
+          status: 201
           body: { dateOfJoining: { $regex: "^{{today}}T" } }
 
   - id: SES-003
@@ -85,7 +85,7 @@ cases:
           dateOfJoining: "{{today -10d}}T10:00:00"
           dateOfDisjoining: "{{today +1d}}T10:00:00"
         expect: { status: 400 }
-      - GET: /api/student-sessions/all
+      - GET: /api/student-sessions
         auth: admin
         expect: { status: 200, body: [] }
 
@@ -109,13 +109,13 @@ cases:
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -100d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { first: body.id }
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -5d}}T10:00:00" }
         expect:
-          status: 400
+          status: 409
           body: { message: { $contains: "ID: {{first}}" } }
 
   - id: SES-007
@@ -129,7 +129,7 @@ cases:
           courseName: Violin
           dateOfJoining: "{{today -100d}}T10:00:00"
           dateOfDisjoining: "{{today -50d}}T10:00:00"
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/student-sessions
         auth: admin
         body:
@@ -137,7 +137,7 @@ cases:
           courseName: Violin
           dateOfJoining: "{{today -60d}}T10:00:00"
           dateOfDisjoining: "{{today -40d}}T10:00:00"
-        expect: { status: 400 }
+        expect: { status: 409 }
 
   - id: SES-008
     title: Non-overlapping sessions in the same course, and parallel sessions in different courses, are allowed
@@ -150,19 +150,19 @@ cases:
           courseName: Violin
           dateOfJoining: "{{today -100d}}T10:00:00"
           dateOfDisjoining: "{{today -50d}}T10:00:00"
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -40d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Keyboard, dateOfJoining: "{{today -40d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{ravi}}", courseName: Violin, dateOfJoining: "{{today -40d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
 
   - id: SES-009
     title: studentId and courseName are required
@@ -186,7 +186,7 @@ cases:
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -30d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { sid: body.id }
       - PATCH: /api/student-sessions/{{sid}}/disjoin
         auth: admin
@@ -201,14 +201,14 @@ cases:
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -30d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { sid: body.id }
       - PATCH: /api/student-sessions/{{sid}}/disjoin
         auth: admin
         expect: { status: 200 }
       - PATCH: /api/student-sessions/{{sid}}/disjoin
         auth: admin
-        expect: { status: 400 }
+        expect: { status: 409 }
       - PATCH: /api/student-sessions/999999/disjoin
         auth: admin
         expect: { status: 404 }
@@ -222,7 +222,7 @@ cases:
       - POST: /api/student-sessions
         auth: admin
         body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -30d}}T10:00:00" }
-        expect: { status: 200 }
+        expect: { status: 201 }
         save: { sid: body.id }
       - GET: /api/student-sessions/{{sid}}
         auth: admin
@@ -230,128 +230,3 @@ cases:
       - GET: /api/student-sessions/999999
         auth: admin
         expect: { status: 404 }
-
-  - id: SES-021
-    title: The /all endpoint filters by student, course and active flag in any combination
-    req: [REQ-032.AC2]
-    steps:
-      # Asha: Violin closed, Violin ongoing, Keyboard ongoing.  Ravi: Violin ongoing.
-      - POST: /api/student-sessions
-        auth: admin
-        body:
-          studentId: "{{asha}}"
-          courseName: Violin
-          dateOfJoining: "{{today -100d}}T10:00:00"
-          dateOfDisjoining: "{{today -50d}}T10:00:00"
-        expect: { status: 200 }
-        save: { ashaViolinOld: body.id }
-      - POST: /api/student-sessions
-        auth: admin
-        body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -40d}}T10:00:00" }
-        expect: { status: 200 }
-        save: { ashaViolin: body.id }
-      - POST: /api/student-sessions
-        auth: admin
-        body: { studentId: "{{asha}}", courseName: Keyboard, dateOfJoining: "{{today -40d}}T10:00:00" }
-        expect: { status: 200 }
-        save: { ashaKeys: body.id }
-      - POST: /api/student-sessions
-        auth: admin
-        body: { studentId: "{{ravi}}", courseName: Violin, dateOfJoining: "{{today -40d}}T10:00:00" }
-        expect: { status: 200 }
-        save: { raviViolin: body.id }
-
-      - GET: /api/student-sessions/all
-        auth: admin
-        expect: { status: 200, body: { $len: 4 } }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { active: false }
-        expect: { status: 200, body: [ { id: "{{ashaViolinOld}}" } ] }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { studentId: "{{asha}}" }
-        expect: { status: 200, body: { $len: 3 } }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { studentId: "{{asha}}", active: true }
-        expect: { status: 200, body: { $unordered: [ { id: "{{ashaViolin}}" }, { id: "{{ashaKeys}}" } ] } }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { courseName: Violin, active: true }
-        expect: { status: 200, body: { $unordered: [ { id: "{{ashaViolin}}" }, { id: "{{raviViolin}}" } ] } }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { studentId: "{{asha}}", courseName: Violin }
-        expect: { status: 200, body: { $len: 2 } }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { studentId: "{{asha}}", courseName: Violin, active: false }
-        expect: { status: 200, body: [ { id: "{{ashaViolinOld}}" } ] }
-
-  - id: SES-022
-    title: The /all endpoint gives 404 for an unknown student or course
-    req: [REQ-032.AC2]
-    steps:
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { studentId: 999999 }
-        expect: { status: 404 }
-      - GET: /api/student-sessions/all
-        auth: admin
-        query: { courseName: Cello }
-        expect: { status: 404 }
-
-  - id: SES-023
-    title: Per-student session lists give 404 when the student has no matching sessions
-    req: [REQ-032.AC3]
-    steps:
-      - GET: /api/student-sessions/active/student/{{asha}}
-        auth: admin
-        expect: { status: 404 }
-      - GET: /api/student-sessions/all/student/{{asha}}
-        auth: admin
-        expect: { status: 404 }
-      - POST: /api/student-sessions
-        auth: admin
-        body:
-          studentId: "{{asha}}"
-          courseName: Violin
-          dateOfJoining: "{{today -100d}}T10:00:00"
-          dateOfDisjoining: "{{today -50d}}T10:00:00"
-        expect: { status: 200 }
-      - GET: /api/student-sessions/active/student/{{asha}}
-        auth: admin
-        expect: { status: 404 }
-      - GET: /api/student-sessions/all/student/{{asha}}
-        auth: admin
-        expect: { status: 200, body: { $len: 1 } }
-
-  - id: SES-024
-    title: Per-course session lists give 404 when the course has no matching sessions
-    req: [REQ-032.AC4]
-    steps:
-      - GET: /api/student-sessions/active/course/Violin
-        auth: admin
-        expect: { status: 404 }
-      - GET: /api/student-sessions/all/course/Violin
-        auth: admin
-        expect: { status: 404 }
-      - POST: /api/student-sessions
-        auth: admin
-        body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{today -10d}}T10:00:00" }
-        expect: { status: 200 }
-      - GET: /api/student-sessions/active/course/Violin
-        auth: admin
-        expect: { status: 200, body: [ { student: { studentName: Asha } } ] }
-      - GET: /api/student-sessions/all/course/Violin
-        auth: admin
-        expect: { status: 200, body: { $len: 1 } }
-
-  - id: SES-025
-    title: Session search needs at least one filter
-    req: [REQ-032.AC5]
-    steps:
-      - GET: /api/student-sessions/search
-        auth: admin
-        expect: { status: 400 }

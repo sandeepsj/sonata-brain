@@ -1,16 +1,16 @@
 # Courses
 
 ### REQ-040 Create a course
-Status: accepted · Source: user ("allow the user to add new subject"), 2026-10-04
+Status: implemented · Source: user ("allow the user to add new subject"), 2026-10-04
 
-- **REQ-040.AC1** [baseline] `POST /api/courses` `{name}` → 200 with `{name, id}` (`id` equals `name`).
+- **REQ-040.AC1** [retired] *(was baseline)* `POST /api/courses` returned 200 `{name, id}`. Replaced by REQ-040.AC3.
 - **REQ-040.AC2** [baseline] `GET /api/courses` lists all courses.
 - **REQ-040.AC3** [target] `POST /api/courses` `{name}` → 201 `{name, status: "ACTIVE", closedAt: null}`.
 - **REQ-040.AC4** [target] A blank name → 400. A name that already exists, ignoring case → 409.
 - **REQ-040.AC5** [target] Leading and trailing whitespace is trimmed from the name.
 
 ### REQ-041 List and get courses
-Status: accepted · Source: user, 2026-10-04
+Status: implemented · Source: user, 2026-10-04
 
 - **REQ-041.AC1** [target] `GET /api/courses` lists all courses. `?status=ACTIVE|CLOSED` filters them. An invalid
   status → 400.
