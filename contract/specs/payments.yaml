@@ -1,0 +1,414 @@
+area: Payments and discounts (today)
+suite: baseline
+background:
+  - use: baseline-admin
+  - use: legacy-enrolment        # Violin, last year's terms t1..t4 (1000, 1000, 1200, 1200), Asha enrolled all year
+  - POST: /api/students          # Ravi: a student with no session at all
+    auth: admin
+    body: { studentName: Ravi }
+    expect: { status: 200 }
+    save: { ravi: body.admissionNo }
+
+cases:
+  # ---------- regular (course fee) payments ----------
+
+  - id: PAY-001
+    title: A payment with a termId is a REGULAR course-fee payment
+    req: [REQ-060.AC1]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 600, label: Q1 fee, remarks: cash }
+        expect:
+          status: 201
+          body:
+            id: { $type: integer }
+            paymentType: REGULAR
+            amountPaid: 600
+            discountAmount: 0
+            courseName: Violin
+            label: Q1 fee
+            remarks: cash
+            isActive: true
+            student: { admissionNo: "{{asha}}" }
+            feeStructure: { id: "{{t1}}", term: 1, year: "{{year -1}}" }
+            date: { $regex: "^{{today}}T" }
+
+  - id: PAY-002
+    title: Unknown student, unknown course, unknown term, or a course that doesn't match the term, are rejected
+    req: [REQ-060.AC2]
+    steps:
+      - POST: /api/courses
+        auth: admin
+        body: { name: Keyboard }
+        expect: { status: 200 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: 999999, termId: "{{t1}}", courseName: Violin, amountPaid: 100, label: Course fee }
+        expect: { status: 400, body: { message: { $contains: student not found } } }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Cello, amountPaid: 100, label: Course fee }
+        expect: { status: 400, body: { message: { $contains: course not found } } }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: 999999, courseName: Violin, amountPaid: 100, label: Course fee }
+        expect: { status: 400, body: { message: { $contains: fee structure not found } } }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Keyboard, amountPaid: 100, label: Course fee }
+        expect: { status: 400, body: { message: { $contains: mismatch } } }
+      - GET: /api/payments
+        auth: admin
+        expect: { status: 200, body: [] }
+
+  - id: PAY-003
+    title: A student without a session overlapping the term can't pay for it
+    req: [REQ-060.AC3]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", termId: "{{t1}}", courseName: Violin, amountPaid: 100, label: Course fee }
+        expect: { status: 400, body: { message: { $contains: no sessions found } } }
+
+  - id: PAY-004
+    title: Payments plus discounts for a term can't exceed the term amount; exactly the amount is fine
+    req: [REQ-060.AC4]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 600, label: Course fee }
+        expect: { status: 201 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 500, label: Course fee }
+        expect: { status: 400, body: { message: { $contains: would exceed } } }
+      - POST: /api/payments
+        auth: admin
+        body:
+          studentId: "{{asha}}"
+          termId: "{{t1}}"
+          label: Course fee
+          courseName: Violin
+          amountPaid: 300
+          discounts: [ { discountAmount: 150, label: Sibling } ]
+        expect: { status: 400 }
+      - POST: /api/payments
+        auth: admin
+        body:
+          studentId: "{{asha}}"
+          termId: "{{t1}}"
+          label: Course fee
+          courseName: Violin
+          amountPaid: 300
+          discounts: [ { discountAmount: 100, label: Sibling } ]
+        expect: { status: 201 }
+
+  - id: PAY-005
+    title: Deactivated payments don't count towards the term limit
+    req: [REQ-060.AC4, REQ-064.AC6]
+    suite: quarantine   # flaky until REQ-064.AC6 (deactivation race) is fixed
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t2}}", courseName: Violin, amountPaid: 1000, label: Course fee }
+        expect: { status: 201 }
+        save: { pid: body.id }
+      - PATCH: /api/payments/{{pid}}/deactivate
+        auth: admin
+        expect: { status: 200 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t2}}", courseName: Violin, amountPaid: 1000, label: Course fee }
+        expect: { status: 201 }
+
+  - id: PAY-006
+    title: "Known defect: a course-fee payment without a label fails with 500"
+    req: [REQ-060.AC11]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 100 }
+        expect: { status: 500 }
+      - GET: /api/payments
+        auth: admin
+        expect: { status: 200, body: [] }
+
+  # ---------- additional payments ----------
+
+  - id: PAY-010
+    title: A payment without termId is ADDITIONAL; course is optional but must exist if given
+    req: [REQ-061.AC1]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 500, label: Admission fee }
+        expect:
+          status: 201
+          body: { paymentType: ADDITIONAL, label: Admission fee, feeStructure: null, courseName: null }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", amountPaid: 250, label: Exam fee, courseName: Violin }
+        expect: { status: 201, body: { paymentType: ADDITIONAL, courseName: Violin } }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", amountPaid: 250, label: Exam fee, courseName: Cello }
+        expect: { status: 400 }
+
+  - id: PAY-011
+    title: An additional payment needs a label
+    req: [REQ-061.AC2]
+    examples:
+      - { label: null }
+      - { label: "  " }
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 500, label: "{{label}}" }
+        expect: { status: 400, body: { message: { $contains: label is required } } }
+
+  # ---------- amounts ----------
+
+  - id: PAY-020
+    title: A zero-amount payment is allowed only together with a discount
+    req: [REQ-062.AC1]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 0, label: Waiver }
+        expect: { status: 400, body: { message: { $contains: zero amount } } }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 0, label: Waiver, discounts: [ { discountAmount: 500, label: Scholarship } ] }
+        expect: { status: 201, body: { amountPaid: 0, discountAmount: 500 } }
+
+  - id: PAY-021
+    title: Negative or missing amount, or missing student, is rejected
+    req: [REQ-062.AC2]
+    examples:
+      - { body: { studentId: 1, amountPaid: -1, label: x } }
+      - { body: { studentId: 1, label: x } }
+      - { body: { amountPaid: 100, label: x } }
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: "{{body}}"
+        expect: { status: 400 }
+      - GET: /api/payments
+        auth: admin
+        expect: { status: 200, body: [] }
+
+  # ---------- discounts ----------
+
+  - id: PAY-030
+    title: Discounts are stored with the payment and their sum becomes the payment's discountAmount
+    req: [REQ-063.AC1]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body:
+          studentId: "{{asha}}"
+          termId: "{{t3}}"
+          label: Course fee
+          courseName: Violin
+          amountPaid: 800
+          discounts:
+            - { discountAmount: 100, label: Sibling, remarks: second child }
+            - { discountAmount: 50, label: Early bird }
+        expect:
+          status: 201
+          body: { amountPaid: 800, discountAmount: 150 }
+        save: { pid: body.id }
+      - GET: /api/discounts/payment/{{pid}}
+        auth: admin
+        expect:
+          status: 200
+          body:
+            $unordered:
+              - { discountAmount: 100, label: Sibling, remarks: second child }
+              - { discountAmount: 50, label: Early bird }
+
+  - id: PAY-031
+    title: "Known defect: discount amount isn't validated (0 accepted) and a missing label gives 500"
+    req: [REQ-063.AC2]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 100, label: Books, discounts: [ { discountAmount: 0, label: Nothing } ] }
+        expect: { status: 201, body: { discountAmount: 0 } }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 100, label: Books, discounts: [ { discountAmount: 10 } ] }
+        expect: { status: 500 }
+
+  - id: PAY-032
+    title: Discounts can be read by payment and by id; unknown id gives 404
+    req: [REQ-063.AC3]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 100, label: Books, discounts: [ { discountAmount: 20, label: Staff } ] }
+        expect: { status: 201 }
+        save: { pid: body.id }
+      - GET: /api/discounts/payment/{{pid}}
+        auth: admin
+        expect: { status: 200, body: [ { label: Staff } ] }
+        save: { did: body.0.id }
+      - GET: /api/discounts/{{did}}
+        auth: admin
+        expect: { status: 200, body: { id: "{{did}}", discountAmount: 20, label: Staff } }
+      - GET: /api/discounts/999999
+        auth: admin
+        expect: { status: 404 }
+
+  # ---------- deactivation ----------
+
+  - id: PAY-040
+    title: A payment can be deactivated
+    req: [REQ-064.AC1]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 100, label: Books }
+        expect: { status: 201 }
+        save: { pid: body.id }
+      - PATCH: /api/payments/{{pid}}/deactivate
+        auth: admin
+        expect: { status: 200, body: { id: "{{pid}}", isActive: false } }
+      - GET: /api/payments/{{pid}}
+        auth: admin
+        expect: { status: 200, body: { isActive: false } }
+
+  - id: PAY-041
+    title: Deactivating twice is rejected; an unknown payment gives 404
+    req: [REQ-064.AC2]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 100, label: Books }
+        expect: { status: 201 }
+        save: { pid: body.id }
+      - PATCH: /api/payments/{{pid}}/deactivate
+        auth: admin
+        expect: { status: 200 }
+      - PATCH: /api/payments/{{pid}}/deactivate
+        auth: admin
+        expect: { status: 400, body: { message: { $contains: already deactivated } } }
+      - PATCH: /api/payments/999999/deactivate
+        auth: admin
+        expect: { status: 404 }
+
+  - id: PAY-042
+    title: There is no way to reactivate a payment
+    req: [REQ-064.AC3]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 100, label: Books }
+        expect: { status: 201 }
+        save: { pid: body.id }
+      - PATCH: /api/payments/{{pid}}/deactivate
+        auth: admin
+        expect: { status: 200 }
+      - PATCH: /api/payments/{{pid}}/activate
+        auth: admin
+        expect: { status: { $gte: 400 } }
+      - PUT: /api/payments/{{pid}}
+        auth: admin
+        body: { isActive: true }
+        expect: { status: { $gte: 400 } }
+      - GET: /api/payments/{{pid}}
+        auth: admin
+        expect: { status: 200, body: { isActive: false } }
+
+  # ---------- queries ----------
+
+  - id: PAY-050
+    title: A payment can be fetched by id and all of a student's payments listed
+    req: [REQ-066.AC1]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 1000, label: Course fee }
+        expect: { status: 201 }
+        save: { p1: body.id }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", amountPaid: 300, label: Books }
+        expect: { status: 201 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 500, label: Admission fee }
+        expect: { status: 201 }
+      - GET: /api/payments/{{p1}}
+        auth: admin
+        expect: { status: 200, body: { id: "{{p1}}", amountPaid: 1000 } }
+      - GET: /api/payments/999999
+        auth: admin
+        expect: { status: 404 }
+      - GET: /api/payments/student/{{asha}}
+        auth: admin
+        expect: { status: 200, body: { $len: 2, $every: { student: { admissionNo: "{{asha}}" } } } }
+
+  - id: PAY-051
+    title: A student's payments can be filtered by type and by active status
+    req: [REQ-066.AC2]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 1000, label: Course fee }
+        expect: { status: 201 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", amountPaid: 300, label: Books }
+        expect: { status: 201 }
+        save: { books: body.id }
+      - PATCH: /api/payments/{{books}}/deactivate
+        auth: admin
+        expect: { status: 200 }
+      - GET: /api/payments/student/{{asha}}/type/REGULAR
+        auth: admin
+        expect: { status: 200, body: [ { paymentType: REGULAR } ] }
+      - GET: /api/payments/student/{{asha}}/type/ADDITIONAL
+        auth: admin
+        expect: { status: 200, body: [ { paymentType: ADDITIONAL } ] }
+      - GET: /api/payments/student/{{asha}}/active
+        auth: admin
+        expect: { status: 200, body: [ { paymentType: REGULAR, isActive: true } ] }
+
+  - id: PAY-052
+    title: Date-range queries return active payments in the range, newest first, optionally by course or type
+    req: [REQ-066.AC3]
+    steps:
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", termId: "{{t1}}", courseName: Violin, amountPaid: 1000, date: "{{today -10d}}T09:00:00", label: Course fee }
+        expect: { status: 201 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{asha}}", amountPaid: 300, label: Books, date: "{{today -5d}}T09:00:00" }
+        expect: { status: 201 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 500, label: Admission fee, date: "{{today -40d}}T09:00:00" }
+        expect: { status: 201 }
+      - POST: /api/payments
+        auth: admin
+        body: { studentId: "{{ravi}}", amountPaid: 70, label: Old, date: "{{today -6d}}T09:00:00" }
+        expect: { status: 201 }
+        save: { inactive: body.id }
+      - PATCH: /api/payments/{{inactive}}/deactivate
+        auth: admin
+        expect: { status: 200 }
+      - GET: /api/payments/date-range
+        auth: admin
+        query: { startDate: "{{today -20d}}T00:00:00", endDate: "{{today}}T23:59:59" }
+        expect: { status: 200, body: [ { label: Books }, { amountPaid: 1000 } ] }
+      - GET: /api/payments/date-range/course/Violin
+        auth: admin
+        query: { startDate: "{{today -20d}}T00:00:00", endDate: "{{today}}T23:59:59" }
+        expect: { status: 200, body: [ { amountPaid: 1000 } ] }
+      - GET: /api/payments/date-range/type/ADDITIONAL
+        auth: admin
+        query: { startDate: "{{today -60d}}T00:00:00", endDate: "{{today}}T23:59:59" }
+        expect: { status: 200, body: [ { label: Books }, { label: Admission fee } ] }

@@ -35,3 +35,16 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - **REQ-054.AC4:** how to bill a partial term left after a structure switch. Options are full amount (proposed),
   prorate by days, or skip to the next boundary.
 - **REQ-005, REQ-015:** proposed by design and awaiting the user's confirmation.
+
+## 2026-10-04: Findings while characterising today's behaviour
+
+- REQ-063.AC2 corrected: discount fields are not validated today (the list lacks `@Valid`). Recorded as a known
+  defect; fix specified as REQ-063.AC4.
+- REQ-077 added: how dues are generated today (session, fee structure, payment, deactivation, disjoin). Note:
+  creating a fee structure bills future terms immediately, but creating a session only bills terms up to today.
+  Superseded by the derived-dues design, and kept as the comparison point for the migration.
+- REQ-060.AC11 added: a REGULAR payment without a label returns 500 (NOT NULL column, prod too). Proposed fix
+  REQ-060.AC12: label required for all payments.
+- REQ-064.AC6 added: race between payment deactivation and the background dues job (shared lazy `discounts`
+  collection), giving an intermittent 500 or an unrestored due. Reproduced in 5 of 6 runs. Fix specified as
+  REQ-064.AC7. The affected baseline cases moved to a new `quarantine` suite.

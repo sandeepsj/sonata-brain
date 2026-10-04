@@ -22,6 +22,11 @@ Status: accepted · Source: existing code; contract changed by user decision, 20
   states the balance.
 - **REQ-060.AC9** [target] A REGULAR payment for a CLOSED course → 409.
 - **REQ-060.AC10** [target] Creating a REGULAR payment rebuilds that student's dues (REQ-074).
+- **REQ-060.AC11** [baseline-defect] A REGULAR payment without `label` fails with 500, because `payments.label` is
+  NOT NULL in the database (prod too) while the code treats the label as optional. All 2,539 prod payments have a
+  label. Fixed by REQ-060.AC12.
+- **REQ-060.AC12** [target] *(proposed)* `label` is required for every payment type. A missing or blank label → 400
+  with a `details` entry for `label`.
 
 ### REQ-061 Additional payment
 Status: accepted · Source: existing code; user clarification 2026-10-04
@@ -47,9 +52,12 @@ Status: accepted · Source: existing code
 
 - **REQ-063.AC1** [baseline] `discounts: [{discountAmount, label, remarks?}]` are stored against the payment. The
   payment's `discountAmount` equals their sum.
-- **REQ-063.AC2** [baseline] A discount with an amount of 0 or less, or no label → 400.
+- **REQ-063.AC2** [baseline-defect] Discount fields aren't validated today. A discount amount of 0 or less is
+  accepted as given, and a missing label fails with a 500. Fixed by REQ-063.AC4.
 - **REQ-063.AC3** [baseline] `GET /api/discounts/payment/{paymentId}` lists a payment's discounts. `GET
   /api/discounts/{id}` → 200 or 404.
+- **REQ-063.AC4** [target] A discount with an amount of 0 or less, or a blank label → 400 with a `details` entry for
+  that field. Nothing is stored.
 
 ### REQ-064 Deactivate a payment
 Status: accepted · Source: existing code
@@ -60,6 +68,12 @@ Status: accepted · Source: existing code
 - **REQ-064.AC4** [target] Deactivating an already inactive payment → 409.
 - **REQ-064.AC5** [target] Deactivating a REGULAR payment rebuilds dues, so the period balance goes back up by
   amount + discounts.
+- **REQ-064.AC6** [baseline-defect] Deactivating a REGULAR payment races with the background dues job. Both lazily
+  load the same payment's `discounts` at once, so the request intermittently fails with 500, or the due is not
+  restored ("Illegal pop() with non-matching JdbcValuesSourceProcessingState" in the log). Reproduced in 5 of 6 runs.
+  Fixed by REQ-064.AC7.
+- **REQ-064.AC7** [target] Deactivation never fails or loses a dues update because of background work. Repeating
+  the deactivate-then-check-dues flow 20 times succeeds every time.
 
 ### REQ-065 Convert an additional payment into a course fee
 Status: accepted · Source: user ("admin staff sometimes mark payments as additional instead of course fee"), 2026-10-04

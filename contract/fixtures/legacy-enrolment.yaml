@@ -1,0 +1,51 @@
+# TODAY's model: one course with last year's fee structure and one student enrolled for the whole year.
+# Everything is in the past, so results don't depend on the date the suite runs.
+#
+#   Course Violin, fee structure for {{year -1}}: term 1 = 1000, 2 = 1000, 3 = 1200, 4 = 1200
+#   (terms are Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec)
+#   Student Asha, enrolled in Violin from 10 Jan {{year -1}}, still enrolled.
+#
+# Saves: {{asha}} (admission no), {{sid}} (session id), {{t1}}..{{t4}} (fee structure term ids).
+steps:
+  - POST: /api/courses
+    auth: admin
+    body: { name: Violin }
+    expect: { status: 200 }
+  - POST: /api/fee-structures
+    auth: admin
+    body:
+      courseId: Violin
+      year: "{{year -1}}"
+      numberOfTerms: 4
+      termFees:
+        - { term: 1, amount: 1000 }
+        - { term: 2, amount: 1000 }
+        - { term: 3, amount: 1200 }
+        - { term: 4, amount: 1200 }
+    expect: { status: 200 }
+  - GET: /api/fee-structures/by-course/Violin/year/{{year -1}}/term/1
+    auth: admin
+    expect: { status: 200 }
+    save: { t1: body.id }
+  - GET: /api/fee-structures/by-course/Violin/year/{{year -1}}/term/2
+    auth: admin
+    expect: { status: 200 }
+    save: { t2: body.id }
+  - GET: /api/fee-structures/by-course/Violin/year/{{year -1}}/term/3
+    auth: admin
+    expect: { status: 200 }
+    save: { t3: body.id }
+  - GET: /api/fee-structures/by-course/Violin/year/{{year -1}}/term/4
+    auth: admin
+    expect: { status: 200 }
+    save: { t4: body.id }
+  - POST: /api/students
+    auth: admin
+    body: { studentName: Asha }
+    expect: { status: 200 }
+    save: { asha: body.admissionNo }
+  - POST: /api/student-sessions
+    auth: admin
+    body: { studentId: "{{asha}}", courseName: Violin, dateOfJoining: "{{year -1}}-01-10T10:00:00" }
+    expect: { status: 200 }
+    save: { sid: body.id }

@@ -42,6 +42,23 @@ Status: accepted · Source: existing code (`mark-student-left-cancelled`), rewor
   its computed status.
 - **REQ-072.AC4** [target] `GET /api/dues/waivers?studentId=` lists waivers with their reason, author and date.
 
+### REQ-077 How dues are generated today (legacy)
+Status: superseded by REQ-070 to REQ-075 · Source: existing code, characterised 2026-10-04
+
+Recorded so the migration can be compared with it (REQ-081) and so the rewrite doesn't lose a behaviour by accident.
+Terms are calendar blocks: 4 terms per year → Jan–Mar, Apr–Jun, Jul–Sep, Oct–Dec.
+
+- **REQ-077.AC1** [baseline] When a session is created, a `DUE` is created for each term of its course whose dates
+  overlap the session up to today, in years that have a fee structure. The due amount is the term amount.
+- **REQ-077.AC2** [baseline] When a fee structure is created, a `DUE` is created for every term of it, **including
+  terms that haven't started yet**, for each ongoing session of that course that joined on or before the term start.
+- **REQ-077.AC3** [baseline] A REGULAR payment reduces the matching due by amount + discounts. The status becomes
+  `PARTIALLY_PAID`, or `PAID` once the balance reaches 0.
+- **REQ-077.AC4** [baseline] Deactivating that payment adds amount + discounts back, and the status returns to `DUE`
+  or `PARTIALLY_PAID`.
+- **REQ-077.AC5** [baseline] Disjoining a session marks dues for terms starting after the disjoin date as
+  `CANCELLED`, unless they're already `PAID`.
+
 ### REQ-073 Fee changes leave earlier periods alone
 Status: accepted · Source: user ("fee structure updates in middle of an year, but keep the fee dues still intact"), 2026-10-04
 

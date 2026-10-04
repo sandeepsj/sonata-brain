@@ -1,0 +1,71 @@
+area: Fee structures - one row per course, year and term (today)
+suite: baseline
+background:
+  - use: baseline-admin
+  - POST: /api/courses
+    auth: admin
+    body: { name: Violin }
+    expect: { status: 200 }
+
+cases:
+  - id: FEE-L01
+    title: A year's fee structure is created as one row per term
+    req: [REQ-050.AC7]
+    steps:
+      - POST: /api/fee-structures
+        auth: admin
+        body:
+          courseId: Violin
+          year: 2025
+          numberOfTerms: 4
+          termFees:
+            - { term: 1, amount: 1000 }
+            - { term: 2, amount: 1000 }
+            - { term: 3, amount: 1200 }
+            - { term: 4, amount: 1200 }
+        expect:
+          status: 200
+          body:
+            $unordered:
+              - { course: { name: Violin }, year: 2025, term: 1, amount: 1000, isActive: true, id: { $type: integer } }
+              - { course: { name: Violin }, year: 2025, term: 2, amount: 1000, isActive: true }
+              - { course: { name: Violin }, year: 2025, term: 3, amount: 1200, isActive: true }
+              - { course: { name: Violin }, year: 2025, term: 4, amount: 1200, isActive: true }
+
+  - id: FEE-L02
+    title: A second fee structure for the same course and year is rejected
+    req: [REQ-050.AC7]
+    steps:
+      - POST: /api/fee-structures
+        auth: admin
+        body: { courseId: Violin, year: 2025, numberOfTerms: 1, termFees: [ { term: 1, amount: 5000 } ] }
+        expect: { status: 200 }
+      - POST: /api/fee-structures
+        auth: admin
+        body: { courseId: Violin, year: 2025, numberOfTerms: 1, termFees: [ { term: 1, amount: 6000 } ] }
+        expect: { status: 400, body: { message: { $contains: already exists } } }
+      - GET: /api/fee-structures/by-course/Violin/year/2025
+        auth: admin
+        expect: { status: 200, body: [ { amount: 5000 } ] }
+
+  - id: FEE-L03
+    title: Every term from 1 to numberOfTerms must be given
+    req: [REQ-050.AC7]
+    steps:
+      - POST: /api/fee-structures
+        auth: admin
+        body:
+          courseId: Violin
+          year: 2025
+          numberOfTerms: 4
+          termFees: [ { term: 1, amount: 1000 }, { term: 2, amount: 1000 }, { term: 4, amount: 1000 } ]
+        expect: { status: 400, body: { message: { $contains: "Missing terms: 3" } } }
+
+  - id: FEE-L04
+    title: An unknown course is rejected with 400
+    req: [REQ-050.AC7]
+    steps:
+      - POST: /api/fee-structures
+        auth: admin
+        body: { courseId: Cello, year: 2025, numberOfTerms: 1, termFees: [ { term: 1, amount: 1000 } ] }
+        expect: { status: 400, body: { message: { $contains: not found } } }

@@ -20,7 +20,7 @@ from runner.templating import SpecError  # noqa: E402
 
 def main():
     p = argparse.ArgumentParser(description="Run the Sonata API contract")
-    p.add_argument("--suite", default="baseline", choices=["baseline", "target", "all"])
+    p.add_argument("--suite", default="baseline", choices=["baseline", "target", "quarantine", "all"])
     p.add_argument("--only", help="case id or id prefix")
     p.add_argument("--file", help="spec file name (substring)")
     p.add_argument("--no-build", action="store_true", help="don't rebuild the backend")

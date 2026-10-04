@@ -48,7 +48,9 @@ class Database:
         tables = [r["tablename"] for r in self.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")]
         doomed = [f'"{t}"' for t in tables if t not in self.preserve]
         if doomed:
-            self._psql(f"TRUNCATE {', '.join(doomed)} RESTART IDENTITY CASCADE")
+            # IDs keep counting up between cases, so a background job still finishing for the previous case can
+            # never touch rows of the next one.
+            self._psql(f"TRUNCATE {', '.join(doomed)} CASCADE")
 
 
 def _typed(v):

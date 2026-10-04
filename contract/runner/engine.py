@@ -18,6 +18,26 @@ METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
 STEP_KEYS = {"auth", "query", "headers", "body", "rawBody", "expect", "save", "repeat", "eventually", "note"}
 
 
+class _StrictLoader(yaml.SafeLoader):
+    """Rejects duplicate keys, which plain YAML would silently overwrite."""
+
+
+def _strict_mapping(loader, node, deep=False):
+    keys = [loader.construct_object(k, deep=deep) for k, _ in node.value]
+    duplicates = sorted({str(k) for k in keys if keys.count(k) > 1})
+    if duplicates:
+        raise SpecError(f"{node.start_mark.name}:{node.start_mark.line + 1}: duplicate keys {duplicates}")
+    return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+
+_StrictLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _strict_mapping)
+
+
+def load_yaml(path):
+    with open(path) as f:
+        return yaml.load(f, Loader=_StrictLoader) or {}
+
+
 @dataclass
 class Case:
     id: str
@@ -41,7 +61,7 @@ class CaseFailed(Exception):
 def load_cases(spec_dir):
     cases, seen = [], {}
     for path in sorted(Path(spec_dir).rglob("*.yaml")):
-        doc = yaml.safe_load(path.read_text()) or {}
+        doc = load_yaml(path)
         rel = str(path.relative_to(spec_dir))
         default_suite = doc.get("suite", "baseline")
         for raw in doc.get("cases", []):
@@ -68,7 +88,7 @@ class Engine:
         self.db = db
         self.fixtures_dir = Path(contract_dir) / "fixtures"
         shapes_file = Path(contract_dir) / "shapes.yaml"
-        self.matcher = Matcher(yaml.safe_load(shapes_file.read_text()) if shapes_file.exists() else {})
+        self.matcher = Matcher(load_yaml(shapes_file) if shapes_file.exists() else {})
 
     # ---- cases -----------------------------------------------------------------------------------------------
 
@@ -99,7 +119,7 @@ class Engine:
         path = self.fixtures_dir / f"{step['use']}.yaml"
         if not path.exists():
             raise SpecError(f"{where}: fixture '{step['use']}' not found in {self.fixtures_dir}")
-        fixture = yaml.safe_load(path.read_text()) or {}
+        fixture = load_yaml(path)
         params = {**(fixture.get("params") or {}), **render(step.get("with") or {}, variables)}
         previous = {k: variables.get(k, MISSING) for k in params}
         variables.update(params)

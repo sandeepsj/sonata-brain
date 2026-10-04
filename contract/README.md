@@ -25,6 +25,7 @@ criteria it proves (`req:`), and the runner reports which criteria are covered a
 ```bash
 python3 contract/run.py                    # baseline suite (today's behaviour) - must be green
 python3 contract/run.py --suite target     # new contract - red until each feature is built
+python3 contract/run.py --suite quarantine # known-flaky cases (documented defects)
 python3 contract/run.py --suite all
 python3 contract/run.py --only STU-003     # one case (or a prefix: --only STU-)
 python3 contract/run.py --file students    # one spec file
@@ -37,7 +38,7 @@ The run writes `contract/.out/report.md` (results and requirement coverage) and 
 What a run does:
 1. Builds and starts the backend against a fresh, empty database (`contract.yaml` → `server`, `database`).
 2. Before **each case**, empties every table except the ones listed in `database.preserveTables`, so cases never
-   see each other's data.
+   see each other's data. ID sequences are not reset, so don't hard-code generated IDs. Save them instead.
 3. Runs the file's `background` steps, then the case's `steps`, in order. The first failing expectation fails the
    case and its message shows exactly what differed.
 
@@ -66,6 +67,10 @@ cases:
 **Suites:**
 - `baseline` describes how the API behaves today. These cases must pass on every commit.
 - `target` describes the new contract. These cases are red until the feature is built.
+
+- `quarantine` asserts the correct behaviour but fails intermittently because of a known, documented defect, such as
+  a race condition. It runs only with `--suite quarantine` (or `all`) and doesn't block commits. The case's `req:`
+  points at the defect, and the case moves back to its real suite once the defect is fixed.
 
 A requirement change that alters behaviour deletes or edits the baseline case in the same commit.
 
