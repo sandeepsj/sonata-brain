@@ -1,6 +1,5 @@
 package com.example.sonata_brain.common.error;
 
-import com.example.sonata_brain.exception.FeeStructureValidationException;
 import com.example.sonata_brain.exception.PaymentValidationException;
 import com.example.sonata_brain.exception.StudentNotFoundException;
 import org.slf4j.Logger;
@@ -84,7 +83,7 @@ public class GlobalErrorHandler {
         return respond(HttpStatus.NOT_FOUND, e.getMessage(), null);
     }
 
-    @ExceptionHandler({FeeStructureValidationException.class, PaymentValidationException.class,
+    @ExceptionHandler({PaymentValidationException.class,
             IllegalArgumentException.class})
     ResponseEntity<ApiError> invalid(RuntimeException e) {
         return respond(HttpStatus.BAD_REQUEST, e.getMessage(), null);

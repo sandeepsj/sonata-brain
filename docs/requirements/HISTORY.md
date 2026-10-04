@@ -80,3 +80,24 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - Retired REQ-040.AC1 (old course response) and REQ-032.AC2–AC5 (old session query endpoints, including `/search` and
   `/students/*`, which depended on legacy fee rows). Replaced by REQ-040.AC3 and REQ-032.AC6/AC7.
 
+## 2026-10-04: Migration rehearsal on the production copy (dump of 2026-10-04)
+
+- Migration V2–V4 and a full rebuild ran with no errors: 5,576 dues for 600 students, 87 waivers.
+- Legacy comparison: 536 of 600 students match exactly; 2024 and 2025 match for everyone.
+- 64 students differ, all in 2026 and all in the same direction: the new system bills 149 dues
+  (₹1,64,400) that the legacy system never created. 70 of the 72 affected sessions are students who joined in 2026
+  and are still enrolled. For 69 of them, legacy billing stops at the quarter they joined, because legacy created dues
+  for later terms only when a fee structure was created, never on a schedule (REQ-077.AC1/AC2). No due exists only
+  in legacy.
+- Consequence to confirm before production: after migration these students will show the missing quarters
+  (Apr–Dec 2026) as due.
+
+## 2026-10-04: Fee timeline, derived dues, new payments and migration (Tasks 3–7)
+
+- Retired the criteria of the replaced mechanics: legacy per-year fee rows (REQ-050.AC7), `termId` payments
+  (REQ-060.AC1–AC4, AC11), the dues tracker and its queries (REQ-072.AC1, REQ-076.AC1–AC3, REQ-077), the old payment
+  query endpoints (REQ-066.AC1–AC3), and the defects fixed by the new code (REQ-063.AC2, REQ-064.AC6). The
+  `quarantine` cases went with them.
+- Kept and ported to the new request shape: additional payments (REQ-061.AC1/AC2), zero amounts (REQ-062),
+  discounts (REQ-063.AC1/AC3), deactivation (REQ-064.AC1–AC3; a second deactivation is now 409).
+

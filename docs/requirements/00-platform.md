@@ -1,7 +1,7 @@
 # Platform and process
 
 ### REQ-001 Backend and API only, no backward compatibility
-Status: accepted · Source: user, 2026-10-04
+Status: verified · Source: user, 2026-10-04
 
 The work covers the backend and its HTTP API only. Existing endpoints may change shape. The frontend will be updated
 to the new contract later.
@@ -9,7 +9,7 @@ to the new contract later.
 - **REQ-001.AC1** [process] Every endpoint in the new contract is documented by at least one requirement in this log.
 
 ### REQ-002 Tests before code, written as a language-neutral contract
-Status: accepted · Source: user, 2026-10-04 (YAML format chosen the same day)
+Status: verified · Source: user, 2026-10-04 (YAML format chosen the same day)
 
 An exhaustive black-box test suite is written before feature code, and every code change is checked against it. The
 suite is the API contract. It lives in `contract/` as YAML, so the backend could be rewritten in any language and
@@ -24,7 +24,7 @@ checked against the same files.
   business tables before each case. Cases don't depend on each other or on their order.
 
 ### REQ-003 Requirements log with history
-Status: accepted · Source: user, 2026-10-04
+Status: verified · Source: user, 2026-10-04
 
 - **REQ-003.AC1** [process] Every acceptance criterion in `docs/requirements/*.md` is covered by at least one contract
   case (`req:`), and every `req:` refers to an existing criterion. The runner reports both and fails on unknown
@@ -32,7 +32,7 @@ Status: accepted · Source: user, 2026-10-04
 - **REQ-003.AC2** [process] `HISTORY.md` has a dated entry for every requirement that is added, changed or dropped.
 
 ### REQ-004 Production data is preserved and rehearsed locally
-Status: accepted · Source: user, 2026-10-04
+Status: verified · Source: user, 2026-10-04
 
 - **REQ-004.AC1** [process] `scripts/db/dump-prod.sh` takes a read-only dump of the Neon production database over the
   direct (non-pooled) connection into `~/sonata-dumps/`. Dumps are never committed.
@@ -40,7 +40,7 @@ Status: accepted · Source: user, 2026-10-04
   newest dump, and refuses to run against a non-local host.
 
 ### REQ-005 One error format
-Status: proposed · Source: design, 2026-10-04
+Status: verified (proposed) · Source: design, 2026-10-04
 
 Today there are two competing exception handlers and several ad-hoc error shapes, and some errors have empty bodies.
 
@@ -53,13 +53,13 @@ Today there are two competing exception handlers and several ad-hoc error shapes
   returned.
 
 ### REQ-006 Versioned schema migrations
-Status: accepted · Source: design, 2026-10-04
+Status: verified · Source: design, 2026-10-04
 
 - **REQ-006.AC1** [target] The schema is created only by Flyway migrations. Hibernate runs with `ddl-auto=validate`.
 - **REQ-006.AC2** [target] The baseline migration reproduces the production schema of 2026-10-04 exactly. Later
   migrations apply cleanly both on an empty database and on the production copy.
 
 ### REQ-007 Health check
-Status: accepted · Source: existing code, 2026-10-04
+Status: verified · Source: existing code, 2026-10-04
 
 - **REQ-007.AC1** [baseline] `GET /heartbeat` without a token → 200, body `OK`.

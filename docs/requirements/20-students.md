@@ -1,7 +1,7 @@
 # Students
 
 ### REQ-020 Create a student
-Status: implemented · Source: existing code; admission-number override added in commit bdcd6ff
+Status: verified · Source: existing code; admission-number override added in commit bdcd6ff
 
 - **REQ-020.AC1** [baseline] `POST /api/students` with `studentName` and no `admissionNo` → 201 (200 before REQ-020.AC7), with
   `admissionNo` = current maximum + 1 (1 on an empty table).
@@ -16,7 +16,7 @@ Status: implemented · Source: existing code; admission-number override added in
   standard error body (REQ-005).
 
 ### REQ-021 Get and update a student
-Status: accepted · Source: existing code
+Status: verified · Source: existing code
 
 - **REQ-021.AC1** [baseline] `GET /api/students/{admissionNo}` → 200 with the student.
 - **REQ-021.AC2** [baseline] An unknown admission number → 404.
@@ -26,13 +26,13 @@ Status: accepted · Source: existing code
 - **REQ-021.AC5** [baseline] `status` can be changed to `active`, `closed` or `suspended`.
 
 ### REQ-022 List students
-Status: accepted · Source: existing code
+Status: verified · Source: existing code
 
 - **REQ-022.AC1** [baseline] `GET /api/students?page=&size=` returns a Spring page (`content`, `totalElements`,
   `totalPages`, `number`, `size`). The defaults are page 0 and size 10.
 
 ### REQ-023 Search students
-Status: accepted · Source: existing code; admission-number search added in commit f8edee0
+Status: verified · Source: existing code; admission-number search added in commit f8edee0
 
 - **REQ-023.AC1** [baseline] `GET /api/students/search` with no parameters returns all students.
 - **REQ-023.AC2** [baseline] `name` and `school` match case-insensitive substrings. `contactNo` matches a substring.

@@ -79,20 +79,9 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
     @Query("SELECT ss FROM StudentSession ss WHERE ss.dateOfDisjoining IS NOT NULL AND ss.dateOfDisjoining <= CURRENT_TIMESTAMP")
     List<StudentSession> findAllInactiveSessions();
 
-    // Methods for filtering sessions by year and term (simplified - no date overlap checking)
-    @Query("SELECT DISTINCT ss FROM StudentSession ss " +
-           "WHERE ss.course IN (SELECT fs.course FROM FeeStructure fs WHERE fs.year = :year AND fs.term = :termNumber)")
-    List<StudentSession> findSessionsByYearAndTerm(@Param("year") Integer year, @Param("termNumber") Integer termNumber);
+    @Query("SELECT DISTINCT ss.student.admissionNo FROM StudentSession ss WHERE ss.course.name = :courseName")
+    List<Long> findStudentIdsByCourseName(@Param("courseName") String courseName);
 
-    @Query("SELECT DISTINCT ss FROM StudentSession ss " +
-           "WHERE ss.course.name = :courseName " +
-           "AND ss.course IN (SELECT fs.course FROM FeeStructure fs WHERE fs.year = :year AND fs.term = :termNumber)")
-    List<StudentSession> findSessionsByCourseYearAndTerm(@Param("courseName") String courseName,
-                                                         @Param("year") Integer year,
-                                                         @Param("termNumber") Integer termNumber);
-
-    @Query("SELECT DISTINCT ss FROM StudentSession ss " +
-           "WHERE ss.course.name = :courseName " +
-           "AND ss.course IN (SELECT fs.course FROM FeeStructure fs WHERE fs.year = :year)")
-    List<StudentSession> findSessionsByCourseAndYear(@Param("courseName") String courseName, @Param("year") Integer year);
+    @Query("SELECT DISTINCT ss.student.admissionNo FROM StudentSession ss")
+    List<Long> findAllStudentIds();
 }

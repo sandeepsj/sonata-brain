@@ -5,7 +5,7 @@ has no dates. The **fee timeline** assigns structures to date ranges for a cours
 (see 70-dues.md).
 
 ### REQ-050 Fee structures as templates
-Status: accepted · Source: user ("set up different fee structures independently"), 2026-10-04
+Status: verified · Source: user ("set up different fee structures independently"), 2026-10-04
 
 - **REQ-050.AC1** [target] `POST /api/fee-structures` `{name, courseName, termsPerYear, terms: [{termNumber,
   amount}]}` → 201 with `id`.
@@ -16,12 +16,12 @@ Status: accepted · Source: user ("set up different fee structures independently
 - **REQ-050.AC5** [target] An unknown course → 404. A duplicate name within the same course → 409.
 - **REQ-050.AC6** [target] `GET /api/fee-structures?courseName=` lists structures, each with its terms and a
   `usedInTimeline` flag. `GET /api/fee-structures/{id}` returns one, or 404.
-- **REQ-050.AC7** [baseline] Today: `POST /api/fee-structures` `{courseId, year, numberOfTerms, termFees:[{term,
+- **REQ-050.AC7** [retired] *(was baseline; replaced by REQ-050 to REQ-055)* Today: `POST /api/fee-structures` `{courseId, year, numberOfTerms, termFees:[{term,
   amount}]}` → 200 with one row per term. A second structure for the same course and year → 400. Missing terms → 400.
   An unknown course → 400.
 
 ### REQ-051 Edit fee structures
-Status: accepted · Source: user ("update the fee"; "keep data independent … recalculate dues whenever needed"), 2026-10-04
+Status: verified · Source: user ("update the fee"; "keep data independent … recalculate dues whenever needed"), 2026-10-04
 
 - **REQ-051.AC1** [target] `PUT /api/fee-structures/{id}` replaces `name`, `termsPerYear` and `terms`, with the same
   validation as REQ-050. This is allowed even when the structure is used in the timeline.
@@ -30,7 +30,7 @@ Status: accepted · Source: user ("update the fee"; "keep data independent … r
 - **REQ-051.AC3** [target] The course of a structure cannot be changed → 400 if `courseName` differs.
 
 ### REQ-052 Clone and delete fee structures
-Status: accepted · Source: design, 2026-10-04
+Status: verified · Source: design, 2026-10-04
 
 - **REQ-052.AC1** [target] `POST /api/fee-structures/{id}/clone` `{name}` → 201 with a new structure that has the
   same course, terms and amounts.
@@ -38,7 +38,7 @@ Status: accepted · Source: design, 2026-10-04
   if it is, 404 if unknown.
 
 ### REQ-053 Fee timeline
-Status: accepted · Source: user ("assign each of those to the time period they wish"), 2026-10-04
+Status: verified · Source: user ("assign each of those to the time period they wish"), 2026-10-04
 
 - **REQ-053.AC1** [target] `POST /api/fee-timeline` `{courseName, feeStructureId, effectiveFrom, effectiveTo?}` →
   201. A null `effectiveTo` means open-ended.
@@ -54,7 +54,7 @@ Status: accepted · Source: user ("assign each of those to the time period they 
 - **REQ-053.AC7** [target] Adding an entry to a CLOSED course → 409 (REQ-042.AC4).
 
 ### REQ-054 Billing periods
-Status: accepted · Source: user ("this fee structure is activated from this day to this day"; mid-term rule chosen 2026-10-04)
+Status: verified · Source: user ("this fee structure is activated from this day to this day"; mid-term rule chosen 2026-10-04)
 
 - **REQ-054.AC1** [target] A structure with N terms per year splits each calendar year into N blocks of 12/N months.
   Term k runs from the 1st of month (k−1)·12/N+1 to the last day of month k·12/N.
@@ -77,14 +77,14 @@ Status: accepted · Source: user ("this fee structure is activated from this day
   amount. The alternatives are prorating by days, or not billing the partial period and starting at 1 Jul.
 
 ### REQ-055 Timeline preview
-Status: accepted · Source: design, 2026-10-04
+Status: verified · Source: design, 2026-10-04
 
 - **REQ-055.AC1** [target] `GET /api/fee-timeline/preview?courseName=&from=&to=` returns the billing periods
   `[{periodStart, periodEnd, termNumber, termsPerYear, amount, feeStructureId}]` that the current timeline produces
   and that overlap `[from, to]`, ordered by `periodStart`. It doesn't write anything. A missing `from` or `to` → 400.
 
 ### REQ-056 Timeline changes rebuild dues
-Status: accepted · Source: user ("every time this fee structure timeline changes, due recalculation triggers"), 2026-10-04
+Status: verified · Source: user ("every time this fee structure timeline changes, due recalculation triggers"), 2026-10-04
 
 - **REQ-056.AC1** [target] Creating, updating or deleting a timeline entry rebuilds the dues of every student with a
   session in that course (REQ-074).

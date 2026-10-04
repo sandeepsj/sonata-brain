@@ -5,7 +5,7 @@ Rows at that time: 600 students, 858 sessions, 17 courses, 180 fee_structure row
 5,516 fee_dues_tracker rows, 2 accounts.
 
 ### REQ-080 Legacy fee structures become templates and timeline entries
-Status: accepted · Source: design, 2026-10-04
+Status: verified · Source: design, 2026-10-04
 
 - **REQ-080.AC1** [target] Each `(course, year)` group of legacy `fee_structure` rows becomes one template named
   `"<course> <year>"`, with `termsPerYear` = number of rows and the amounts copied. It also becomes one timeline entry
@@ -20,7 +20,7 @@ Status: accepted · Source: design, 2026-10-04
   and after the migration.
 
 ### REQ-081 Check the migrated dues against the old ones
-Status: accepted · Source: user ("test everything including migration works properly"), 2026-10-04
+Status: verified · Source: user ("test everything including migration works properly"), 2026-10-04
 
 - **REQ-081.AC1** [target] `GET /api/dues/legacy-comparison` (DUES_READ) compares, per student:
   - **Legacy billed:** the term amounts of legacy dues not `CANCELLED`.
