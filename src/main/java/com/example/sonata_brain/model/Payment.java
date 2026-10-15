@@ -46,6 +46,17 @@ public class Payment {
     @JsonIgnoreProperties("payment")
     private List<Discount> discounts = new ArrayList<>();
 
+    // REQ-065.AC8: set when an ADDITIONAL payment is converted into a course fee
+    @Enumerated(EnumType.STRING)
+    @Column(name = "original_type")
+    private PaymentType originalType;
+
+    @Column(name = "converted_at")
+    private LocalDateTime convertedAt;
+
+    @Column(name = "converted_by")
+    private String convertedBy;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
@@ -192,5 +203,26 @@ public class Payment {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public PaymentType getOriginalType() {
+        return originalType;
+    }
+
+    public LocalDateTime getConvertedAt() {
+        return convertedAt;
+    }
+
+    public String getConvertedBy() {
+        return convertedBy;
+    }
+
+    /** Turns this ADDITIONAL payment into a course fee for {@code course}, recording who did it and when. */
+    public void convertToCourseFee(String course, String by) {
+        this.originalType = this.paymentType;
+        this.paymentType = PaymentType.REGULAR;
+        this.courseName = course;
+        this.convertedAt = LocalDateTime.now();
+        this.convertedBy = by;
     }
 }

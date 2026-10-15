@@ -7,6 +7,8 @@ import com.example.sonata_brain.model.Payment;
 import com.example.sonata_brain.repository.DiscountRepository;
 import com.example.sonata_brain.repository.PaymentRepository;
 import com.example.sonata_brain.Repository.StudentRepository;
+import com.example.sonata_brain.common.context.RequestContext;
+import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.dues.DuesService;
 import com.example.sonata_brain.repository.CourseRepository;
 import com.example.sonata_brain.repository.StudentSessionRepository;
@@ -194,6 +196,39 @@ public class PaymentService {
 
     public List<Payment> getPaymentsByDateRangeAndType(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, Payment.PaymentType paymentType) {
         return paymentRepository.findByDateBetweenAndPaymentType(startDate, endDate, paymentType);
+    }
+
+    /**
+     * REQ-065: converts an active ADDITIONAL payment into a course fee and brings the student's dues in sync before
+     * returning. The id, amount, date, label, remarks and discounts are unchanged.
+     */
+    public Payment convertToCourseFee(Long paymentId, String requestedCourse) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> ApiException.notFound("Payment " + paymentId + " not found"));
+        if (payment.getPaymentType() == Payment.PaymentType.REGULAR) {
+            throw ApiException.conflict("Payment " + paymentId + " is already a course fee");
+        }
+        if (!Boolean.TRUE.equals(payment.getIsActive())) {
+            throw ApiException.conflict("Payment " + paymentId + " is deactivated and can't be converted");
+        }
+        String course = blankToNull(requestedCourse) != null ? blankToNull(requestedCourse) : payment.getCourseName();
+        if (course == null) {
+            throw ApiException.invalidField("courseName", "courseName is required: the payment has no course");
+        }
+        if (!courseRepository.existsById(course)) {
+            throw ApiException.invalidField("courseName", "Course not found: " + course);
+        }
+        Long student = payment.getStudent().getAdmissionNo();
+        if (studentSessionRepository.findAllSessionsByStudentIdAndCourseName(student, course).isEmpty()) {
+            throw ApiException.invalidField("courseName", "Student " + student + " has no session in " + course
+                    + ", so there is no course fee to pay");
+        }
+        String by = RequestContext.current().map(RequestContext.Values::user).orElse(null);
+        payment.convertToCourseFee(course, by);
+        paymentRepository.saveAndFlush(payment);
+        duesService.recalculateStudent(student);
+        logger.logInfo("PAYMENT_CONVERSION", "Payment " + paymentId + " converted to a course fee for " + course);
+        return payment;
     }
 
     /** REQ-060.AC14, REQ-061.AC6, REQ-062. Messages are part of the contract (tests match on them). */

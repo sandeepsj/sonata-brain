@@ -2,12 +2,14 @@
 
 Paste the block below into a Claude Code session opened in `~/dev/sonata-face`.
 
-One decision is built in. Screens whose endpoints this backend branch doesn't have (course close/reopen, payment
-conversion, dues aggregate, waivers, legacy comparison) are **disabled, not deleted or rewired**. Change step 8 if
+One decision is built in. Screens whose endpoints this backend branch doesn't have (course close/reopen, dues aggregate,
+waivers, legacy comparison) are **disabled, not deleted or rewired**. Change step 8 if
 that has been decided.
 
 ```text
-The backend (repo ~/dev/sonata-brain, branch `dues-timeline`) changed its auth model and added request logging.
+The backend (repo ~/dev/sonata-brain, branch `main`) changed its auth model, added request logging, and replaced the
+fee model: school-wide fee structures on a timeline that changes only at term boundaries, with dues calculated from
+enrolments and payments. Production already runs this backend, so the current frontend is broken until this is done.
 Update this SvelteKit frontend to match. The backend's generated OpenAPI spec is the contract; when it disagrees
 with anything else (including this prompt), the spec wins.
 
@@ -20,8 +22,8 @@ with anything else (including this prompt), the spec wins.
    50-fees.md, 60-payments.md and 70-dues.md — fee structures, the timeline, payments and dues.
 4. ~/dev/sonata-brain/docs/requirements/00-platform.md — error body (REQ-005), logging headers (REQ-008),
    API docs (REQ-009).
-5. Real request/response examples: ~/dev/sonata-brain/postman/collections/access.postman_collection.json and
-   route-access.postman_collection.json (open as JSON; each request's Tests show the expected response).
+5. Real request/response examples in ~/dev/sonata-brain/postman/collections/ (open as JSON; each request's Tests
+   show the expected response): access, payments, fee-structures, fee-timeline and dues collections.
 
 In this repo, read before changing anything: src/lib/api/client.ts, src/lib/api/types.ts, the auth store in
 src/lib/stores/, src/routes/+layout.svelte, src/routes/(app)/+layout.svelte, src/routes/(app)/no-access,
@@ -37,14 +39,15 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
 1. Generate API types from the spec instead of hand-writing them:
    npx openapi-typescript ~/dev/sonata-brain/docs/api/openapi.json -o src/lib/api/schema.d.ts
    Use them in client.ts/types.ts. Keep all API calls in the one client module. Add an npm script for
-   regenerating.
+   regenerating. Ignore the `regularPayment` and `validZeroPayment` properties the spec shows on
+   PaymentCreateRequest (internal helpers; never send them).
 2. Routes replace permissions. Login, refresh and GET /api/users/me return
    `routes: [{path, read, write}]` instead of `permissions: string[]`. Replace every permission check with a
    helper like `can(routes, '/api/payments/**', 'read' | 'write')`. A screen shows when its route has `read`;
    create/edit/delete actions show when it has `write`. Read and write are independent. Update the landing-page
    logic and the no-access page (sign-up gives `routes: []`).
 3. Roles admin screen: the role body is now `{name, description, routes: [{path, read, write}]}`; GET returns
-   all 10 catalogue routes with false flags where not granted. Edit it as a table: one row per route path, two
+   all 11 catalogue routes with false flags where not granted. Edit it as a table: one row per route path, two
    checkboxes (Read, Write). Show 400 errors on the fields. Built-in ADMIN can't be deleted (409).
 4. Tokens: on 401, call POST /api/auth/refresh once with `Authorization: Bearer <refreshToken>`, retry, then go
    to login. On 403 show "You don't have permission". Role changes reach the token only at the next refresh, so
@@ -62,9 +65,12 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
      the editor.
    - Dues: show periods as dates (`periodStart` – `periodEnd`), status DUE / PARTIALLY_PAID / PAID, and the summary's
      `credit`. Add an admin "Recalculate dues" action using the rebuild job.
-   - Payments: remove the term/period picker; send `paymentType`, `courseName` and a required `label`. Explain that a
-     course fee pays the oldest unpaid term first. "Forgive a term" = a ₹0 REGULAR payment with a discount.
-8. Screens whose endpoints don't exist on the backend branch (course close/reopen, payment convert-to-course-fee,
+   - Payments: remove the term/period picker and every `termId` / `periodDate`; send `paymentType`
+     (REGULAR | ADDITIONAL), `courseName` (required for REGULAR) and a required `label`. Explain that a course fee
+     pays the oldest unpaid term first. "Forgive a term" = a ₹0 REGULAR payment with a discount.
+   - "Convert to course fee" action on ADDITIONAL payments: `POST /api/payments/{id}/convert-to-course-fee`
+     `{ courseName? }`; refresh the student's dues afterwards.
+8. Screens whose endpoints don't exist on the backend branch (course close/reopen,
    dues aggregate, waivers, legacy comparison, the query-param list endpoints for sessions and payments): do NOT
    delete them and do NOT rewire them to other endpoints. Hide them from navigation behind one feature flag and
    leave the code intact. List them in your final summary.
@@ -73,9 +79,12 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
 - First, list every API call the app makes and map each one to its operation in openapi.json, or mark it
   "not on backend". Show me that list before changing code.
 - After each step, check it against the running backend in the browser: log in as admin; create a "Teacher"
-  role (read on students, student-sessions, courses, fee-structures, payments, discounts, dues; write on none);
+  role (read on students, student-sessions, courses, fee-structures, fee-timeline, payments, discounts, dues;
+  write on none);
   sign up a user, assign the role, log in as them and confirm write actions are hidden and that a forced write
   gives the 403 message; confirm requests carry X-Session-Id and error toasts show the request id.
+- Test timeline and fee-structure edits only against the local backend: on production a full dues recalculation
+  is still slow (being fixed) and those requests would time out.
 - Keep the existing look and component patterns. Run the project's type check and build before finishing.
 ```
 
