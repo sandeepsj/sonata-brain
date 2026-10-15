@@ -139,3 +139,10 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
   (REQ-082.AC6). Retired: REQ-070.AC8, REQ-071.AC6, REQ-072.AC3–AC5, REQ-082.AC3. *(user)*
 - `fee_due` is written by comparing each student's calculated dues with the stored rows (update, insert, delete),
   not by clearing the table, so unchanged dues keep their ids. *(design, user asked)*
+
+## 2026-10-16: Fast full recalculation (branch `fast-recalculation`)
+
+- Performance only, no requirement changed. On production a full recalculation took about 20 minutes (about 2.3 s per
+  student of round trips to Neon), so REQ-074.AC7 (timeline and structure changes recalculate everyone before
+  responding) would time out. The facts are now read in one query each and `fee_due` is written in JDBC batches:
+  600 students in about 0.15–0.35 s locally, with identical results on the production copy.

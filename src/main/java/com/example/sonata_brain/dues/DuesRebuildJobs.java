@@ -71,14 +71,25 @@ public class DuesRebuildJobs {
         List<String> errors = new CopyOnWriteArrayList<>();
         Changes changes = new Changes(0, 0, 0);
         int done = 0;
-        for (Long id : studentIds) {
+        if (studentIds.size() > 1) {
+            // Everyone at once: a few bulk queries and batched writes (fast even with a distant database).
             try {
-                changes = changes.plus(dues.recalculateStudent(id));
+                changes = dues.recalculateAll();
+                done = studentIds.size();
             } catch (RuntimeException e) {
-                log.error("Recalculating dues for student {} failed", id, e);
-                errors.add("Student " + id + ": " + e.getMessage());
+                log.error("Bulk recalculation failed; retrying student by student to find the problem", e);
             }
-            done++;
+        }
+        if (done == 0) {
+            for (Long id : studentIds) {
+                try {
+                    changes = changes.plus(dues.recalculateStudent(id));
+                } catch (RuntimeException e) {
+                    log.error("Recalculating dues for student {} failed", id, e);
+                    errors.add("Student " + id + ": " + e.getMessage());
+                }
+                done++;
+            }
         }
         jobs.put(started.jobId(), new Job(started.jobId(), started.scope(), errors.isEmpty() || done > errors.size()
                 ? "DONE" : "FAILED", done, changes, List.copyOf(errors), started.startedAt(), LocalDateTime.now()));
