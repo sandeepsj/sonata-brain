@@ -24,10 +24,10 @@
 					"const pad = (n) => String(n).padStart(2, '0');",
 					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
 					"pm.collectionVariables.set('today', day(0));",
-					"for (const n of [-100, -60, -50, -40, -30, -20, -10, -6, -5, 1]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"for (const n of [-60, -40, -20, -10, -6, -5]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
 					"const year = new Date().getFullYear();",
 					"pm.collectionVariables.set('year', year);",
-					"for (const n of [-1, 1]) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+					"for (const n of []) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
 				]
 			}
 		}
@@ -140,7 +140,95 @@
 					]
 				},
 				{
-					"name": "Before 02 POST /api/fee-structures",
+					"name": "Before 02 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Piano\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 03 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Guitar\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 04 POST /api/fee-structures",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -161,7 +249,52 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_m1}}\",\n  \"numberOfTerms\": 4,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 3,\n      \"amount\": 1200\n    },\n    {\n      \"term\": 4,\n      \"amount\": 1200\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1000\n    },\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 05 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{std}}\",\n  \"effectiveFrom\": \"2025-01-01\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -177,7 +310,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_m1\"), \"numberOfTerms\": 4, \"termFees\": [{\"term\": 1, \"amount\": 1000}, {\"term\": 2, \"amount\": 1000}, {\"term\": 3, \"amount\": 1200}, {\"term\": 4, \"amount\": 1200}]});"
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"std\"), \"effectiveFrom\": \"2025-01-01\"});"
 								]
 							}
 						},
@@ -187,163 +320,16 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 03 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/1",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"1"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(201);",
 									"});",
-									"pm.collectionVariables.set(\"t1\", pm.response.json()?.id);"
+									"pm.collectionVariables.set(\"entry\", pm.response.json()?.id);"
 								]
 							}
 						}
 					]
 				},
 				{
-					"name": "Before 04 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/2",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/2",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"2"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.collectionVariables.set(\"t2\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 05 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/3",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/3",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"3"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.collectionVariables.set(\"t3\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 06 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/4",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/4",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"4"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.collectionVariables.set(\"t4\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 07 POST /api/students",
+					"name": "Before 06 POST /api/students",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -388,7 +374,7 @@
 					]
 				},
 				{
-					"name": "Before 08 POST /api/student-sessions",
+					"name": "Before 07 POST /api/student-sessions",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -409,7 +395,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{year_m1}}-01-10T10:00:00\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-01-10T10:00:00\",\n  \"dateOfDisjoining\": \"2025-12-20T10:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -425,7 +411,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{year_m1}}-01-10T10:00:00\")});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-01-10T10:00:00\", \"dateOfDisjoining\": \"2025-12-20T10:00:00\"});"
 								]
 							}
 						},
@@ -444,7 +430,7 @@
 					]
 				},
 				{
-					"name": "Before 09 POST /api/students",
+					"name": "Before 08 POST /api/students",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -491,8 +477,8 @@
 			]
 		},
 		{
-			"name": "PAY-001 A payment with a termId is a REGULAR course-fee payment",
-			"description": "Proves: REQ-060.AC1",
+			"name": "PAY-001 A REGULAR payment is a date, an amount and a course, with no term",
+			"description": "Proves: REQ-060.AC13",
 			"item": [
 				{
 					"name": "PAY-001 01 POST /api/payments",
@@ -516,7 +502,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 600,\n  \"label\": \"Q1 fee\",\n  \"remarks\": \"cash\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 600,\n  \"label\": \"Q1 fee\",\n  \"remarks\": \"cash\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -532,7 +518,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 600, \"label\": \"Q1 fee\", \"remarks\": \"cash\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 600, \"label\": \"Q1 fee\", \"remarks\": \"cash\"});"
 								]
 							}
 						},
@@ -556,9 +542,8 @@
 									"  pm.expect(b?.remarks, \"remarks\").to.eql(\"cash\");",
 									"  pm.expect(b?.isActive, \"isActive\").to.eql(true);",
 									"  pm.expect(b?.student?.admissionNo, \"student.admissionNo\").to.eql(V(\"asha\"));",
-									"  pm.expect(b?.feeStructure?.id, \"feeStructure.id\").to.eql(V(\"t1\"));",
-									"  pm.expect(b?.feeStructure?.term, \"feeStructure.term\").to.eql(1);",
-									"  pm.expect(b?.feeStructure?.year, \"feeStructure.year\").to.eql(V(\"year_m1\"));",
+									"  pm.expect(b, \"body\").to.not.have.property(\"feeStructure\");",
+									"  pm.expect(b, \"body\").to.not.have.property(\"termId\");",
 									"  pm.expect(b?.date, \"date\").to.match(new RegExp(pm.variables.replaceIn(\"^{{today}}T\"), \"\"));",
 									"});"
 								]
@@ -569,11 +554,11 @@
 			]
 		},
 		{
-			"name": "PAY-002 Unknown student, unknown course, unknown term, or a course that doesn't match the term, are rejected",
-			"description": "Proves: REQ-060.AC2",
+			"name": "PAY-002 A REGULAR payment needs a known student and course, and a session in that course",
+			"description": "Proves: REQ-060.AC14",
 			"item": [
 				{
-					"name": "PAY-002 01 POST /api/courses",
+					"name": "PAY-002 01 POST /api/payments",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -583,18 +568,18 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/courses",
+							"raw": "{{baseUrl}}/api/payments",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"courses"
+								"payments"
 							]
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Keyboard\"\n}",
+							"raw": "{\n  \"studentId\": 999999,\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -609,7 +594,11 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"student not found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"student not found\\\"}\").to.be.true;",
 									"});"
 								]
 							}
@@ -638,7 +627,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": 999999,\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Cello\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -654,7 +643,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": 999999, \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Cello\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -668,7 +657,7 @@
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"student not found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"student not found\\\"}\").to.be.true;",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"course not found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"course not found\\\"}\").to.be.true;",
 									"});"
 								]
 							}
@@ -697,7 +686,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Cello\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -713,7 +702,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Cello\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -727,7 +716,7 @@
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"course not found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"course not found\\\"}\").to.be.true;",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"course\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"course\\\"}\").to.be.true;",
 									"});"
 								]
 							}
@@ -756,7 +745,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": 999999,\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -772,7 +761,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": 999999, \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -786,7 +775,7 @@
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"fee structure not found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"fee structure not found\\\"}\").to.be.true;",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"no session\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"no session\\\"}\").to.be.true;",
 									"});"
 								]
 							}
@@ -794,66 +783,7 @@
 					]
 				},
 				{
-					"name": "PAY-002 05 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Keyboard\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Keyboard\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"mismatch\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"mismatch\\\"}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "PAY-002 06 GET /api/payments",
+					"name": "PAY-002 05 GET /api/payments",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -889,8 +819,8 @@
 			]
 		},
 		{
-			"name": "PAY-003 A student without a session overlapping the term can't pay for it",
-			"description": "Proves: REQ-060.AC3",
+			"name": "PAY-003 There is no upper limit; paying more than is due is accepted",
+			"description": "Proves: REQ-060.AC14",
 			"item": [
 				{
 					"name": "PAY-003 01 POST /api/payments",
@@ -914,7 +844,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 9000,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -930,7 +860,72 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 9000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.amountPaid, \"amountPaid\").to.eql(9000);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-004 [1] The payment type is required and must be REGULAR or ADDITIONAL",
+			"description": "Proves: REQ-061.AC6",
+			"item": [
+				{
+					"name": "PAY-004 [1] 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": null,\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": null, \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -944,68 +939,11 @@
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"no sessions found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"no sessions found\\\"}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "PAY-004 Payments plus discounts for a term can't exceed the term amount; exactly the amount is fine",
-			"description": "Proves: REQ-060.AC4",
-			"item": [
-				{
-					"name": "PAY-004 01 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 600,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 600, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
 									"});"
 								]
 							}
@@ -1013,386 +951,7 @@
 					]
 				},
 				{
-					"name": "PAY-004 02 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 500,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 500, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"would exceed\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"would exceed\\\"}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "PAY-004 03 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 300,\n  \"discounts\": [\n    {\n      \"discountAmount\": 150,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 300, \"discounts\": [{\"discountAmount\": 150, \"label\": \"Sibling\"}]});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "PAY-004 04 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 300,\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 300, \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\"}]});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "PAY-005 Deactivated payments don't count towards the term limit",
-			"description": "Proves: REQ-060.AC4, REQ-064.AC6",
-			"item": [
-				{
-					"name": "PAY-005 01 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t2}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t2\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});",
-									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "PAY-005 02 PATCH /api/payments/{{pid}}/deactivate",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/{{pid}}/deactivate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"{{pid}}",
-								"deactivate"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "PAY-005 03 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t2}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t2\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "PAY-006 Known defect: a course-fee payment without a label fails with 500",
-			"description": "Proves: REQ-060.AC11",
-			"item": [
-				{
-					"name": "PAY-006 01 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 100});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(500);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "PAY-006 02 GET /api/payments",
+					"name": "PAY-004 [1] 02 GET /api/payments",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1428,8 +987,423 @@
 			]
 		},
 		{
-			"name": "PAY-010 A payment without termId is ADDITIONAL; course is optional but must exist if given",
-			"description": "Proves: REQ-061.AC1",
+			"name": "PAY-004 [2] The payment type is required and must be REGULAR or ADDITIONAL",
+			"description": "Proves: REQ-061.AC6",
+			"item": [
+				{
+					"name": "PAY-004 [2] 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"COURSE\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"COURSE\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-004 [2] 02 GET /api/payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-006 [1] Every payment needs a label",
+			"description": "Proves: REQ-060.AC12",
+			"item": [
+				{
+					"name": "PAY-006 [1] 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": null});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"label\"))), \"details includes {\\\"field\\\": \\\"label\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-006 [1] 02 GET /api/payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-006 [2] Every payment needs a label",
+			"description": "Proves: REQ-060.AC12",
+			"item": [
+				{
+					"name": "PAY-006 [2] 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"  \"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"  \"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"label\"))), \"details includes {\\\"field\\\": \\\"label\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-006 [2] 02 GET /api/payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-006 [3] Every payment needs a label",
+			"description": "Proves: REQ-060.AC12",
+			"item": [
+				{
+					"name": "PAY-006 [3] 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": null});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"label\"))), \"details includes {\\\"field\\\": \\\"label\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-006 [3] 02 GET /api/payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-010 An ADDITIONAL payment's course is optional but must exist if given",
+			"description": "Proves: REQ-061.AC6",
 			"item": [
 				{
 					"name": "PAY-010 01 POST /api/payments",
@@ -1453,7 +1427,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 500,\n  \"label\": \"Admission fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 500,\n  \"label\": \"Admission fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1469,7 +1443,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 500, \"label\": \"Admission fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 500, \"label\": \"Admission fee\"});"
 								]
 							}
 						},
@@ -1485,7 +1459,6 @@
 									"  const b = pm.response.json();",
 									"  pm.expect(b?.paymentType, \"paymentType\").to.eql(\"ADDITIONAL\");",
 									"  pm.expect(b?.label, \"label\").to.eql(\"Admission fee\");",
-									"  pm.expect(b?.feeStructure, \"feeStructure\").to.eql(null);",
 									"  pm.expect(b?.courseName, \"courseName\").to.eql(null);",
 									"});"
 								]
@@ -1515,7 +1488,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"amountPaid\": 250,\n  \"label\": \"Exam fee\",\n  \"courseName\": \"Violin\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 250,\n  \"label\": \"Exam fee\",\n  \"courseName\": \"Violin\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1531,7 +1504,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"amountPaid\": 250, \"label\": \"Exam fee\", \"courseName\": \"Violin\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 250, \"label\": \"Exam fee\", \"courseName\": \"Violin\"});"
 								]
 							}
 						},
@@ -1575,7 +1548,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"amountPaid\": 250,\n  \"label\": \"Exam fee\",\n  \"courseName\": \"Cello\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 250,\n  \"label\": \"Exam fee\",\n  \"courseName\": \"Cello\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1591,7 +1564,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"amountPaid\": 250, \"label\": \"Exam fee\", \"courseName\": \"Cello\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 250, \"label\": \"Exam fee\", \"courseName\": \"Cello\"});"
 								]
 							}
 						},
@@ -1602,136 +1575,6 @@
 								"exec": [
 									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(400);",
-									"});"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "PAY-011 [1] An additional payment needs a label",
-			"description": "Proves: REQ-061.AC2",
-			"item": [
-				{
-					"name": "PAY-011 [1] 01 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 500,\n  \"label\": null\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 500, \"label\": null});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"label is required\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"label is required\\\"}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "PAY-011 [2] An additional payment needs a label",
-			"description": "Proves: REQ-061.AC2",
-			"item": [
-				{
-					"name": "PAY-011 [2] 01 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 500,\n  \"label\": \"  \"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 500, \"label\": \"  \"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"label is required\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"label is required\\\"}\").to.be.true;",
 									"});"
 								]
 							}
@@ -1766,7 +1609,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 0,\n  \"label\": \"Waiver\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 0,\n  \"label\": \"Waiver\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1782,7 +1625,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 0, \"label\": \"Waiver\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 0, \"label\": \"Waiver\"});"
 								]
 							}
 						},
@@ -1825,7 +1668,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 0,\n  \"label\": \"Waiver\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 500,\n      \"label\": \"Scholarship\"\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 0,\n  \"label\": \"Waiver\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 500,\n      \"label\": \"Scholarship\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1841,7 +1684,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 0, \"label\": \"Waiver\", \"discounts\": [{\"discountAmount\": 500, \"label\": \"Scholarship\"}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 0, \"label\": \"Waiver\", \"discounts\": [{\"discountAmount\": 500, \"label\": \"Scholarship\"}]});"
 								]
 							}
 						},
@@ -1891,7 +1734,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": 1,\n  \"amountPaid\": -1,\n  \"label\": \"x\"\n}",
+							"raw": "{\n  \"studentId\": 1,\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": -1,\n  \"label\": \"x\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1975,7 +1818,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": 1,\n  \"label\": \"x\"\n}",
+							"raw": "{\n  \"studentId\": 1,\n  \"paymentType\": \"ADDITIONAL\",\n  \"label\": \"x\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2059,7 +1902,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"amountPaid\": 100,\n  \"label\": \"x\"\n}",
+							"raw": "{\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"x\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2143,7 +1986,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t3}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 800,\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\",\n      \"remarks\": \"second child\"\n    },\n    {\n      \"discountAmount\": 50,\n      \"label\": \"Early bird\"\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 800,\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\",\n      \"remarks\": \"second child\"\n    },\n    {\n      \"discountAmount\": 50,\n      \"label\": \"Early bird\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2159,7 +2002,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t3\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 800, \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\", \"remarks\": \"second child\"}, {\"discountAmount\": 50, \"label\": \"Early bird\"}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 800, \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\", \"remarks\": \"second child\"}, {\"discountAmount\": 50, \"label\": \"Early bird\"}]});"
 								]
 							}
 						},
@@ -2248,7 +2091,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 0,\n      \"label\": \"Nothing\"\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 0,\n      \"label\": \"Nothing\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2264,7 +2107,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 100, \"label\": \"Books\", \"discounts\": [{\"discountAmount\": 0, \"label\": \"Nothing\"}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 100, \"label\": \"Books\", \"discounts\": [{\"discountAmount\": 0, \"label\": \"Nothing\"}]});"
 								]
 							}
 						},
@@ -2307,7 +2150,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 10\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 10\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2323,7 +2166,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 100, \"label\": \"Books\", \"discounts\": [{\"discountAmount\": 10}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 100, \"label\": \"Books\", \"discounts\": [{\"discountAmount\": 10}]});"
 								]
 							}
 						},
@@ -2368,7 +2211,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 20,\n      \"label\": \"Staff\"\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 20,\n      \"label\": \"Staff\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2384,7 +2227,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 100, \"label\": \"Books\", \"discounts\": [{\"discountAmount\": 20, \"label\": \"Staff\"}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 100, \"label\": \"Books\", \"discounts\": [{\"discountAmount\": 20, \"label\": \"Staff\"}]});"
 								]
 							}
 						},
@@ -2537,7 +2380,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2553,7 +2396,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 100, \"label\": \"Books\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 100, \"label\": \"Books\"});"
 								]
 							}
 						},
@@ -2672,7 +2515,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2688,7 +2531,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 100, \"label\": \"Books\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 100, \"label\": \"Books\"});"
 								]
 							}
 						},
@@ -2834,7 +2677,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 100,\n  \"label\": \"Books\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2850,7 +2693,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 100, \"label\": \"Books\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 100, \"label\": \"Books\"});"
 								]
 							}
 						},
@@ -3015,6 +2858,140 @@
 			]
 		},
 		{
+			"name": "PAY-043 Deactivating a REGULAR payment puts its amount back on the dues straight away",
+			"description": "Proves: REQ-064.AC7",
+			"item": [
+				{
+					"name": "PAY-043 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-043 02 PATCH /api/payments/{{pid}}/deactivate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"deactivate"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-043 03 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.status === \"DUE\"))), \": every item matches {\\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "PAY-050 A payment can be fetched by id and all of a student's payments listed",
 			"description": "Proves: REQ-066.AC1",
 			"item": [
@@ -3040,7 +3017,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3056,7 +3033,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -3096,7 +3073,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"amountPaid\": 300,\n  \"label\": \"Books\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 300,\n  \"label\": \"Books\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3112,7 +3089,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"amountPaid\": 300, \"label\": \"Books\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 300, \"label\": \"Books\"});"
 								]
 							}
 						},
@@ -3151,7 +3128,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 500,\n  \"label\": \"Admission fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 500,\n  \"label\": \"Admission fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3167,7 +3144,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 500, \"label\": \"Admission fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 500, \"label\": \"Admission fee\"});"
 								]
 							}
 						},
@@ -3318,7 +3295,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3334,7 +3311,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -3373,7 +3350,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"amountPaid\": 300,\n  \"label\": \"Books\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 300,\n  \"label\": \"Books\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3389,7 +3366,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"amountPaid\": 300, \"label\": \"Books\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 300, \"label\": \"Books\"});"
 								]
 							}
 						},
@@ -3584,7 +3561,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"date\": \"{{today_m10d}}T09:00:00\",\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"date\": \"{{today_m10d}}T09:00:00\",\n  \"label\": \"Course fee\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3600,7 +3577,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"date\": pm.variables.replaceIn(\"{{today_m10d}}T09:00:00\"), \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"date\": pm.variables.replaceIn(\"{{today_m10d}}T09:00:00\"), \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -3639,7 +3616,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"amountPaid\": 300,\n  \"label\": \"Books\",\n  \"date\": \"{{today_m5d}}T09:00:00\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 300,\n  \"label\": \"Books\",\n  \"date\": \"{{today_m5d}}T09:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3655,7 +3632,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"amountPaid\": 300, \"label\": \"Books\", \"date\": pm.variables.replaceIn(\"{{today_m5d}}T09:00:00\")});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 300, \"label\": \"Books\", \"date\": pm.variables.replaceIn(\"{{today_m5d}}T09:00:00\")});"
 								]
 							}
 						},
@@ -3694,7 +3671,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 500,\n  \"label\": \"Admission fee\",\n  \"date\": \"{{today_m40d}}T09:00:00\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 500,\n  \"label\": \"Admission fee\",\n  \"date\": \"{{today_m40d}}T09:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3710,7 +3687,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 500, \"label\": \"Admission fee\", \"date\": pm.variables.replaceIn(\"{{today_m40d}}T09:00:00\")});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 500, \"label\": \"Admission fee\", \"date\": pm.variables.replaceIn(\"{{today_m40d}}T09:00:00\")});"
 								]
 							}
 						},
@@ -3749,7 +3726,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"amountPaid\": 70,\n  \"label\": \"Old\",\n  \"date\": \"{{today_m6d}}T09:00:00\"\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 70,\n  \"label\": \"Old\",\n  \"date\": \"{{today_m6d}}T09:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3765,7 +3742,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"amountPaid\": 70, \"label\": \"Old\", \"date\": pm.variables.replaceIn(\"{{today_m6d}}T09:00:00\")});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 70, \"label\": \"Old\", \"date\": pm.variables.replaceIn(\"{{today_m6d}}T09:00:00\")});"
 								]
 							}
 						},

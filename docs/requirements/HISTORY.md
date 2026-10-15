@@ -117,3 +117,19 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 | # | What was asked or decided | Source | Requirements |
 |---|---|---|---|
 | 1 | The frontend needs a contract to refer to. Generate it from the code (springdoc / OpenAPI), commit it, and write a frontend handoff note. | User | REQ-009 |
+
+## 2026-10-15: School-wide fee structures on a timeline; dues from facts (branch `dues-timeline`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Fee structures can change mid-year; dues must be recalculated from regular payments, additional payments and student lifecycles. | User | REQ-070, REQ-074 |
+| 2 | A fee structure is a name, an amount per subject and how many months a term is; an admin decides on a timeline which structure applies when. | User | REQ-057, REQ-058 |
+| 3 | All subjects share one term length. Terms count from the timeline entry. A new structure may start only at the beginning of a term. | User (options chosen) | REQ-058.AC2, REQ-059.AC1 |
+| 4 | Payments only hold the date they happened; they are decoupled from terms. They are applied oldest due first; leftover is credit. | User | REQ-060.AC13, REQ-071.AC6, REQ-071.AC7 |
+| 5 | A term is billed in full if the student is enrolled on any day of it. Dues exist for terms that have started. | User (options chosen) | REQ-070.AC9, REQ-075.AC2 |
+
+- The per-course design of 2026-10-04 (REQ-050 to REQ-056, periodDate on payments, legacy comparison endpoint) was
+  never released; its criteria are retired and point to their replacements.
+- Design: timeline changes and structure edits recalculate everyone before the response returns (simpler and always
+  consistent; about 600 students). The rebuild endpoint runs as a background job.
+- `label` is now required on every payment (REQ-060.AC12), fixing the 500 of REQ-060.AC11.

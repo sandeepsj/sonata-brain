@@ -24,10 +24,10 @@
 					"const pad = (n) => String(n).padStart(2, '0');",
 					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
 					"pm.collectionVariables.set('today', day(0));",
-					"for (const n of [-100, -60, -50, -40, -30, -20, -10, -6, -5, 1]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"for (const n of [-60, -40, -20, -10, -6, -5]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
 					"const year = new Date().getFullYear();",
 					"pm.collectionVariables.set('year', year);",
-					"for (const n of [-1, 1]) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+					"for (const n of []) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
 				]
 			}
 		}
@@ -140,7 +140,95 @@
 					]
 				},
 				{
-					"name": "Before 02 POST /api/fee-structures",
+					"name": "Before 02 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Piano\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 03 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Guitar\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 04 POST /api/fee-structures",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -161,7 +249,52 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_m1}}\",\n  \"numberOfTerms\": 4,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 3,\n      \"amount\": 1200\n    },\n    {\n      \"term\": 4,\n      \"amount\": 1200\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1000\n    },\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 05 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{std}}\",\n  \"effectiveFrom\": \"2025-01-01\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -177,7 +310,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_m1\"), \"numberOfTerms\": 4, \"termFees\": [{\"term\": 1, \"amount\": 1000}, {\"term\": 2, \"amount\": 1000}, {\"term\": 3, \"amount\": 1200}, {\"term\": 4, \"amount\": 1200}]});"
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"std\"), \"effectiveFrom\": \"2025-01-01\"});"
 								]
 							}
 						},
@@ -187,163 +320,16 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 03 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/1",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"1"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(201);",
 									"});",
-									"pm.collectionVariables.set(\"t1\", pm.response.json()?.id);"
+									"pm.collectionVariables.set(\"entry\", pm.response.json()?.id);"
 								]
 							}
 						}
 					]
 				},
 				{
-					"name": "Before 04 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/2",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/2",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"2"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.collectionVariables.set(\"t2\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 05 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/3",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/3",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"3"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.collectionVariables.set(\"t3\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 06 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/4",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/4",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"{{year_m1}}",
-								"term",
-								"4"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.collectionVariables.set(\"t4\", pm.response.json()?.id);"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "Before 07 POST /api/students",
+					"name": "Before 06 POST /api/students",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -388,7 +374,7 @@
 					]
 				},
 				{
-					"name": "Before 08 POST /api/student-sessions",
+					"name": "Before 07 POST /api/student-sessions",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -409,7 +395,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{year_m1}}-01-10T10:00:00\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-01-10T10:00:00\",\n  \"dateOfDisjoining\": \"2025-12-20T10:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -425,7 +411,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{year_m1}}-01-10T10:00:00\")});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-01-10T10:00:00\", \"dateOfDisjoining\": \"2025-12-20T10:00:00\"});"
 								]
 							}
 						},
@@ -444,21 +430,33 @@
 					]
 				},
 				{
-					"name": "Before 09 GET /api/dues/student/{{asha}}",
+					"name": "Before 08 POST /api/students",
 					"request": {
-						"method": "GET",
-						"header": [],
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/students",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
+								"students"
 							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Ravi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						}
 					},
 					"event": [
@@ -467,33 +465,10 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
+									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
-									"  const b = pm.response.json();",
-									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect(b, \" length\").to.have.lengthOf(4);",
-									"  });",
-									"  pm.collectionVariables.set(\"d1\", pm.response.json()?.[0]?.id);",
-									"  pm.collectionVariables.set(\"d2\", pm.response.json()?.[1]?.id);",
-									"  pm.collectionVariables.set(\"d3\", pm.response.json()?.[2]?.id);",
-									"  pm.collectionVariables.set(\"d4\", pm.response.json()?.[3]?.id);",
-									"}"
+									"});",
+									"pm.collectionVariables.set(\"ravi\", pm.response.json()?.admissionNo);"
 								]
 							}
 						}
@@ -502,24 +477,28 @@
 			]
 		},
 		{
-			"name": "DUE-L01 Enrolling creates one DUE per term the session has covered, at the term amount, ordered by term",
-			"description": "Proves: REQ-077.AC1, REQ-076.AC1",
+			"name": "DUE-001 A student is billed every term of their session, from the moment the session is created",
+			"description": "Proves: REQ-070.AC6, REQ-070.AC7, REQ-070.AC8, REQ-074.AC1, REQ-030.AC8",
 			"item": [
 				{
-					"name": "DUE-L01 01 GET /api/dues/student/{{asha}}",
+					"name": "DUE-001 01 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
 							]
 						}
 					},
@@ -536,30 +515,71 @@
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
 									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
-									"  pm.expect(b?.[0]?.termYear, \"[0].termYear\").to.eql(V(\"year_m1\"));",
-									"  pm.expect(b?.[0]?.termNumber, \"[0].termNumber\").to.eql(1);",
-									"  pm.expect(b?.[0]?.dueAmount, \"[0].dueAmount\").to.eql(1000);",
-									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"DUE\");",
-									"  pm.expect(b?.[0]?.feeStructureId, \"[0].feeStructureId\").to.eql(V(\"t1\"));",
-									"  pm.expect(b?.[0]?.courseName, \"[0].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(((Number.isInteger(b?.[0]?.id))), \"[0].id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
 									"  pm.expect(b?.[0]?.studentId, \"[0].studentId\").to.eql(V(\"asha\"));",
 									"  pm.expect(b?.[0]?.studentName, \"[0].studentName\").to.eql(\"Asha\");",
-									"  pm.expect(b?.[0]?.sessionId, \"[0].sessionId\").to.eql(V(\"sid\"));",
-									"  pm.expect(b?.[1]?.termYear, \"[1].termYear\").to.eql(V(\"year_m1\"));",
-									"  pm.expect(b?.[1]?.termNumber, \"[1].termNumber\").to.eql(2);",
-									"  pm.expect(b?.[1]?.dueAmount, \"[1].dueAmount\").to.eql(1000);",
+									"  pm.expect(b?.[0]?.courseName, \"[0].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.periodEnd, \"[0].periodEnd\").to.eql(\"2025-03-31\");",
+									"  pm.expect(b?.[0]?.feeStructureId, \"[0].feeStructureId\").to.eql(V(\"std\"));",
+									"  pm.expect(b?.[0]?.feeStructureName, \"[0].feeStructureName\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(1000);",
+									"  pm.expect(b?.[0]?.paidAmount, \"[0].paidAmount\").to.eql(0);",
+									"  pm.expect(b?.[0]?.discountAmount, \"[0].discountAmount\").to.eql(0);",
+									"  pm.expect(b?.[0]?.balance, \"[0].balance\").to.eql(1000);",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.periodEnd, \"[1].periodEnd\").to.eql(\"2025-06-30\");",
+									"  pm.expect(b?.[1]?.amount, \"[1].amount\").to.eql(1000);",
 									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"DUE\");",
-									"  pm.expect(b?.[1]?.feeStructureId, \"[1].feeStructureId\").to.eql(V(\"t2\"));",
-									"  pm.expect(b?.[2]?.termYear, \"[2].termYear\").to.eql(V(\"year_m1\"));",
-									"  pm.expect(b?.[2]?.termNumber, \"[2].termNumber\").to.eql(3);",
-									"  pm.expect(b?.[2]?.dueAmount, \"[2].dueAmount\").to.eql(1200);",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.periodEnd, \"[2].periodEnd\").to.eql(\"2025-09-30\");",
+									"  pm.expect(b?.[2]?.amount, \"[2].amount\").to.eql(1000);",
 									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"DUE\");",
-									"  pm.expect(b?.[2]?.feeStructureId, \"[2].feeStructureId\").to.eql(V(\"t3\"));",
-									"  pm.expect(b?.[3]?.termYear, \"[3].termYear\").to.eql(V(\"year_m1\"));",
-									"  pm.expect(b?.[3]?.termNumber, \"[3].termNumber\").to.eql(4);",
-									"  pm.expect(b?.[3]?.dueAmount, \"[3].dueAmount\").to.eql(1200);",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.periodEnd, \"[3].periodEnd\").to.eql(\"2025-12-31\");",
+									"  pm.expect(b?.[3]?.amount, \"[3].amount\").to.eql(1000);",
 									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
-									"  pm.expect(b?.[3]?.feeStructureId, \"[3].feeStructureId\").to.eql(V(\"t4\"));",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-001 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
 									"});"
 								]
 							}
@@ -569,11 +589,11 @@
 			]
 		},
 		{
-			"name": "DUE-L02 Creating a fee structure bills ongoing students immediately, even for terms that haven't started",
-			"description": "Proves: REQ-077.AC2",
+			"name": "DUE-002 Joining or leaving mid-term bills that whole term; terms after leaving aren't billed",
+			"description": "Proves: REQ-070.AC9",
 			"item": [
 				{
-					"name": "DUE-L02 01 POST /api/fee-structures",
+					"name": "DUE-002 01 POST /api/student-sessions",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -583,18 +603,18 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures",
+							"raw": "{{baseUrl}}/api/student-sessions",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures"
+								"student-sessions"
 							]
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_p1}}\",\n  \"numberOfTerms\": 2,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 3000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 3500\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Piano\",\n  \"dateOfJoining\": \"2025-02-15T10:00:00\",\n  \"dateOfDisjoining\": \"2025-05-10T10:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -610,7 +630,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_p1\"), \"numberOfTerms\": 2, \"termFees\": [{\"term\": 1, \"amount\": 3000}, {\"term\": 2, \"amount\": 3500}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Piano\", \"dateOfJoining\": \"2025-02-15T10:00:00\", \"dateOfDisjoining\": \"2025-05-10T10:00:00\"});"
 								]
 							}
 						},
@@ -628,20 +648,391 @@
 					]
 				},
 				{
-					"name": "DUE-L02 02 GET /api/dues/student/{{asha}}",
+					"name": "DUE-002 02 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.[0]?.courseName, \"[0].courseName\").to.eql(\"Piano\");",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(1200);",
+									"  pm.expect(b?.[1]?.courseName, \"[1].courseName\").to.eql(\"Piano\");",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.amount, \"[1].amount\").to.eql(1200);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-003 Two sessions in the same term give one due",
+			"description": "Proves: REQ-070.AC6",
+			"item": [
+				{
+					"name": "DUE-003 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-01-05T10:00:00\",\n  \"dateOfDisjoining\": \"2025-02-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-01-05T10:00:00\", \"dateOfDisjoining\": \"2025-02-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-003 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-03-01T10:00:00\",\n  \"dateOfDisjoining\": \"2025-03-20T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-03-01T10:00:00\", \"dateOfDisjoining\": \"2025-03-20T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-003 03 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(1000);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-004 A course without an amount in the structure isn't billed",
+			"description": "Proves: REQ-070.AC6, REQ-057.AC3",
+			"item": [
+				{
+					"name": "DUE-004 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Guitar\",\n  \"dateOfJoining\": \"2025-01-05T10:00:00\",\n  \"dateOfDisjoining\": \"2025-06-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Guitar\", \"dateOfJoining\": \"2025-01-05T10:00:00\", \"dateOfDisjoining\": \"2025-06-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-004 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-005 Only terms that have started are billed",
+			"description": "Proves: REQ-075.AC2",
+			"item": [
+				{
+					"name": "DUE-005 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Piano\",\n  \"dateOfJoining\": \"{{today}}T00:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Piano\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today}}T00:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ravisPiano\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-005 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
 							]
 						}
 					},
@@ -652,32 +1043,88 @@
 								"type": "text/javascript",
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
+									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(b, \" length\").to.have.lengthOf(6);",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.dueAmount === 3000) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"dueAmount\\\": 3000, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.dueAmount === 3500) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"dueAmount\\\": 3500, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect(b, \" length\").to.have.lengthOf(6);",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.dueAmount === 3000) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"dueAmount\\\": 3000, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.dueAmount === 3500) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"dueAmount\\\": 3500, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"  });",
-									"}"
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(((b?.[0]?.periodStart <= V(\"today\"))), \"[0].periodStart matches {\\\"$lte\\\": \\\"{{today}}\\\"}\").to.be.true;",
+									"  pm.expect(((b?.[0]?.periodEnd >= V(\"today\"))), \"[0].periodEnd matches {\\\"$gte\\\": \\\"{{today}}\\\"}\").to.be.true;",
+									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(1200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-005 03 PATCH /api/student-sessions/{{ravisPiano}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{ravisPiano}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{ravisPiano}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-005 04 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"});"
 								]
 							}
 						}
@@ -686,11 +1133,187 @@
 			]
 		},
 		{
-			"name": "DUE-L03 A course-fee payment lowers the matching due - partly paid, then paid",
-			"description": "Proves: REQ-077.AC3",
+			"name": "DUE-006 Disjoining recalculates the student's dues",
+			"description": "Proves: REQ-031.AC4, REQ-074.AC1",
 			"item": [
 				{
-					"name": "DUE-L03 01 POST /api/payments",
+					"name": "DUE-006 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Piano\",\n  \"dateOfJoining\": \"2026-01-02T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Piano\", \"dateOfJoining\": \"2026-01-02T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"open\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-006 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((b != null && (((b.length ?? Object.keys(b).length) >= 1)))), \" matches {\\\"$len\\\": {\\\"$gte\\\": 1}}\").to.be.true;",
+									"});",
+									"pm.collectionVariables.set(\"before\", pm.response.json());"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-006 03 PATCH /api/student-sessions/{{open}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{open}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{open}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-006 04 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{ravi}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{ravi}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \"\").to.eql(V(\"before\"));",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-010 Payments fill the oldest term first, in payment-date order",
+			"description": "Proves: REQ-071.AC6, REQ-071.AC4, REQ-074.AC1",
+			"item": [
+				{
+					"name": "DUE-010 01 POST /api/payments",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -711,7 +1334,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 400,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1500,\n  \"label\": \"Course fee\",\n  \"date\": \"2025-06-01T10:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -727,7 +1350,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 400, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1500, \"label\": \"Course fee\", \"date\": \"2025-06-01T10:00:00\"});"
 								]
 							}
 						},
@@ -745,59 +1368,7 @@
 					]
 				},
 				{
-					"name": "DUE-L03 02 GET /api/dues/student/{{asha}}",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"{{asha}}"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
-									"  pm.response.to.have.status(200);",
-									"  const b = pm.response.json();",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 600) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 600, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 600) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 600, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
-									"  });",
-									"}"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L03 03 POST /api/payments",
+					"name": "DUE-010 02 POST /api/payments",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -818,7 +1389,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 500,\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 700,\n  \"label\": \"Course fee\",\n  \"date\": \"2025-02-01T10:00:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -834,7 +1405,7 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 500, \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\"}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 700, \"label\": \"Course fee\", \"date\": \"2025-02-01T10:00:00\"});"
 								]
 							}
 						},
@@ -852,20 +1423,24 @@
 					]
 				},
 				{
-					"name": "DUE-L03 04 GET /api/dues/student/{{asha}}",
+					"name": "DUE-010 03 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
 							]
 						}
 					},
@@ -875,29 +1450,29 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
+									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 0) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 0, \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 0) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 0, \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
-									"  });",
-									"}"
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.paidAmount, \"[0].paidAmount\").to.eql(1000);",
+									"  pm.expect(b?.[0]?.balance, \"[0].balance\").to.eql(0);",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.paidAmount, \"[1].paidAmount\").to.eql(1000);",
+									"  pm.expect(b?.[1]?.balance, \"[1].balance\").to.eql(0);",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.paidAmount, \"[2].paidAmount\").to.eql(200);",
+									"  pm.expect(b?.[2]?.balance, \"[2].balance\").to.eql(800);",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"PARTIALLY_PAID\");",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.paidAmount, \"[3].paidAmount\").to.eql(0);",
+									"  pm.expect(b?.[3]?.balance, \"[3].balance\").to.eql(1000);",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"});"
 								]
 							}
 						}
@@ -906,11 +1481,11 @@
 			]
 		},
 		{
-			"name": "DUE-L04 Deactivating a payment puts amount and discount back on the due",
-			"description": "Proves: REQ-077.AC4, REQ-064.AC6",
+			"name": "DUE-011 A payment's discounts count towards what it pays",
+			"description": "Proves: REQ-071.AC4",
 			"item": [
 				{
-					"name": "DUE-L04 01 POST /api/payments",
+					"name": "DUE-011 01 POST /api/payments",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -931,7 +1506,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t3}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 300,\n  \"discounts\": [\n    {\n      \"discountAmount\": 200,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 800,\n  \"label\": \"Course fee\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 200,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -947,7 +1522,423 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t3\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 300, \"discounts\": [{\"discountAmount\": 200, \"label\": \"Sibling\"}]});"
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 800, \"label\": \"Course fee\", \"discounts\": [{\"discountAmount\": 200, \"label\": \"Sibling\"}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-011 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}&status=PAID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "status",
+									"value": "PAID"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.paidAmount, \"[0].paidAmount\").to.eql(800);",
+									"  pm.expect(b?.[0]?.discountAmount, \"[0].discountAmount\").to.eql(200);",
+									"  pm.expect(b?.[0]?.balance, \"[0].balance\").to.eql(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-012 Money beyond what is due is credit, and pays new terms",
+			"description": "Proves: REQ-071.AC7, REQ-076.AC7",
+			"item": [
+				{
+					"name": "DUE-012 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 5000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 5000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-012 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.status === \"PAID\") && (y?.balance === 0))), \": every item matches {\\\"status\\\": \\\"PAID\\\", \\\"balance\\\": 0}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-012 03 GET /api/dues/summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/summary?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.studentId, \"studentId\").to.eql(V(\"asha\"));",
+									"  pm.expect(b?.courses, \"courses length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.courses?.[0]?.courseName, \"courses[0].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.courses?.[0]?.amount, \"courses[0].amount\").to.eql(4000);",
+									"  pm.expect(b?.courses?.[0]?.paid, \"courses[0].paid\").to.eql(4000);",
+									"  pm.expect(b?.courses?.[0]?.discount, \"courses[0].discount\").to.eql(0);",
+									"  pm.expect(b?.courses?.[0]?.balance, \"courses[0].balance\").to.eql(0);",
+									"  pm.expect(b?.courses?.[0]?.credit, \"courses[0].credit\").to.eql(1000);",
+									"  pm.expect(b?.amount, \"amount\").to.eql(4000);",
+									"  pm.expect(b?.balance, \"balance\").to.eql(0);",
+									"  pm.expect(b?.credit, \"credit\").to.eql(1000);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-012 04 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2026-01-05T10:00:00\",\n  \"dateOfDisjoining\": \"2026-02-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2026-01-05T10:00:00\", \"dateOfDisjoining\": \"2026-02-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-012 05 GET /api/dues/summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/summary?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.amount, \"amount\").to.eql(5000);",
+									"  pm.expect(b?.balance, \"balance\").to.eql(0);",
+									"  pm.expect(b?.credit, \"credit\").to.eql(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-013 Additional and deactivated payments don't pay dues",
+			"description": "Proves: REQ-071.AC5, REQ-061.AC4, REQ-064.AC5",
+			"item": [
+				{
+					"name": "DUE-013 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Exam fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Exam fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-013 02 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
 								]
 							}
 						},
@@ -966,20 +1957,28 @@
 					]
 				},
 				{
-					"name": "DUE-L04 02 GET /api/dues/student/{{asha}}",
+					"name": "DUE-013 03 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}&status=PAID",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "status",
+									"value": "PAID"
+								}
 							]
 						}
 					},
@@ -989,36 +1988,20 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
+									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 700) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 700, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 700) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 700, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
-									"  });",
-									"}"
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"});"
 								]
 							}
 						}
 					]
 				},
 				{
-					"name": "DUE-L04 03 PATCH /api/payments/{{pid}}/deactivate",
+					"name": "DUE-013 04 PATCH /api/payments/{{pid}}/deactivate",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -1050,20 +2033,24 @@
 					]
 				},
 				{
-					"name": "DUE-L04 04 GET /api/dues/student/{{asha}}",
+					"name": "DUE-013 05 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
 							]
 						}
 					},
@@ -1073,29 +2060,14 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
+									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 1200) && (y?.status === \"DUE\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 1200, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 1200) && (y?.status === \"DUE\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 1200, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"  });",
-									"}"
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.status === \"DUE\") && (y?.paidAmount === 0))), \": every item matches {\\\"status\\\": \\\"DUE\\\", \\\"paidAmount\\\": 0}\").to.be.true;",
+									"});"
 								]
 							}
 						}
@@ -1104,11 +2076,67 @@
 			]
 		},
 		{
-			"name": "DUE-L05 Disjoining cancels dues of terms that start later; past terms stay due",
-			"description": "Proves: REQ-077.AC5",
+			"name": "DUE-020 A fee change from October leaves earlier terms and the payments alone",
+			"description": "Proves: REQ-073.AC1, REQ-073.AC3",
 			"item": [
 				{
-					"name": "DUE-L05 01 POST /api/fee-structures",
+					"name": "DUE-020 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 2500,\n  \"label\": \"Course fee\",\n  \"date\": \"2025-05-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 2500, \"label\": \"Course fee\", \"date\": \"2025-05-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-020 02 POST /api/fee-structures",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1129,7 +2157,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_p1}}\",\n  \"numberOfTerms\": 2,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 3000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 3500\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Revised\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1200\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1139,177 +2167,21 @@
 					},
 					"event": [
 						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_p1\"), \"numberOfTerms\": 2, \"termFees\": [{\"term\": 1, \"amount\": 3000}, {\"term\": 2, \"amount\": 3500}]});"
-								]
-							}
-						},
-						{
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});"
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"revised\", pm.response.json()?.id);"
 								]
 							}
 						}
 					]
 				},
 				{
-					"name": "DUE-L05 02 GET /api/dues/student/{{asha}}",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"{{asha}}"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
-									"  pm.response.to.have.status(200);",
-									"  const b = pm.response.json();",
-									"  pm.expect(b, \" length\").to.have.lengthOf(6);",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect(b, \" length\").to.have.lengthOf(6);",
-									"  });",
-									"}"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L05 03 PATCH /api/student-sessions/{{sid}}/disjoin",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"{{sid}}",
-								"disjoin"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L05 04 GET /api/dues/student/{{asha}}",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"{{asha}}"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
-									"  pm.response.to.have.status(200);",
-									"  const b = pm.response.json();",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
-									"  pm.expect(((Array.isArray(b) && !b.some(y0 => ((y0 !== null && typeof y0 === 'object' && !Array.isArray(y0)) && (JSON.stringify(y0?.termYear) === JSON.stringify(V(\"year_m1\"))) && (y0?.status === \"CANCELLED\"))))), \" matches {\\\"$none\\\": {\\\"termYear\\\": \\\"{{year_m1}}\\\", \\\"status\\\": \\\"CANCELLED\\\"}}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
-									"    pm.expect(((Array.isArray(b) && !b.some(y0 => ((y0 !== null && typeof y0 === 'object' && !Array.isArray(y0)) && (JSON.stringify(y0?.termYear) === JSON.stringify(V(\"year_m1\"))) && (y0?.status === \"CANCELLED\"))))), \" matches {\\\"$none\\\": {\\\"termYear\\\": \\\"{{year_m1}}\\\", \\\"status\\\": \\\"CANCELLED\\\"}}\").to.be.true;",
-									"  });",
-									"}"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "DUE-L06 A due can be marked \"student left\" only after the student has left, and only while unpaid",
-			"description": "Proves: REQ-072.AC1",
-			"item": [
-				{
-					"name": "DUE-L06 01 POST /api/payments",
+					"name": "DUE-020 03 POST /api/fee-timeline",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1319,18 +2191,18 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/payments",
+							"raw": "{{baseUrl}}/api/fee-timeline",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"payments"
+								"fee-timeline"
 							]
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-10-15\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1346,7 +2218,62 @@
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
 									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-10-15\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-020 04 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-10-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-10-01\"});"
 								]
 							}
 						},
@@ -1364,108 +2291,24 @@
 					]
 				},
 				{
-					"name": "DUE-L06 02 GET /api/dues/student/{{asha}}",
+					"name": "DUE-020 05 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"student",
-								"{{asha}}"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
-									"  pm.response.to.have.status(200);",
-									"  const b = pm.response.json();",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
-									"  });",
-									"}"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L06 03 PATCH /api/dues/{{d4}}/mark-student-left-cancelled",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/{{d4}}/mark-student-left-cancelled",
-							"host": [
-								"{{baseUrl}}"
+								"dues"
 							],
-							"path": [
-								"api",
-								"dues",
-								"{{d4}}",
-								"mark-student-left-cancelled"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"does not have any disjoined session\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"does not have any disjoined session\\\"}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L06 04 PATCH /api/student-sessions/{{sid}}/disjoin",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"{{sid}}",
-								"disjoin"
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
 							]
 						}
 					},
@@ -1477,6 +2320,25 @@
 								"exec": [
 									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(1000);",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.amount, \"[1].amount\").to.eql(1000);",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.amount, \"[2].amount\").to.eql(1000);",
+									"  pm.expect(b?.[2]?.paidAmount, \"[2].paidAmount\").to.eql(500);",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"PARTIALLY_PAID\");",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.amount, \"[3].amount\").to.eql(1200);",
+									"  pm.expect(b?.[3]?.balance, \"[3].balance\").to.eql(1200);",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[3]?.feeStructureName, \"[3].feeStructureName\").to.eql(\"Revised\");",
 									"});"
 								]
 							}
@@ -1484,20 +2346,19 @@
 					]
 				},
 				{
-					"name": "DUE-L06 05 PATCH /api/dues/{{d4}}/mark-student-left-cancelled",
+					"name": "DUE-020 06 GET /api/payments/{{pid}}",
 					"request": {
-						"method": "PATCH",
+						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/{{d4}}/mark-student-left-cancelled",
+							"raw": "{{baseUrl}}/api/payments/{{pid}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"dues",
-								"{{d4}}",
-								"mark-student-left-cancelled"
+								"payments",
+								"{{pid}}"
 							]
 						}
 					},
@@ -1507,50 +2368,14 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
 									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(200);",
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(b?.id, \"id\").to.eql(V(\"d4\"));",
-									"  pm.expect(b?.status, \"status\").to.eql(\"STUDENT_LEFT_DUE_CANCELLED\");",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L06 06 PATCH /api/dues/{{d1}}/mark-student-left-cancelled",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/{{d1}}/mark-student-left-cancelled",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"{{d1}}",
-								"mark-student-left-cancelled"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"Current status: PAID\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"Current status: PAID\\\"}\").to.be.true;",
+									"  pm.expect(b?.amountPaid, \"amountPaid\").to.eql(2500);",
+									"  pm.expect(b?.date, \"date\").to.eql(\"2025-05-01T10:00:00\");",
+									"  pm.expect(b?.isActive, \"isActive\").to.eql(true);",
 									"});"
 								]
 							}
@@ -1560,11 +2385,11 @@
 			]
 		},
 		{
-			"name": "DUE-L10 The student summary counts and totals dues per status",
-			"description": "Proves: REQ-076.AC2",
+			"name": "DUE-030 A waived term has no balance and payments skip it; removing the waiver restores it",
+			"description": "Proves: REQ-072.AC5, REQ-072.AC3, REQ-072.AC4",
 			"item": [
 				{
-					"name": "DUE-L10 01 POST /api/payments",
+					"name": "DUE-030 01 POST /api/dues/waivers",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1574,168 +2399,320 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L10 02 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t2}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 400,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t2\"), \"courseName\": \"Violin\", \"amountPaid\": 400, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L10 03 GET /api/dues/summary/{{asha}}",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues/waivers",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"summary",
-								"{{asha}}"
+								"waivers"
 							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"periodStart\": \"2025-04-01\",\n  \"reason\": \"Student was ill\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						}
 					},
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"periodStart\": \"2025-04-01\", \"reason\": \"Student was ill\"});"
+								]
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
 								"exec": [
 									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
-									"const attempt = Number(V('_attempt') || 0);",
-									"let passed = true;",
-									"try {",
-									"  pm.response.to.have.status(200);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
+									"  pm.expect(((Number.isInteger(b?.id))), \"id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
 									"  pm.expect(b?.studentId, \"studentId\").to.eql(V(\"asha\"));",
-									"  pm.expect(b?.studentName, \"studentName\").to.eql(\"Asha\");",
-									"  pm.expect(b?.totalCount, \"totalCount\").to.eql(4);",
-									"  pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
-									"  pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
-									"  pm.expect(b?.partiallyPaidAmount, \"partiallyPaidAmount\").to.eql(600);",
-									"  pm.expect(b?.dueCount, \"dueCount\").to.eql(2);",
-									"  pm.expect(b?.dueAmount, \"dueAmount\").to.eql(2400);",
-									"  pm.expect(b?.totalDueAmount, \"totalDueAmount\").to.eql(3000);",
-									"} catch (e) { passed = false; }",
-									"if (!passed && attempt < 30) {",
-									"  pm.collectionVariables.set('_attempt', attempt + 1);",
-									"  setTimeout(() => {}, 300);",
-									"  pm.execution.setNextRequest(pm.info.requestName);",
-									"} else {",
-									"  pm.collectionVariables.set('_attempt', 0);",
-									"  pm.test(\"status\", () => {",
-									"    pm.response.to.have.status(200);",
-									"  });",
-									"  pm.test(\"body\", () => {",
-									"    const b = pm.response.json();",
-									"    pm.expect(b?.studentId, \"studentId\").to.eql(V(\"asha\"));",
-									"    pm.expect(b?.studentName, \"studentName\").to.eql(\"Asha\");",
-									"    pm.expect(b?.totalCount, \"totalCount\").to.eql(4);",
-									"    pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
-									"    pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
-									"    pm.expect(b?.partiallyPaidAmount, \"partiallyPaidAmount\").to.eql(600);",
-									"    pm.expect(b?.dueCount, \"dueCount\").to.eql(2);",
-									"    pm.expect(b?.dueAmount, \"dueAmount\").to.eql(2400);",
-									"    pm.expect(b?.totalDueAmount, \"totalDueAmount\").to.eql(3000);",
-									"  });",
-									"}"
+									"  pm.expect(b?.courseName, \"courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.periodStart, \"periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.reason, \"reason\").to.eql(\"Student was ill\");",
+									"  pm.expect(b?.createdBy, \"createdBy\").to.eql(\"root@sonata.test\");",
+									"  pm.expect(b?.createdAt, \"createdAt\").to.be.a('string').and.match(/\\S/);",
+									"});",
+									"pm.collectionVariables.set(\"waiver\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-030 02 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 2000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 2000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-030 03 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"WAIVED\");",
+									"  pm.expect(b?.[1]?.balance, \"[1].balance\").to.eql(0);",
+									"  pm.expect(b?.[1]?.paidAmount, \"[1].paidAmount\").to.eql(0);",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-030 04 GET /api/dues/waivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.id, \"[0].id\").to.eql(V(\"waiver\"));",
+									"  pm.expect(b?.[0]?.reason, \"[0].reason\").to.eql(\"Student was ill\");",
+									"  pm.expect(b?.[0]?.createdBy, \"[0].createdBy\").to.eql(\"root@sonata.test\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-030 05 DELETE /api/dues/waivers/{{waiver}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers/{{waiver}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers",
+								"{{waiver}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-030 06 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-030 07 DELETE /api/dues/waivers/{{waiver}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers/{{waiver}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers",
+								"{{waiver}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
 								]
 							}
 						}
@@ -1744,11 +2721,11 @@
 			]
 		},
 		{
-			"name": "DUE-L11 Due lists and totals can be filtered by status, year, term and course; a bad status gives 400",
-			"description": "Proves: REQ-076.AC3",
+			"name": "DUE-031 A waiver needs an existing due, a reason, and can't be repeated",
+			"description": "Proves: REQ-072.AC5",
 			"item": [
 				{
-					"name": "DUE-L11 01 POST /api/payments",
+					"name": "DUE-031 01 POST /api/dues/waivers",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1758,120 +2735,363 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L11 02 POST /api/payments",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t2}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 400,\n  \"label\": \"Course fee\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"const V = (k) => pm.collectionVariables.get(k);",
-									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
-									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t2\"), \"courseName\": \"Violin\", \"amountPaid\": 400, \"label\": \"Course fee\"});"
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(201);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L11 03 GET /api/dues/summary/{{asha}}",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/{{asha}}",
+							"raw": "{{baseUrl}}/api/dues/waivers",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"summary",
-								"{{asha}}"
+								"waivers"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"periodStart\": \"2025-04-01\",\n  \"reason\": \"Ill\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"periodStart\": \"2025-04-01\", \"reason\": \"Ill\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-031 02 POST /api/dues/waivers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"periodStart\": \"2025-04-01\",\n  \"reason\": \"Again\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"periodStart\": \"2025-04-01\", \"reason\": \"Again\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-031 03 POST /api/dues/waivers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"periodStart\": \"2026-04-01\",\n  \"reason\": \"Future\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"periodStart\": \"2026-04-01\", \"reason\": \"Future\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-031 04 POST /api/dues/waivers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"periodStart\": \"2025-07-01\",\n  \"reason\": \"  \"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"periodStart\": \"2025-07-01\", \"reason\": \"  \"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"reason\"))), \"details includes {\\\"field\\\": \\\"reason\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-032 Waivers survive a full recalculation",
+			"description": "Proves: REQ-072.AC3, REQ-074.AC8",
+			"item": [
+				{
+					"name": "DUE-032 01 POST /api/dues/waivers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/waivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"waivers"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"periodStart\": \"2025-10-01\",\n  \"reason\": \"Left early\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"periodStart\": \"2025-10-01\", \"reason\": \"Left early\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-032 02 POST /api/dues/rebuild",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild?scope=ALL",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild"
+							],
+							"query": [
+								{
+									"key": "scope",
+									"value": "ALL"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(202);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.jobId, \"jobId\").to.be.a('string').and.match(/\\S/);",
+									"});",
+									"pm.collectionVariables.set(\"job\", pm.response.json()?.jobId);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-032 03 GET /api/dues/rebuild/{{job}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/{{job}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"{{job}}"
 							]
 						}
 					},
@@ -1888,8 +3108,11 @@
 									"try {",
 									"  pm.response.to.have.status(200);",
 									"  const b = pm.response.json();",
-									"  pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
-									"  pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
+									"  pm.expect(b?.jobId, \"jobId\").to.eql(V(\"job\"));",
+									"  pm.expect(b?.scope, \"scope\").to.eql(\"ALL\");",
+									"  pm.expect(b?.status, \"status\").to.eql(\"DONE\");",
+									"  pm.expect(((b?.students >= 2)), \"students matches {\\\"$gte\\\": 2}\").to.be.true;",
+									"  pm.expect(b?.errors, \"errors length\").to.have.lengthOf(0);",
 									"} catch (e) { passed = false; }",
 									"if (!passed && attempt < 30) {",
 									"  pm.collectionVariables.set('_attempt', attempt + 1);",
@@ -1902,8 +3125,11 @@
 									"  });",
 									"  pm.test(\"body\", () => {",
 									"    const b = pm.response.json();",
-									"    pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
-									"    pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
+									"    pm.expect(b?.jobId, \"jobId\").to.eql(V(\"job\"));",
+									"    pm.expect(b?.scope, \"scope\").to.eql(\"ALL\");",
+									"    pm.expect(b?.status, \"status\").to.eql(\"DONE\");",
+									"    pm.expect(((b?.students >= 2)), \"students matches {\\\"$gte\\\": 2}\").to.be.true;",
+									"    pm.expect(b?.errors, \"errors length\").to.have.lengthOf(0);",
 									"  });",
 									"}"
 								]
@@ -1912,12 +3138,12 @@
 					]
 				},
 				{
-					"name": "DUE-L11 04 GET /api/dues",
+					"name": "DUE-032 04 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues?statuses=DUE",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}&status=WAIVED",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1927,53 +3153,12 @@
 							],
 							"query": [
 								{
-									"key": "statuses",
-									"value": "DUE"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
-									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.status === \"DUE\"))), \": every item matches {\\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L11 05 GET /api/dues",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues?statuses=DUE,PAID&termNumber=1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues"
-							],
-							"query": [
-								{
-									"key": "statuses",
-									"value": "DUE,PAID"
+									"key": "studentId",
+									"value": "{{asha}}"
 								},
 								{
-									"key": "termNumber",
-									"value": "1"
+									"key": "status",
+									"value": "WAIVED"
 								}
 							]
 						}
@@ -1990,8 +3175,68 @@
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
 									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
-									"  pm.expect(b?.[0]?.termNumber, \"[0].termNumber\").to.eql(1);",
-									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-10-01\");",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-040 Recalculating twice changes nothing",
+			"description": "Proves: REQ-070.AC4, REQ-074.AC8",
+			"item": [
+				{
+					"name": "DUE-040 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1300,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1300, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
 									"});"
 								]
 							}
@@ -1999,12 +3244,12 @@
 					]
 				},
 				{
-					"name": "DUE-L11 06 GET /api/dues",
+					"name": "DUE-040 02 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues?statuses=bogus",
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2014,8 +3259,191 @@
 							],
 							"query": [
 								{
-									"key": "statuses",
-									"value": "bogus"
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"before\", pm.response.json());"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-040 03 POST /api/dues/rebuild",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild?scope=STUDENT&id={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild"
+							],
+							"query": [
+								{
+									"key": "scope",
+									"value": "STUDENT"
+								},
+								{
+									"key": "id",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(202);",
+									"});",
+									"pm.collectionVariables.set(\"job\", pm.response.json()?.jobId);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-040 04 GET /api/dues/rebuild/{{job}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/{{job}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"{{job}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.scope, \"scope\").to.eql(\"STUDENT\");",
+									"  pm.expect(b?.status, \"status\").to.eql(\"DONE\");",
+									"  pm.expect(b?.students, \"students\").to.eql(1);",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect(b?.scope, \"scope\").to.eql(\"STUDENT\");",
+									"    pm.expect(b?.status, \"status\").to.eql(\"DONE\");",
+									"    pm.expect(b?.students, \"students\").to.eql(1);",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-040 05 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \"\").to.eql(V(\"before\"));",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-041 The rebuild endpoint checks its parameters",
+			"description": "Proves: REQ-074.AC8",
+			"item": [
+				{
+					"name": "DUE-041 01 POST /api/dues/rebuild",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild?scope=STUDENT",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild"
+							],
+							"query": [
+								{
+									"key": "scope",
+									"value": "STUDENT"
 								}
 							]
 						}
@@ -2028,6 +3456,14 @@
 								"exec": [
 									"pm.test(\"status\", () => {",
 									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
 									"});"
 								]
 							}
@@ -2035,28 +3471,308 @@
 					]
 				},
 				{
-					"name": "DUE-L11 07 GET /api/dues/pending",
+					"name": "DUE-041 02 POST /api/dues/rebuild",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/pending?course=Violin&year={{year_m1}}",
+							"raw": "{{baseUrl}}/api/dues/rebuild?scope=COURSE",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"pending"
+								"rebuild"
 							],
 							"query": [
 								{
-									"key": "course",
-									"value": "Violin"
+									"key": "scope",
+									"value": "COURSE"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-041 03 GET /api/dues/rebuild/no-such-job",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/no-such-job",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"no-such-job"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-050 Dues can be filtered by student, course, status and term start",
+			"description": "Proves: REQ-076.AC4",
+			"item": [
+				{
+					"name": "DUE-050 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Piano\",\n  \"dateOfJoining\": \"2025-01-05T10:00:00\",\n  \"dateOfDisjoining\": \"2025-06-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Piano\", \"dateOfJoining\": \"2025-01-05T10:00:00\", \"dateOfDisjoining\": \"2025-06-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-050 02 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-050 03 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(6);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-050 04 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?courseName=Piano",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "courseName",
+									"value": "Piano"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.studentId) === JSON.stringify(V(\"ravi\"))))), \": every item matches {\\\"studentId\\\": \\\"{{ravi}}\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-050 05 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?status=DUE&from=2025-04-01&to=2025-07-01",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "DUE"
 								},
 								{
-									"key": "year",
-									"value": "{{year_m1}}"
+									"key": "from",
+									"value": "2025-04-01"
+								},
+								{
+									"key": "to",
+									"value": "2025-07-01"
 								}
 							]
 						}
@@ -2073,6 +3789,7 @@
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
 									"  pm.expect(b, \" length\").to.have.lengthOf(3);",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.status === \"DUE\") && ((y?.periodStart >= \"2025-04-01\")))), \": every item matches {\\\"status\\\": \\\"DUE\\\", \\\"periodStart\\\": {\\\"$gte\\\": \\\"2025-04-01\\\"}}\").to.be.true;",
 									"});"
 								]
 							}
@@ -2080,24 +3797,228 @@
 					]
 				},
 				{
-					"name": "DUE-L11 08 GET /api/dues/aggregate",
+					"name": "DUE-050 06 GET /api/dues",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate?statuses=DUE,PARTIALLY_PAID",
+							"raw": "{{baseUrl}}/api/dues?status=NOPE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "NOPE"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-050 07 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?from=not-a-date",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "not-a-date"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-051 The summary totals each course and the student",
+			"description": "Proves: REQ-076.AC7",
+			"item": [
+				{
+					"name": "DUE-051 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Piano\",\n  \"dateOfJoining\": \"2025-01-05T10:00:00\",\n  \"dateOfDisjoining\": \"2025-03-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Piano\", \"dateOfJoining\": \"2025-01-05T10:00:00\", \"dateOfDisjoining\": \"2025-03-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-051 02 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 900,\n  \"label\": \"Course fee\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 900, \"label\": \"Course fee\", \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\"}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-051 03 GET /api/dues/summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/summary?studentId={{asha}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"aggregate"
+								"summary"
 							],
 							"query": [
 								{
-									"key": "statuses",
-									"value": "DUE,PARTIALLY_PAID"
+									"key": "studentId",
+									"value": "{{asha}}"
 								}
 							]
 						}
@@ -2113,8 +4034,24 @@
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(b?.count, \"count\").to.eql(3);",
-									"  pm.expect(b?.totalDue, \"totalDue\").to.eql(3000);",
+									"  pm.expect(b?.courses, \"courses length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.courses?.[0]?.courseName, \"courses[0].courseName\").to.eql(\"Piano\");",
+									"  pm.expect(b?.courses?.[0]?.amount, \"courses[0].amount\").to.eql(1200);",
+									"  pm.expect(b?.courses?.[0]?.paid, \"courses[0].paid\").to.eql(0);",
+									"  pm.expect(b?.courses?.[0]?.discount, \"courses[0].discount\").to.eql(0);",
+									"  pm.expect(b?.courses?.[0]?.balance, \"courses[0].balance\").to.eql(1200);",
+									"  pm.expect(b?.courses?.[0]?.credit, \"courses[0].credit\").to.eql(0);",
+									"  pm.expect(b?.courses?.[1]?.courseName, \"courses[1].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.courses?.[1]?.amount, \"courses[1].amount\").to.eql(4000);",
+									"  pm.expect(b?.courses?.[1]?.paid, \"courses[1].paid\").to.eql(900);",
+									"  pm.expect(b?.courses?.[1]?.discount, \"courses[1].discount\").to.eql(100);",
+									"  pm.expect(b?.courses?.[1]?.balance, \"courses[1].balance\").to.eql(3000);",
+									"  pm.expect(b?.courses?.[1]?.credit, \"courses[1].credit\").to.eql(0);",
+									"  pm.expect(b?.amount, \"amount\").to.eql(5200);",
+									"  pm.expect(b?.paid, \"paid\").to.eql(900);",
+									"  pm.expect(b?.discount, \"discount\").to.eql(100);",
+									"  pm.expect(b?.balance, \"balance\").to.eql(4200);",
+									"  pm.expect(b?.credit, \"credit\").to.eql(0);",
 									"});"
 								]
 							}
@@ -2122,20 +4059,25 @@
 					]
 				},
 				{
-					"name": "DUE-L11 09 GET /api/dues/aggregate/pending",
+					"name": "DUE-051 04 GET /api/dues/summary",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
+							"raw": "{{baseUrl}}/api/dues/summary?studentId=999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"aggregate",
-								"pending"
+								"summary"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "999999"
+								}
 							]
 						}
 					},
@@ -2146,51 +4088,15 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
+									"  pm.response.to.have.status(404);",
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(b?.count, \"count\").to.eql(3);",
-									"  pm.expect(b?.totalDue, \"totalDue\").to.eql(3000);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "DUE-L11 10 GET /api/dues/aggregate/by-course",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-course"
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
-									"  pm.expect(b?.[0]?.course, \"[0].course\").to.eql(\"Violin\");",
-									"  pm.expect(b?.[0]?.count, \"[0].count\").to.eql(4);",
-									"  pm.expect(b?.[0]?.totalDue, \"[0].totalDue\").to.eql(3000);",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
 									"});"
 								]
 							}
