@@ -65,6 +65,7 @@ public class SecurityConfig {
                                 write(res, HttpStatus.FORBIDDEN, "You don't have permission for this action")))
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/heartbeat", "/error").permitAll();
+                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll(); // REQ-009
                     auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/users/signup")
                             .permitAll();

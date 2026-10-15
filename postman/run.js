@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Runs the Postman collections against a backend on a fresh database, with a clean slate for every case.
 //
-//   node run.js                       build, start the backend on a new database, run every case
+//   node run.js                       build, start the backend on a new database, run every case,
+//                                     and rewrite docs/api/openapi.json from the running backend
 //   node run.js Payments              only the Payments collection
 //   node run.js "PAY-004"             only cases whose name starts with PAY-004
 //   node run.js --no-build            skip the Maven build
@@ -100,6 +101,18 @@ function runCase(collectionFile, folders, baseUrl) {
   });
 }
 
+// REQ-009.AC3: keep the committed copy of the generated API spec in step with the code.
+async function exportSpec(baseUrl) {
+  const res = await fetch(`${baseUrl}/v3/api-docs`);
+  if (!res.ok) throw new Error(`GET /v3/api-docs answered ${res.status}`);
+  const spec = await res.json();
+  spec.servers = [{ url: 'http://localhost:8080', description: 'local backend' }];
+  const file = path.join(REPO, 'docs', 'api', 'openapi.json');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(spec, null, 2) + '\n');
+  console.log(`Wrote ${path.relative(REPO, file)}`);
+}
+
 function describeFailure(f) {
   const where = f.source && f.source.name ? f.source.name : '(collection)';
   return `      ${where}\n        ${f.error.test ? f.error.test + ': ' : ''}${f.error.message}`;
@@ -109,6 +122,7 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   let backend;
   const baseUrl = externalUrl || (backend = await startBackend()).url;
+  if (!externalUrl && !filters.length) await exportSpec(baseUrl);
   const files = fs.readdirSync(COLLECTIONS).filter((f) => f.endsWith('.postman_collection.json')).sort();
 
   let passed = 0;

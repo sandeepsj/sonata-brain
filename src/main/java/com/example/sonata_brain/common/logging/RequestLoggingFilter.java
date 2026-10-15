@@ -53,7 +53,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         RequestContext.set(new RequestContext.Values(requestId, sessionId, null));
         response.setHeader(REQUEST_ID_HEADER, requestId);
 
-        boolean logged = !"OPTIONS".equals(request.getMethod()) && !request.getRequestURI().equals("/heartbeat");
+        String uri = request.getRequestURI();
+        boolean logged = !"OPTIONS".equals(request.getMethod()) && !uri.equals("/heartbeat")
+                && !uri.startsWith("/v3/api-docs") && !uri.startsWith("/swagger-ui");
         if (!logged) {
             try {
                 chain.doFilter(request, response);

@@ -84,3 +84,15 @@ behind an interface (`LogStore`); the database is the only implementation for no
   the stack trace. Work done on `@Async` threads keeps the context of the request that started it.
 - **REQ-008.AC6** [manual] Logging never fails or noticeably slows a request: rows are written in the background, in
   their own transaction, and a database problem is reported on stderr and dropped.
+
+### REQ-009 Machine-readable API documentation
+Status: accepted · Source: user, 2026-10-15
+
+The frontend works from a spec generated from the code, not from prose.
+
+- **REQ-009.AC1** [target] `GET /v3/api-docs` returns the OpenAPI 3 spec of every endpoint, and `/swagger-ui.html`
+  serves browsable docs. Both work without a token.
+- **REQ-009.AC2** [target] The spec declares the Bearer access token, the `X-Request-Id` and `X-Session-Id` headers,
+  and the standard error body.
+- **REQ-009.AC3** [process] `docs/api/openapi.json` is the committed copy of the spec. `postman/run.js` rewrites it on
+  every full run, so an API change shows up as a diff in the same commit.

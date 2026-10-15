@@ -111,3 +111,9 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 | 2 | Log every request/response, the application's log statements and errors. Session id comes from a client header (`X-Session-Id`). Bodies are stored with secrets masked. Storage is an interface with a database implementation only; no read API or retention yet. | User (options chosen) | REQ-008.AC2-AC6 |
 
 - New criterion tag `[manual]` for behaviour the API can't show (rows in `log`).
+
+## 2026-10-15: Generated API docs for the frontend
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | The frontend needs a contract to refer to. Generate it from the code (springdoc / OpenAPI), commit it, and write a frontend handoff note. | User | REQ-009 |
