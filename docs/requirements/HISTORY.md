@@ -85,3 +85,14 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
   login or refresh instead of the next request.
 - `/api/discounts/**` is its own route instead of sharing PAYMENT. `/api/fee-timeline/**` is not in the catalogue
   because that feature is not on this branch.
+
+## 2026-10-15: Postman replaces the YAML contract (branch `self-service`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | The testing setup is Postman-based: hit the APIs and verify the responses, nothing more. Cover all existing features, and keep expanding the cases as features are added. | User | REQ-002, REQ-003.AC1 |
+| 2 | Postman replaces the YAML suite in `contract/`; run with Newman from the command line and openable in the Postman app; a fresh database per run. | User (options chosen) | REQ-002.AC2, REQ-002.AC3 |
+
+- All 112 cases that were green in the YAML suite were ported, keeping their IDs and `Proves:` citations. Not ported:
+  PLT-T01 and PLT-T02 (still red, REQ-005.AC1/AC2), PLT-T05 (a SQL check; a failed migration already stops the
+  runner), and the fee-timeline migration specs (that feature is not on this branch).

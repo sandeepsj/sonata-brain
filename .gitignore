@@ -1,7 +1,5 @@
 HELP.md
 target/
-# Maven output only; the contract's target specs are source.
-!contract/specs/target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -35,3 +33,7 @@ build/
 .vscode/
 .neon
 .env.local
+
+### Postman tests ###
+postman/node_modules/
+postman/.out/

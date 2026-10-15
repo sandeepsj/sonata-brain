@@ -1,0 +1,2745 @@
+{
+	"info": {
+		"name": "Sonata API - Sessions",
+		"description": "Run with postman/run.js (fresh database, clean slate per case) or in the Postman app. See postman/README.md.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{admin}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Date helpers for the tests: {{today}}, {{today_m40d}} (40 days ago), {{today_p1d}}, {{year}}, {{year_m1}}, ...",
+					"const pad = (n) => String(n).padStart(2, '0');",
+					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
+					"pm.collectionVariables.set('today', day(0));",
+					"for (const n of [-100, -60, -50, -40, -30, -20, -10, -6, -5, 1]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"const year = new Date().getFullYear();",
+					"pm.collectionVariables.set('year', year);",
+					"for (const n of [-1, 1]) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+				]
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "00 Setup",
+			"description": "Logs in as the bootstrap administrator. run.js runs this before every case.",
+			"item": [
+				{
+					"name": "Setup 01 POST /api/auth/login (bootstrap admin)",
+					"request": {
+						"method": "POST",
+						"auth": {
+							"type": "noauth"
+						},
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('admin can log in', () => pm.response.to.have.status(200));",
+									"const b = pm.response.json();",
+									"// 'root' and 'admin' are the same bootstrap administrator.",
+									"pm.collectionVariables.set('admin', b.accessToken);",
+									"pm.collectionVariables.set('adminRefresh', b.refreshToken);",
+									"pm.collectionVariables.set('root', b.accessToken);",
+									"pm.collectionVariables.set('rootRefresh', b.refreshToken);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "00 Before each",
+			"description": "Data every case in this collection starts from. run.js runs it after 00 Setup, before every case.",
+			"item": [
+				{
+					"name": "Before 01 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 02 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Keyboard\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 03 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Asha\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"asha\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 04 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Ravi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ravi\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-001 A session is created with the given dates and returns the student and course",
+			"description": "Proves: REQ-030.AC1",
+			"item": [
+				{
+					"name": "SES-001 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m60d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m60d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((Number.isInteger(b?.id))), \"id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
+									"  pm.expect(b?.student?.admissionNo, \"student.admissionNo\").to.eql(V(\"asha\"));",
+									"  pm.expect(b?.student?.studentName, \"student.studentName\").to.eql(\"Asha\");",
+									"  pm.expect(b?.course?.name, \"course.name\").to.eql(\"Violin\");",
+									"  pm.expect(b?.dateOfJoining, \"dateOfJoining\").to.eql(pm.variables.replaceIn(\"{{today_m60d}}T10:00:00\"));",
+									"  pm.expect(b?.dateOfDisjoining, \"dateOfDisjoining\").to.eql(null);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-002 A missing joining date defaults to now",
+			"description": "Proves: REQ-030.AC1",
+			"item": [
+				{
+					"name": "SES-002 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dateOfJoining, \"dateOfJoining\").to.match(new RegExp(pm.variables.replaceIn(\"^{{today}}T\"), \"\"));",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-003 An unknown student or course gives 404",
+			"description": "Proves: REQ-030.AC2",
+			"item": [
+				{
+					"name": "SES-003 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": 999999,\n  \"courseName\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-003 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Cello\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Cello\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-004 Joining or disjoining dates in the future are rejected",
+			"description": "Proves: REQ-030.AC3",
+			"item": [
+				{
+					"name": "SES-004 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_p1d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_p1d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-004 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m10d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_p1d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m10d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_p1d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-004 03 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-005 A disjoining date before the joining date is rejected",
+			"description": "Proves: REQ-030.AC4",
+			"item": [
+				{
+					"name": "SES-005 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m10d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_m20d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m10d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_m20d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-006 A second session overlapping an ongoing one in the same course is rejected, naming the conflict",
+			"description": "Proves: REQ-030.AC5",
+			"item": [
+				{
+					"name": "SES-006 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m100d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m100d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"first\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-006 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m5d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m5d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(pm.variables.replaceIn(\"ID: {{first}}\")).toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"ID: {{first}}\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-007 A past session that overlaps a closed session in the same course is rejected",
+			"description": "Proves: REQ-030.AC5",
+			"item": [
+				{
+					"name": "SES-007 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m100d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_m50d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m100d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_m50d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-007 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m60d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m60d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-008 Non-overlapping sessions in the same course, and parallel sessions in different courses, are allowed",
+			"description": "Proves: REQ-030.AC5",
+			"item": [
+				{
+					"name": "SES-008 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m100d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_m50d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m100d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_m50d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-008 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-008 03 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Keyboard\",\n  \"dateOfJoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Keyboard\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-008 04 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-009 studentId and courseName are required",
+			"description": "Proves: REQ-030.AC6",
+			"item": [
+				{
+					"name": "SES-009 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseName\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-009 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-010 Disjoining sets the disjoining date to now",
+			"description": "Proves: REQ-031.AC1",
+			"item": [
+				{
+					"name": "SES-010 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m30d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m30d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-010 02 PATCH /api/student-sessions/{{sid}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"sid\"));",
+									"  pm.expect(b?.dateOfDisjoining, \"dateOfDisjoining\").to.match(new RegExp(pm.variables.replaceIn(\"^{{today}}T\"), \"\"));",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-011 Disjoining twice is rejected; an unknown session gives 404",
+			"description": "Proves: REQ-031.AC2",
+			"item": [
+				{
+					"name": "SES-011 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m30d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m30d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-011 02 PATCH /api/student-sessions/{{sid}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-011 03 PATCH /api/student-sessions/{{sid}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-011 04 PATCH /api/student-sessions/999999/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/999999/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"999999",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-020 A session can be fetched by id; unknown id gives 404",
+			"description": "Proves: REQ-032.AC1",
+			"item": [
+				{
+					"name": "SES-020 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m30d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m30d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-020 02 GET /api/student-sessions/{{sid}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"sid\"));",
+									"  pm.expect(b?.course?.name, \"course.name\").to.eql(\"Violin\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-020 03 GET /api/student-sessions/999999",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"999999"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-021 The /all endpoint filters by student, course and active flag in any combination",
+			"description": "Proves: REQ-032.AC2",
+			"item": [
+				{
+					"name": "SES-021 01 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m100d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_m50d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m100d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_m50d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ashaViolinOld\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 02 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ashaViolin\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 03 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Keyboard\",\n  \"dateOfJoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Keyboard\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ashaKeys\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 04 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m40d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m40d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"raviViolin\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 05 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 06 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?active=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "active",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.id, \"[0].id\").to.eql(V(\"ashaViolinOld\"));",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 07 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 08 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?studentId={{asha}}&active=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "active",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"ashaViolin\"))))), \" includes {\\\"id\\\": \\\"{{ashaViolin}}\\\"}\").to.be.true;",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"ashaKeys\"))))), \" includes {\\\"id\\\": \\\"{{ashaKeys}}\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 09 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?courseName=Violin&active=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "courseName",
+									"value": "Violin"
+								},
+								{
+									"key": "active",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"ashaViolin\"))))), \" includes {\\\"id\\\": \\\"{{ashaViolin}}\\\"}\").to.be.true;",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"raviViolin\"))))), \" includes {\\\"id\\\": \\\"{{raviViolin}}\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 10 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?studentId={{asha}}&courseName=Violin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "courseName",
+									"value": "Violin"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-021 11 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?studentId={{asha}}&courseName=Violin&active=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "courseName",
+									"value": "Violin"
+								},
+								{
+									"key": "active",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.id, \"[0].id\").to.eql(V(\"ashaViolinOld\"));",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-022 The /all endpoint gives 404 for an unknown student or course",
+			"description": "Proves: REQ-032.AC2",
+			"item": [
+				{
+					"name": "SES-022 01 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?studentId=999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "999999"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-022 02 GET /api/student-sessions/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all?courseName=Cello",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all"
+							],
+							"query": [
+								{
+									"key": "courseName",
+									"value": "Cello"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-023 Per-student session lists give 404 when the student has no matching sessions",
+			"description": "Proves: REQ-032.AC3",
+			"item": [
+				{
+					"name": "SES-023 01 GET /api/student-sessions/active/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/active/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"active",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-023 02 GET /api/student-sessions/all/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-023 03 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m100d}}T10:00:00\",\n  \"dateOfDisjoining\": \"{{today_m50d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m100d}}T10:00:00\"), \"dateOfDisjoining\": pm.variables.replaceIn(\"{{today_m50d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-023 04 GET /api/student-sessions/active/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/active/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"active",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-023 05 GET /api/student-sessions/all/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-024 Per-course session lists give 404 when the course has no matching sessions",
+			"description": "Proves: REQ-032.AC4",
+			"item": [
+				{
+					"name": "SES-024 01 GET /api/student-sessions/active/course/Violin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/active/course/Violin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"active",
+								"course",
+								"Violin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-024 02 GET /api/student-sessions/all/course/Violin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all/course/Violin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all",
+								"course",
+								"Violin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-024 03 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{today_m10d}}T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{today_m10d}}T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-024 04 GET /api/student-sessions/active/course/Violin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/active/course/Violin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"active",
+								"course",
+								"Violin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.student?.studentName, \"[0].student.studentName\").to.eql(\"Asha\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SES-024 05 GET /api/student-sessions/all/course/Violin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/all/course/Violin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"all",
+								"course",
+								"Violin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SES-025 Session search needs at least one filter",
+			"description": "Proves: REQ-032.AC5",
+			"item": [
+				{
+					"name": "SES-025 01 GET /api/student-sessions/search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/search",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"search"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -8,27 +8,26 @@ to the new contract later.
 
 - **REQ-001.AC1** [process] Every endpoint in the new contract is documented by at least one requirement in this log.
 
-### REQ-002 Tests before code, written as a language-neutral contract
-Status: accepted · Source: user, 2026-10-04 (YAML format chosen the same day)
+### REQ-002 Tests before code, as Postman API tests
+Status: accepted · Source: user, 2026-10-04; changed 2026-10-15 (YAML contract replaced by Postman)
 
-An exhaustive black-box test suite is written before feature code, and every code change is checked against it. The
-suite is the API contract. It lives in `contract/` as YAML, so the backend could be rewritten in any language and
-checked against the same files.
+An exhaustive black-box test suite is written before feature code, and every code change is checked against it. Tests
+only call the API and check the responses. They live in `postman/collections/`, one Postman collection per feature,
+and open as-is in the Postman app.
 
-- **REQ-002.AC1** [process] Every test case is fully described in YAML: requests, data and expected results. The
-  runner (`contract/runner/`) holds no case-specific logic or assertions. Its vocabulary is documented in
-  `contract/README.md`.
-- **REQ-002.AC2** [process] `python3 contract/run.py` runs the `baseline` suite and must be green on every commit.
-  `--suite target` reports which parts of the new contract are still red.
+- **REQ-002.AC1** [process] Each case is a folder of requests, run in order, whose Tests scripts check the status and
+  body with plain `pm.test` / `pm.expect`. A case's folder is named `<ID> <title>`.
+- **REQ-002.AC2** [process] `npm test` in `postman/` (`node run.js`) runs every case and must be green on every
+  commit.
 - **REQ-002.AC3** [process] The runner starts the backend against a freshly created database, and empties all
   business tables before each case. Cases don't depend on each other or on their order.
 
 ### REQ-003 Requirements log with history
 Status: accepted · Source: user, 2026-10-04
 
-- **REQ-003.AC1** [process] Every acceptance criterion in `docs/requirements/*.md` is covered by at least one contract
-  case (`req:`), and every `req:` refers to an existing criterion. The runner reports both and fails on unknown
-  citations. `--strict-trace` also fails on uncovered criteria.
+- **REQ-003.AC1** [process] Every acceptance criterion in `docs/requirements/*.md` is covered by at least one case
+  (its folder description says `Proves: REQ-xxx.ACn`), and every cited criterion exists. `node postman/trace.js`
+  reports both and fails on unknown citations; `--strict` also fails on uncovered criteria.
 - **REQ-003.AC2** [process] `HISTORY.md` has a dated entry for every requirement that is added, changed or dropped.
 
 ### REQ-004 Production data is preserved and rehearsed locally

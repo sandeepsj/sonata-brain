@@ -31,13 +31,13 @@ Status: accepted · Source: user, 2026-10-04 · Since: v2
 - **Status:** `proposed` (needs the user's confirmation), `accepted`, `implemented`, `verified` (target tests green),
   `superseded by REQ-xxx`, `dropped`.
 - **Criterion tags:**
-  - `[baseline]` describes how the API behaves today. Its contract case must pass on the current code. It protects
+  - `[baseline]` describes how the API behaves today. Its test case must pass on the current code. It protects
     behaviour during the rewrite.
-  - `[target]` describes the new contract. Its contract case fails until the feature is built.
+  - `[target]` describes the new contract. Its test case is added with the feature and passes once it is built.
   - `[retired]` was `[baseline]` until the new contract replaced it. The criterion stays for history and names its
     replacement. Its case was deleted, and coverage doesn't count it.
   - `[process]` describes how the project is run (scripts, logs, test format). It can't be verified through the
-    API, so contract coverage doesn't count it.
+    API, so test coverage doesn't count it.
   - A criterion that exists only to record a current defect is tagged `[baseline-defect]`. Its case documents the
     current behaviour, and the criterion names the `[target]` criterion that fixes it. When the fix lands, the
     baseline case is deleted in the same commit, and that is noted in HISTORY.md.
@@ -45,6 +45,7 @@ Status: accepted · Source: user, 2026-10-04 · Since: v2
 ## Rules
 
 1. A new or changed requirement goes into HISTORY.md first (date, source, what changed), then into its area file.
-2. Every acceptance criterion is proved by at least one case in [`contract/specs/`](../../contract/README.md),
-   which cites it under `req:`. The contract runner reports uncovered criteria and fails on unknown citations.
+2. Every acceptance criterion is proved by at least one Postman case in [`postman/`](../../postman/README.md), whose
+   folder description cites it (`Proves: REQ-xxx.ACn`). `node postman/trace.js` reports uncovered criteria and fails
+   on unknown citations.
 3. IDs are never renumbered or reused. Dropped requirements stay in the file, marked `dropped`.
