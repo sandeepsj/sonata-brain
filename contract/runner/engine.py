@@ -163,9 +163,11 @@ class Engine:
             return
         if "sql" in step:
             return self._sql(step, variables, label)
+        if "value" in step:
+            return self._value(step, variables, label)
         methods = [m for m in METHODS if m in step]
         if len(methods) != 1:
-            raise SpecError(f"{label}: a step needs exactly one of {METHODS}, 'sql' or 'use'")
+            raise SpecError(f"{label}: a step needs exactly one of {METHODS}, 'sql', 'value' or 'use'")
         unknown = set(step) - STEP_KEYS - {methods[0]}
         if unknown:
             raise SpecError(f"{label}: unknown step keys {sorted(unknown)}")
@@ -226,6 +228,16 @@ class Engine:
                 self.matcher.check(expect["text"], response["text"], "text")
         except Mismatch as m:
             raise CaseFailed(label, f"{m}\n      response {response['status']}: {show(response['text'], 600)}")
+
+    # ---- plain values ------------------------------------------------------------------------------------------
+
+    def _value(self, step, variables, label):
+        actual = render(step["value"], variables)
+        label = f"{label}: value {show(step['value'], 80)}"
+        try:
+            self.matcher.check(render(step.get("expect"), variables), actual, "value")
+        except Mismatch as m:
+            raise CaseFailed(label, f"{m}\n      value: {show(actual, 600)}")
 
     # ---- SQL -------------------------------------------------------------------------------------------------
 

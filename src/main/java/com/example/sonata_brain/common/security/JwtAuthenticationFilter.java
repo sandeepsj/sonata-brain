@@ -1,8 +1,7 @@
 package com.example.sonata_brain.common.security;
 
 import com.example.sonata_brain.access.JwtService;
-import com.example.sonata_brain.access.JwtService.TokenType;
-import com.example.sonata_brain.access.UserRepository;
+import com.example.sonata_brain.access.Routes;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,19 +16,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Authenticates requests carrying a valid access token. The user and their roles are loaded from the database on
- * every request, so permission changes apply without logging in again (REQ-011.AC5). A missing or bad token simply
- * leaves the request anonymous; protected endpoints then answer 401.
+ * Authenticates requests carrying a valid access token. The principal is the email and the authorities come from
+ * the token's routes, with no database lookup (REQ-011.AC9, REQ-016). A missing or bad token simply leaves the
+ * request anonymous; protected endpoints then answer 401.
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwt;
-    private final UserRepository users;
 
-    public JwtAuthenticationFilter(JwtService jwt, UserRepository users) {
+    public JwtAuthenticationFilter(JwtService jwt) {
         this.jwt = jwt;
-        this.users = users;
     }
 
     @Override
@@ -38,10 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
-            jwt.subject(header.substring("Bearer ".length()), TokenType.ACCESS)
-                    .flatMap(users::findByEmail)
-                    .ifPresent(user -> {
-                        var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            jwt.verifyAccess(header.substring("Bearer ".length()))
+                    .ifPresent(claims -> {
+                        var auth = new UsernamePasswordAuthenticationToken(claims.email(), null,
+                                Routes.authorities(claims.routes()));
                         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(auth);
                     });

@@ -76,8 +76,8 @@ public final class AccessControllers {
         }
 
         @GetMapping("/me")
-        public MeResponse me(@AuthenticationPrincipal User me) {
-            return MeResponse.of(me);
+        public MeResponse me(@AuthenticationPrincipal String email) {
+            return users.me(email);
         }
 
         @PutMapping("/{id}/roles")

@@ -170,6 +170,16 @@ Used for setup that the API can't do (today's scope-ANY admin), and to prove dat
 | `{{now}}`, `{{now -30d}}` | local date-time, `2026-10-04T10:15:00` |
 | `{{year}}`, `{{year -1}}` | current year (number) |
 | `{{uniq}}` | a value unique within the run, e.g. `u1739` (for emails and role names) |
+| `{{jwtPayload token}}` | the decoded payload (middle part) of the JWT saved as `token`, as an object |
+
+## Checking a value
+
+A step can check a value instead of sending a request, for example what a token carries:
+
+```yaml
+- value: "{{jwtPayload clerk}}"
+  expect: { type: ACCESS, routes: [ { path: /api/students/**, read: true, write: false } ] }
+```
 
 ## Expectations
 

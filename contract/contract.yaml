@@ -27,6 +27,6 @@ database:                      # local PostgreSQL only; dropped and recreated at
   password: sonata123
   # Emptied before every case, except these tables (migration history and access control,
   # so the bootstrap admin survives). Cases that create users or roles use {{uniq}} names.
-  preserveTables: [flyway_schema_history, account, role, role_permission, user_roles]
+  preserveTables: [flyway_schema_history, account, role, role_route, user_roles]
 
 requirements: ../docs/requirements   # where acceptance criteria are defined

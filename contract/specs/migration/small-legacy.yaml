@@ -23,10 +23,10 @@ cases:
           body:
             email: admin@sonata.local
             roles: [ { name: ADMIN } ]
-            permissions: { $has: [STUDENT_WRITE, PAYMENT_WRITE, DUES_WRITE, USER_WRITE] }
+            routes: { $len: 10, $every: { read: true, write: true } }
       - POST: /api/auth/login
         body: { email: staff@sonata.local, password: legacy-staff-1 }
-        expect: { status: 200, body: { permissions: [] } }
+        expect: { status: 200, body: { routes: [] } }
 
   - id: MIG-002
     title: Each legacy course-year becomes a named fee structure with the same terms and amounts

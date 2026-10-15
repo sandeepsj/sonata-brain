@@ -2,13 +2,15 @@ package com.example.sonata_brain.access;
 
 import com.example.sonata_brain.access.AccessDtos.RoleRequest;
 import com.example.sonata_brain.access.AccessDtos.RoleResponse;
+import com.example.sonata_brain.access.AccessDtos.RouteRequest;
 import com.example.sonata_brain.common.error.ApiException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.EnumMap;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -38,7 +40,7 @@ public class RoleService {
         if (roles.existsByName(name)) {
             throw ApiException.conflict("A role named '" + name + "' already exists");
         }
-        Role role = new Role(name, request.description(), parsePermissions(request.permissions()));
+        Role role = new Role(name, request.description(), parseRoutes(request.routes()));
         return RoleResponse.of(roles.save(role));
     }
 
@@ -50,7 +52,7 @@ public class RoleService {
         }
         role.setName(name);
         role.setDescription(request.description());
-        role.setPermissions(parsePermissions(request.permissions()));
+        role.setRoutes(parseRoutes(request.routes()));
         return RoleResponse.of(role);
     }
 
@@ -74,27 +76,25 @@ public class RoleService {
         return request.name().trim();
     }
 
-    private static Map<Resource, Access> parsePermissions(Map<String, String> raw) {
-        Map<Resource, Access> parsed = new EnumMap<>(Resource.class);
+    private static List<RouteAccess> parseRoutes(List<RouteRequest> raw) {
         if (raw == null) {
-            return parsed;
+            return List.of();
         }
-        raw.forEach((resourceName, accessName) -> {
-            Resource resource;
-            Access access;
-            try {
-                resource = Resource.valueOf(resourceName);
-            } catch (IllegalArgumentException e) {
-                throw ApiException.invalidField("permissions." + resourceName, "Unknown resource '" + resourceName + "'");
+        Set<String> seen = new HashSet<>();
+        List<RouteAccess> parsed = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            RouteRequest route = raw.get(i);
+            String field = "routes[" + i + "].path";
+            if (route == null || route.path() == null || !Routes.CATALOGUE.contains(route.path())) {
+                throw ApiException.invalidField(field, "Unknown route '" + (route == null ? null : route.path())
+                        + "'; allowed: " + String.join(", ", Routes.CATALOGUE));
             }
-            try {
-                access = Access.valueOf(String.valueOf(accessName));
-            } catch (IllegalArgumentException e) {
-                throw ApiException.invalidField("permissions." + resourceName,
-                        "Access must be READ, WRITE or NONE, not '" + accessName + "'");
+            if (!seen.add(route.path())) {
+                throw ApiException.invalidField(field, "Route '" + route.path() + "' is listed more than once");
             }
-            parsed.put(resource, access);
-        });
+            parsed.add(new RouteAccess(route.path(), Boolean.TRUE.equals(route.read()),
+                    Boolean.TRUE.equals(route.write())));
+        }
         return parsed;
     }
 }

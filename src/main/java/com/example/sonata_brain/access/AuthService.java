@@ -2,11 +2,12 @@ package com.example.sonata_brain.access;
 
 import com.example.sonata_brain.access.AccessDtos.LoginRequest;
 import com.example.sonata_brain.access.AccessDtos.TokenResponse;
-import com.example.sonata_brain.access.JwtService.TokenType;
 import com.example.sonata_brain.common.error.ApiException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,14 +33,19 @@ public class AuthService {
         User user = users.findByEmail(request.email())
                 .filter(u -> passwordEncoder.matches(request.password(), u.getPassword()))
                 .orElseThrow(() -> ApiException.unauthorized(BAD_CREDENTIALS));
-        return new TokenResponse(jwt.issue(user, TokenType.ACCESS), jwt.issue(user, TokenType.REFRESH),
-                user.permissionNames());
+        return tokens(user, jwt.issueRefresh(user.getEmail()));
     }
 
+    /** A new access token with the user's current routes, read from the database (REQ-016.AC2). */
     public TokenResponse refresh(String refreshToken) {
-        User user = jwt.subject(refreshToken, TokenType.REFRESH)
+        User user = jwt.verifyRefresh(refreshToken)
                 .flatMap(users::findByEmail)
                 .orElseThrow(() -> ApiException.unauthorized("Invalid refresh token"));
-        return new TokenResponse(jwt.issue(user, TokenType.ACCESS), refreshToken, user.permissionNames());
+        return tokens(user, refreshToken);
+    }
+
+    private TokenResponse tokens(User user, String refreshToken) {
+        List<RouteAccess> routes = user.effectiveRoutes();
+        return new TokenResponse(jwt.issueAccess(user.getEmail(), routes), refreshToken, routes);
     }
 }

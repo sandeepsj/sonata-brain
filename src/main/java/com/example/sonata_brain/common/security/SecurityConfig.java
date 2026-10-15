@@ -1,5 +1,6 @@
 package com.example.sonata_brain.common.security;
 
+import com.example.sonata_brain.access.Routes;
 import com.example.sonata_brain.common.error.ApiError;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,9 +66,11 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/users/signup")
                             .permitAll();
                     auth.requestMatchers("/api/users/me").authenticated();
-                    for (ResourceRoutes.Route route : ResourceRoutes.ROUTES) {
-                        auth.requestMatchers(HttpMethod.GET, route.pattern()).hasAuthority(route.resource().readAuthority());
-                        auth.requestMatchers(route.pattern()).hasAuthority(route.resource().writeAuthority());
+                    // GET and HEAD need read on the route; every other method needs write (REQ-011.AC6).
+                    for (String path : Routes.CATALOGUE) {
+                        auth.requestMatchers(HttpMethod.GET, path).hasAuthority(Routes.readAuthority(path));
+                        auth.requestMatchers(HttpMethod.HEAD, path).hasAuthority(Routes.readAuthority(path));
+                        auth.requestMatchers(path).hasAuthority(Routes.writeAuthority(path));
                     }
                     auth.anyRequest().authenticated();
                 })

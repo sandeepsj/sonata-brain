@@ -72,3 +72,16 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
   ANY in SQL.
 - New criterion tag `[retired]`.
 
+
+## 2026-10-15: Route claims in the token (branch `self-service`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | The backend APIs need role-based auth. Teachers can see all data but can't edit anything; no course-level restriction for now. | User | REQ-011, REQ-012 |
+| 2 | Don't overcomplicate: JWTs carry a list of routes, with read and write for each path separately. No built-in TEACHER role. | User | REQ-011.AC6-AC9, REQ-012.AC7-AC11, REQ-016 |
+
+- Retired REQ-010.AC5, REQ-011.AC1/AC2/AC4/AC5, REQ-012.AC1/AC2/AC3/AC5/AC6 and REQ-013.AC3 (per-resource
+  permissions loaded on every request). `read` no longer comes with `write`, and role changes now apply at the next
+  login or refresh instead of the next request.
+- `/api/discounts/**` is its own route instead of sharing PAYMENT. `/api/fee-timeline/**` is not in the catalogue
+  because that feature is not on this branch.

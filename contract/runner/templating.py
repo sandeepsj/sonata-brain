@@ -1,5 +1,7 @@
 """{{ ... }} substitution in spec values. Vocabulary documented in contract/README.md ("Values and variables")."""
+import base64
 import calendar
+import json
 import itertools
 import re
 from datetime import date, datetime, timedelta
@@ -43,9 +45,22 @@ def evaluate(expr, variables):
         return date.today().year + (int(args[0]) if args else 0)
     if head == "uniq":
         return f"u{next(_uniq)}"
+    if head == "jwtPayload":
+        if len(args) != 1:
+            raise SpecError("use {{jwtPayload <variable>}}")
+        return _jwt_payload(lookup(variables, args[0]))
     if args:
         raise SpecError(f"unexpected text after variable in {{{{{expr}}}}}")
     return lookup(variables, head)
+
+
+def _jwt_payload(token):
+    """The decoded middle part of a JWT. The signature is not checked; the API does that."""
+    parts = str(token).split(".")
+    if len(parts) != 3:
+        raise SpecError(f"not a JWT: {str(token)[:40]}")
+    padded = parts[1] + "=" * (-len(parts[1]) % 4)
+    return json.loads(base64.urlsafe_b64decode(padded))
 
 
 def lookup(variables, dotted):

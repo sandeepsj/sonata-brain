@@ -1,5 +1,6 @@
 package com.example.sonata_brain.access;
 
+import com.example.sonata_brain.access.AccessDtos.MeResponse;
 import com.example.sonata_brain.access.AccessDtos.SignupRequest;
 import com.example.sonata_brain.access.AccessDtos.UserResponse;
 import com.example.sonata_brain.common.error.ApiException;
@@ -39,6 +40,13 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public List<UserResponse> list() {
         return users.findAllByOrderByIdAsc().stream().map(UserResponse::of).toList();
+    }
+
+    /** The caller's profile and current routes, from the database rather than the token (REQ-013.AC5). */
+    @Transactional(readOnly = true)
+    public MeResponse me(String email) {
+        return users.findByEmail(email).map(MeResponse::of)
+                .orElseThrow(() -> ApiException.unauthorized("Your account no longer exists"));
     }
 
     public UserResponse setRoles(Long userId, List<Long> roleIds) {

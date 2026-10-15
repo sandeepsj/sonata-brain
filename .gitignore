@@ -1,5 +1,7 @@
 HELP.md
 target/
+# Maven output only; the contract's target specs are source.
+!contract/specs/target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

@@ -11,19 +11,14 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-/** A login account. Its permissions are the union of its roles' permissions (REQ-012.AC5). */
+/** A login account. Its routes are the union of its roles' routes (REQ-012.AC10). */
 @Entity
 @Table(name = "account")
 public class User implements UserDetails {
@@ -53,27 +48,9 @@ public class User implements UserDetails {
         this.password = passwordHash;
     }
 
-    /** Strongest access per resource across all roles. */
-    public Map<Resource, Access> effectiveAccess() {
-        Map<Resource, Access> access = new EnumMap<>(Resource.class);
-        for (Role role : roles) {
-            role.getPermissions().forEach((resource, level) -> access.merge(resource, level, Access::max));
-        }
-        return access;
-    }
-
-    /** Authorities such as PAYMENT_READ, PAYMENT_WRITE. WRITE also grants READ (REQ-011.AC2). */
-    public SortedSet<String> permissionNames() {
-        SortedSet<String> names = new TreeSet<>();
-        effectiveAccess().forEach((resource, level) -> {
-            if (level == Access.READ || level == Access.WRITE) {
-                names.add(resource.readAuthority());
-            }
-            if (level == Access.WRITE) {
-                names.add(resource.writeAuthority());
-            }
-        });
-        return names;
+    /** The union of this user's role routes, in catalogue order (REQ-012.AC10). */
+    public List<RouteAccess> effectiveRoutes() {
+        return Routes.union(roles.stream().flatMap(r -> r.getRoutes().stream()).toList());
     }
 
     public boolean hasRole(String roleName) {
@@ -82,10 +59,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = permissionNames().stream()
-                .map(name -> (GrantedAuthority) new SimpleGrantedAuthority(name))
-                .toList();
-        return authorities;
+        return Routes.authorities(effectiveRoutes());
     }
 
     @Override
