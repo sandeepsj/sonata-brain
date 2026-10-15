@@ -38,6 +38,8 @@ Status: accepted · Source: user, 2026-10-04 · Since: v2
     replacement. Its case was deleted, and coverage doesn't count it.
   - `[process]` describes how the project is run (scripts, logs, test format). It can't be verified through the
     API, so test coverage doesn't count it.
+  - `[manual]` is checked by a documented manual procedure because the API can't show it (for example rows in the
+    `log` table). The procedure is in the requirement's verification notes or commit; coverage doesn't count it.
   - A criterion that exists only to record a current defect is tagged `[baseline-defect]`. Its case documents the
     current behaviour, and the criterion names the `[target]` criterion that fixes it. When the fix lands, the
     baseline case is deleted in the same commit, and that is noted in HISTORY.md.

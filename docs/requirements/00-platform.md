@@ -62,3 +62,25 @@ Status: accepted · Source: design, 2026-10-04
 Status: accepted · Source: existing code, 2026-10-04
 
 - **REQ-007.AC1** [baseline] `GET /heartbeat` without a token → 200, body `OK`.
+
+### REQ-008 Request and application logs in the database
+Status: accepted · Source: user, 2026-10-15
+
+Raw logs go into the `log` table, each tagged with the request it belongs to. The code reads the current request's
+context (request id, session id, user) from anywhere, including `@Async` work started by that request. Storage sits
+behind an interface (`LogStore`); the database is the only implementation for now. There is no read API yet.
+
+- **REQ-008.AC1** [target] Every response carries an `X-Request-Id` header. A valid incoming `X-Request-Id` (1-64
+  characters of letters, digits and `-`) is used and echoed back; a missing or invalid one is replaced by a new UUID.
+- **REQ-008.AC2** [target] Requests may send `X-Session-Id` (any value up to 128 characters, chosen by the client);
+  it never changes how a request is handled. Browsers may send both headers and read `X-Request-Id` (CORS).
+- **REQ-008.AC3** [manual] Every API call except `OPTIONS` and `/heartbeat` writes one `REQUEST` row: request id,
+  session id, user email (from the access token, empty when there is none), method, path, query, status, duration,
+  request body and response body. 401 and 403 responses are logged too.
+- **REQ-008.AC4** [manual] Bodies are stored with the values of `password`, `token`, `accessToken` and `refreshToken`
+  (any case, any depth) replaced by `***`, and are cut at 64 KB. The `Authorization` header is never stored.
+- **REQ-008.AC5** [manual] The application's log statements (INFO and above from its own code, ERROR from anywhere)
+  are stored as `APP` rows with the same request id, session id and user; logged exceptions are `ERROR` rows with
+  the stack trace. Work done on `@Async` threads keeps the context of the request that started it.
+- **REQ-008.AC6** [manual] Logging never fails or noticeably slows a request: rows are written in the background, in
+  their own transaction, and a database problem is reported on stderr and dropped.

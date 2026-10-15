@@ -11,7 +11,7 @@ const path = require('path');
 const REQ_DIR = path.resolve(__dirname, '..', 'docs', 'requirements');
 const COLLECTIONS = path.join(__dirname, 'collections');
 const CRITERION = /\*\*(REQ-\d{3}\.AC\d+)\*\* \[([a-z-]+)\]/g;
-const UNTESTED = new Set(['process', 'retired']); // not checked through the API
+const UNTESTED = new Set(['process', 'retired', 'manual']); // not checked through the API
 
 const criteria = new Map();
 for (const file of fs.readdirSync(REQ_DIR).filter((f) => /^\d.*\.md$/.test(f))) {

@@ -2,6 +2,7 @@ package com.example.sonata_brain.common.security;
 
 import com.example.sonata_brain.access.Routes;
 import com.example.sonata_brain.common.error.ApiError;
+import com.example.sonata_brain.common.logging.RequestLoggingFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +44,9 @@ public class SecurityConfig {
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(List.of("https://sonata-face.vercel.app"));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        cors.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        cors.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type",
+                RequestLoggingFilter.REQUEST_ID_HEADER, RequestLoggingFilter.SESSION_ID_HEADER));
+        cors.setExposedHeaders(List.of(RequestLoggingFilter.REQUEST_ID_HEADER));
         cors.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cors);

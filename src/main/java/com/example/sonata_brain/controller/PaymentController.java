@@ -4,6 +4,8 @@ import com.example.sonata_brain.dto.PaymentCreateRequest;
 import com.example.sonata_brain.model.Payment;
 import com.example.sonata_brain.service.PaymentService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import java.util.Optional;
 @RequestMapping("/api/payments")
 @CrossOrigin(origins = "*")
 public class PaymentController {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
 
     @Autowired
     private PaymentService paymentService;
@@ -45,8 +49,7 @@ public class PaymentController {
             errorResponse.put("status", 409);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         } catch (Exception e) {
-            // Log the exception for debugging
-            e.printStackTrace();
+            log.error("Payment creation failed", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Internal Server Error");
             errorResponse.put("message", "An unexpected error occurred while processing the payment");
@@ -129,7 +132,7 @@ public class PaymentController {
             errorResponse.put("status", 400);
             return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Payment deactivation failed", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Internal Server Error");
             errorResponse.put("message", "An unexpected error occurred while deactivating the payment");

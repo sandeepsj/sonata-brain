@@ -102,3 +102,12 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 | # | What was asked or decided | Source | Requirements |
 |---|---|---|---|
 | 1 | Make test cases that check the route-based auth works for each of the APIs. | User | REQ-011.AC10, REQ-011.AC11 |
+
+## 2026-10-15: Logs in the database
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Store raw logs in the database in a new `log` table with session id, request id, body and user (from the JWT); the request context must be available anywhere in the code. | User | REQ-008 |
+| 2 | Log every request/response, the application's log statements and errors. Session id comes from a client header (`X-Session-Id`). Bodies are stored with secrets masked. Storage is an interface with a database implementation only; no read API or retention yet. | User (options chosen) | REQ-008.AC2-AC6 |
+
+- New criterion tag `[manual]` for behaviour the API can't show (rows in `log`).

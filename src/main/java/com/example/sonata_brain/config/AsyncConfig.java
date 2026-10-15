@@ -1,5 +1,6 @@
 package com.example.sonata_brain.config;
 
+import com.example.sonata_brain.common.context.ContextCopyingTaskDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -18,6 +19,7 @@ public class AsyncConfig {
         executor.setMaxPoolSize(5);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("DuesEvent-");
+        executor.setTaskDecorator(new ContextCopyingTaskDecorator()); // keep the request context (REQ-008.AC5)
         executor.initialize();
         return executor;
     }

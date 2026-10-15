@@ -2,6 +2,7 @@ package com.example.sonata_brain.common.security;
 
 import com.example.sonata_brain.access.JwtService;
 import com.example.sonata_brain.access.Routes;
+import com.example.sonata_brain.common.context.RequestContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             jwt.verifyAccess(header.substring("Bearer ".length()))
                     .ifPresent(claims -> {
+                        RequestContext.setUser(claims.email());
                         var auth = new UsernamePasswordAuthenticationToken(claims.email(), null,
                                 Routes.authorities(claims.routes()));
                         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
