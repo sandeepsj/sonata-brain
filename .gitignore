@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+.neon
+.env.local
+
+### Postman tests ###
+postman/node_modules/
+postman/.out/

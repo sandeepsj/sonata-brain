@@ -1,0 +1,12 @@
+{
+  "name": "sonata-api-tests",
+  "private": true,
+  "description": "Postman API tests for the Sonata backend, run with Newman",
+  "scripts": {
+    "test": "node run.js",
+    "trace": "node trace.js"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}

@@ -1,0 +1,2203 @@
+{
+	"info": {
+		"name": "Sonata API - Dues",
+		"description": "Run with postman/run.js (fresh database, clean slate per case) or in the Postman app. See postman/README.md.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{admin}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Date helpers for the tests: {{today}}, {{today_m40d}} (40 days ago), {{today_p1d}}, {{year}}, {{year_m1}}, ...",
+					"const pad = (n) => String(n).padStart(2, '0');",
+					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
+					"pm.collectionVariables.set('today', day(0));",
+					"for (const n of [-100, -60, -50, -40, -30, -20, -10, -6, -5, 1]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"const year = new Date().getFullYear();",
+					"pm.collectionVariables.set('year', year);",
+					"for (const n of [-1, 1]) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+				]
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "00 Setup",
+			"description": "Logs in as the bootstrap administrator. run.js runs this before every case.",
+			"item": [
+				{
+					"name": "Setup 01 POST /api/auth/login (bootstrap admin)",
+					"request": {
+						"method": "POST",
+						"auth": {
+							"type": "noauth"
+						},
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('admin can log in', () => pm.response.to.have.status(200));",
+									"const b = pm.response.json();",
+									"// 'root' and 'admin' are the same bootstrap administrator.",
+									"pm.collectionVariables.set('admin', b.accessToken);",
+									"pm.collectionVariables.set('adminRefresh', b.refreshToken);",
+									"pm.collectionVariables.set('root', b.accessToken);",
+									"pm.collectionVariables.set('rootRefresh', b.refreshToken);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "00 Before each",
+			"description": "Data every case in this collection starts from. run.js runs it after 00 Setup, before every case.",
+			"item": [
+				{
+					"name": "Before 01 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 02 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_m1}}\",\n  \"numberOfTerms\": 4,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 3,\n      \"amount\": 1200\n    },\n    {\n      \"term\": 4,\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_m1\"), \"numberOfTerms\": 4, \"termFees\": [{\"term\": 1, \"amount\": 1000}, {\"term\": 2, \"amount\": 1000}, {\"term\": 3, \"amount\": 1200}, {\"term\": 4, \"amount\": 1200}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 03 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/1",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"by-course",
+								"Violin",
+								"year",
+								"{{year_m1}}",
+								"term",
+								"1"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"t1\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 04 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"by-course",
+								"Violin",
+								"year",
+								"{{year_m1}}",
+								"term",
+								"2"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"t2\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 05 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/3",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"by-course",
+								"Violin",
+								"year",
+								"{{year_m1}}",
+								"term",
+								"3"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"t3\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 06 GET /api/fee-structures/by-course/Violin/year/{{year_m1}}/term/4",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/{{year_m1}}/term/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"by-course",
+								"Violin",
+								"year",
+								"{{year_m1}}",
+								"term",
+								"4"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"t4\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 07 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Asha\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"asha\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 08 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"{{year_m1}}-01-10T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": pm.variables.replaceIn(\"{{year_m1}}-01-10T10:00:00\")});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 09 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  });",
+									"  pm.collectionVariables.set(\"d1\", pm.response.json()?.[0]?.id);",
+									"  pm.collectionVariables.set(\"d2\", pm.response.json()?.[1]?.id);",
+									"  pm.collectionVariables.set(\"d3\", pm.response.json()?.[2]?.id);",
+									"  pm.collectionVariables.set(\"d4\", pm.response.json()?.[3]?.id);",
+									"}"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L01 Enrolling creates one DUE per term the session has covered, at the term amount, ordered by term",
+			"description": "Proves: REQ-077.AC1, REQ-076.AC1",
+			"item": [
+				{
+					"name": "DUE-L01 01 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.termYear, \"[0].termYear\").to.eql(V(\"year_m1\"));",
+									"  pm.expect(b?.[0]?.termNumber, \"[0].termNumber\").to.eql(1);",
+									"  pm.expect(b?.[0]?.dueAmount, \"[0].dueAmount\").to.eql(1000);",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[0]?.feeStructureId, \"[0].feeStructureId\").to.eql(V(\"t1\"));",
+									"  pm.expect(b?.[0]?.courseName, \"[0].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.[0]?.studentId, \"[0].studentId\").to.eql(V(\"asha\"));",
+									"  pm.expect(b?.[0]?.studentName, \"[0].studentName\").to.eql(\"Asha\");",
+									"  pm.expect(b?.[0]?.sessionId, \"[0].sessionId\").to.eql(V(\"sid\"));",
+									"  pm.expect(b?.[1]?.termYear, \"[1].termYear\").to.eql(V(\"year_m1\"));",
+									"  pm.expect(b?.[1]?.termNumber, \"[1].termNumber\").to.eql(2);",
+									"  pm.expect(b?.[1]?.dueAmount, \"[1].dueAmount\").to.eql(1000);",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[1]?.feeStructureId, \"[1].feeStructureId\").to.eql(V(\"t2\"));",
+									"  pm.expect(b?.[2]?.termYear, \"[2].termYear\").to.eql(V(\"year_m1\"));",
+									"  pm.expect(b?.[2]?.termNumber, \"[2].termNumber\").to.eql(3);",
+									"  pm.expect(b?.[2]?.dueAmount, \"[2].dueAmount\").to.eql(1200);",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[2]?.feeStructureId, \"[2].feeStructureId\").to.eql(V(\"t3\"));",
+									"  pm.expect(b?.[3]?.termYear, \"[3].termYear\").to.eql(V(\"year_m1\"));",
+									"  pm.expect(b?.[3]?.termNumber, \"[3].termNumber\").to.eql(4);",
+									"  pm.expect(b?.[3]?.dueAmount, \"[3].dueAmount\").to.eql(1200);",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[3]?.feeStructureId, \"[3].feeStructureId\").to.eql(V(\"t4\"));",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L02 Creating a fee structure bills ongoing students immediately, even for terms that haven't started",
+			"description": "Proves: REQ-077.AC2",
+			"item": [
+				{
+					"name": "DUE-L02 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_p1}}\",\n  \"numberOfTerms\": 2,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 3000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 3500\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_p1\"), \"numberOfTerms\": 2, \"termFees\": [{\"term\": 1, \"amount\": 3000}, {\"term\": 2, \"amount\": 3500}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L02 02 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(6);",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.dueAmount === 3000) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"dueAmount\\\": 3000, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.dueAmount === 3500) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"dueAmount\\\": 3500, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect(b, \" length\").to.have.lengthOf(6);",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.dueAmount === 3000) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"dueAmount\\\": 3000, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.dueAmount === 3500) && (y?.status === \"DUE\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"dueAmount\\\": 3500, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L03 A course-fee payment lowers the matching due - partly paid, then paid",
+			"description": "Proves: REQ-077.AC3",
+			"item": [
+				{
+					"name": "DUE-L03 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 400,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 400, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L03 02 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 600) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 600, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 600) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 600, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L03 03 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 500,\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 500, \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\"}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L03 04 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 0) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 0, \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.dueAmount === 0) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"dueAmount\\\": 0, \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L04 Deactivating a payment puts amount and discount back on the due",
+			"description": "Proves: REQ-077.AC4, REQ-064.AC6",
+			"item": [
+				{
+					"name": "DUE-L04 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t3}}\",\n  \"label\": \"Course fee\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 300,\n  \"discounts\": [\n    {\n      \"discountAmount\": 200,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t3\"), \"label\": \"Course fee\", \"courseName\": \"Violin\", \"amountPaid\": 300, \"discounts\": [{\"discountAmount\": 200, \"label\": \"Sibling\"}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L04 02 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 700) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 700, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 700) && (y?.status === \"PARTIALLY_PAID\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 700, \\\"status\\\": \\\"PARTIALLY_PAID\\\"}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L04 03 PATCH /api/payments/{{pid}}/deactivate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"deactivate"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L04 04 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 1200) && (y?.status === \"DUE\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 1200, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d3\"))) && (y?.dueAmount === 1200) && (y?.status === \"DUE\"))), \" includes {\\\"id\\\": \\\"{{d3}}\\\", \\\"dueAmount\\\": 1200, \\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L05 Disjoining cancels dues of terms that start later; past terms stay due",
+			"description": "Proves: REQ-077.AC5",
+			"item": [
+				{
+					"name": "DUE-L05 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": \"{{year_p1}}\",\n  \"numberOfTerms\": 2,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 3000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 3500\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"courseId\": \"Violin\", \"year\": V(\"year_p1\"), \"numberOfTerms\": 2, \"termFees\": [{\"term\": 1, \"amount\": 3000}, {\"term\": 2, \"amount\": 3500}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L05 02 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(6);",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect(b, \" length\").to.have.lengthOf(6);",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L05 03 PATCH /api/student-sessions/{{sid}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L05 04 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
+									"  pm.expect(((Array.isArray(b) && !b.some(y0 => ((y0 !== null && typeof y0 === 'object' && !Array.isArray(y0)) && (JSON.stringify(y0?.termYear) === JSON.stringify(V(\"year_m1\"))) && (y0?.status === \"CANCELLED\"))))), \" matches {\\\"$none\\\": {\\\"termYear\\\": \\\"{{year_m1}}\\\", \\\"status\\\": \\\"CANCELLED\\\"}}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 1) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 1, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.termYear) === JSON.stringify(V(\"year_p1\"))) && (y?.termNumber === 2) && (y?.status === \"CANCELLED\"))), \" includes {\\\"termYear\\\": \\\"{{year_p1}}\\\", \\\"termNumber\\\": 2, \\\"status\\\": \\\"CANCELLED\\\"}\").to.be.true;",
+									"    pm.expect(((Array.isArray(b) && !b.some(y0 => ((y0 !== null && typeof y0 === 'object' && !Array.isArray(y0)) && (JSON.stringify(y0?.termYear) === JSON.stringify(V(\"year_m1\"))) && (y0?.status === \"CANCELLED\"))))), \" matches {\\\"$none\\\": {\\\"termYear\\\": \\\"{{year_m1}}\\\", \\\"status\\\": \\\"CANCELLED\\\"}}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L06 A due can be marked \"student left\" only after the student has left, and only while unpaid",
+			"description": "Proves: REQ-072.AC1",
+			"item": [
+				{
+					"name": "DUE-L06 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L06 02 GET /api/dues/student/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/student/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"student",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"d1\"))) && (y?.status === \"PAID\"))), \" includes {\\\"id\\\": \\\"{{d1}}\\\", \\\"status\\\": \\\"PAID\\\"}\").to.be.true;",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L06 03 PATCH /api/dues/{{d4}}/mark-student-left-cancelled",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/{{d4}}/mark-student-left-cancelled",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"{{d4}}",
+								"mark-student-left-cancelled"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"does not have any disjoined session\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"does not have any disjoined session\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L06 04 PATCH /api/student-sessions/{{sid}}/disjoin",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}/disjoin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}",
+								"disjoin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L06 05 PATCH /api/dues/{{d4}}/mark-student-left-cancelled",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/{{d4}}/mark-student-left-cancelled",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"{{d4}}",
+								"mark-student-left-cancelled"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"d4\"));",
+									"  pm.expect(b?.status, \"status\").to.eql(\"STUDENT_LEFT_DUE_CANCELLED\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L06 06 PATCH /api/dues/{{d1}}/mark-student-left-cancelled",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/{{d1}}/mark-student-left-cancelled",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"{{d1}}",
+								"mark-student-left-cancelled"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"Current status: PAID\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"Current status: PAID\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L10 The student summary counts and totals dues per status",
+			"description": "Proves: REQ-076.AC2",
+			"item": [
+				{
+					"name": "DUE-L10 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L10 02 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t2}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 400,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t2\"), \"courseName\": \"Violin\", \"amountPaid\": 400, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L10 03 GET /api/dues/summary/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/summary/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"summary",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.studentId, \"studentId\").to.eql(V(\"asha\"));",
+									"  pm.expect(b?.studentName, \"studentName\").to.eql(\"Asha\");",
+									"  pm.expect(b?.totalCount, \"totalCount\").to.eql(4);",
+									"  pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
+									"  pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
+									"  pm.expect(b?.partiallyPaidAmount, \"partiallyPaidAmount\").to.eql(600);",
+									"  pm.expect(b?.dueCount, \"dueCount\").to.eql(2);",
+									"  pm.expect(b?.dueAmount, \"dueAmount\").to.eql(2400);",
+									"  pm.expect(b?.totalDueAmount, \"totalDueAmount\").to.eql(3000);",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect(b?.studentId, \"studentId\").to.eql(V(\"asha\"));",
+									"    pm.expect(b?.studentName, \"studentName\").to.eql(\"Asha\");",
+									"    pm.expect(b?.totalCount, \"totalCount\").to.eql(4);",
+									"    pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
+									"    pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
+									"    pm.expect(b?.partiallyPaidAmount, \"partiallyPaidAmount\").to.eql(600);",
+									"    pm.expect(b?.dueCount, \"dueCount\").to.eql(2);",
+									"    pm.expect(b?.dueAmount, \"dueAmount\").to.eql(2400);",
+									"    pm.expect(b?.totalDueAmount, \"totalDueAmount\").to.eql(3000);",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "DUE-L11 Due lists and totals can be filtered by status, year, term and course; a bad status gives 400",
+			"description": "Proves: REQ-076.AC3",
+			"item": [
+				{
+					"name": "DUE-L11 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t1}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t1\"), \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 02 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"termId\": \"{{t2}}\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 400,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"termId\": V(\"t2\"), \"courseName\": \"Violin\", \"amountPaid\": 400, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 03 GET /api/dues/summary/{{asha}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/summary/{{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"summary",
+								"{{asha}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Retried until the checks pass (the backend updates this asynchronously), at most 30 times.",
+									"const attempt = Number(V('_attempt') || 0);",
+									"let passed = true;",
+									"try {",
+									"  pm.response.to.have.status(200);",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
+									"  pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
+									"} catch (e) { passed = false; }",
+									"if (!passed && attempt < 30) {",
+									"  pm.collectionVariables.set('_attempt', attempt + 1);",
+									"  setTimeout(() => {}, 300);",
+									"  pm.execution.setNextRequest(pm.info.requestName);",
+									"} else {",
+									"  pm.collectionVariables.set('_attempt', 0);",
+									"  pm.test(\"status\", () => {",
+									"    pm.response.to.have.status(200);",
+									"  });",
+									"  pm.test(\"body\", () => {",
+									"    const b = pm.response.json();",
+									"    pm.expect(b?.paidCount, \"paidCount\").to.eql(1);",
+									"    pm.expect(b?.partiallyPaidCount, \"partiallyPaidCount\").to.eql(1);",
+									"  });",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 04 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?statuses=DUE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "statuses",
+									"value": "DUE"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.status === \"DUE\"))), \": every item matches {\\\"status\\\": \\\"DUE\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 05 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?statuses=DUE,PAID&termNumber=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "statuses",
+									"value": "DUE,PAID"
+								},
+								{
+									"key": "termNumber",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.termNumber, \"[0].termNumber\").to.eql(1);",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 06 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?statuses=bogus",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "statuses",
+									"value": "bogus"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 07 GET /api/dues/pending",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/pending?course=Violin&year={{year_m1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"pending"
+							],
+							"query": [
+								{
+									"key": "course",
+									"value": "Violin"
+								},
+								{
+									"key": "year",
+									"value": "{{year_m1}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 08 GET /api/dues/aggregate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/aggregate?statuses=DUE,PARTIALLY_PAID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"aggregate"
+							],
+							"query": [
+								{
+									"key": "statuses",
+									"value": "DUE,PARTIALLY_PAID"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.count, \"count\").to.eql(3);",
+									"  pm.expect(b?.totalDue, \"totalDue\").to.eql(3000);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 09 GET /api/dues/aggregate/pending",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"aggregate",
+								"pending"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.count, \"count\").to.eql(3);",
+									"  pm.expect(b?.totalDue, \"totalDue\").to.eql(3000);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DUE-L11 10 GET /api/dues/aggregate/by-course",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"aggregate",
+								"by-course"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.course, \"[0].course\").to.eql(\"Violin\");",
+									"  pm.expect(b?.[0]?.count, \"[0].count\").to.eql(4);",
+									"  pm.expect(b?.[0]?.totalDue, \"[0].totalDue\").to.eql(3000);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

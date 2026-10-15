@@ -2,16 +2,22 @@ package com.example.sonata_brain.logging.impl;
 
 import com.example.sonata_brain.logging.ApplicationLogger;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConsoleApplicationLogger implements ApplicationLogger {
 
-    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-
+    // Logs through SLF4J (logger "app.<category>") so lines reach the console and the log table with the request
+    // context (REQ-008.AC5).
     private void log(String level, String category, String message) {
-        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
-        System.out.println(String.format("[%s] [%s] [%s] %s", timestamp, level, category, message));
+        Logger logger = LoggerFactory.getLogger("app." + category);
+        switch (level) {
+            case "ERROR" -> logger.error(message);
+            case "WARN" -> logger.warn(message);
+            case "DEBUG" -> logger.debug(message);
+            case "TRACE" -> logger.trace(message);
+            default -> logger.info(message);
+        }
     }
 
     @Override

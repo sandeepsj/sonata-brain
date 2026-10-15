@@ -1,0 +1,474 @@
+{
+	"info": {
+		"name": "Sonata API - Logging",
+		"description": "Request and session ids (REQ-008). What lands in the log table isn't visible through the API; see the REQ-008 [manual] criteria.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{admin}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "00 Setup",
+			"description": "Logs in as the bootstrap administrator. run.js runs this before every case.",
+			"item": [
+				{
+					"name": "Setup 01 POST /api/auth/login (bootstrap admin)",
+					"request": {
+						"method": "POST",
+						"auth": {
+							"type": "noauth"
+						},
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('admin can log in', () => pm.response.to.have.status(200));",
+									"const b = pm.response.json();",
+									"// 'root' and 'admin' are the same bootstrap administrator.",
+									"pm.collectionVariables.set('admin', b.accessToken);",
+									"pm.collectionVariables.set('adminRefresh', b.refreshToken);",
+									"pm.collectionVariables.set('root', b.accessToken);",
+									"pm.collectionVariables.set('rootRefresh', b.refreshToken);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "LOG-001 Every response carries a request id, including errors and anonymous calls",
+			"description": "Proves: REQ-008.AC1",
+			"item": [
+				{
+					"name": "LOG-001 01 GET /api/students",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));",
+									"pm.test('X-Request-Id is a new UUID', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));",
+									"pm.collectionVariables.set('firstId', pm.response.headers.get('X-Request-Id'));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "LOG-001 02 GET /api/students again",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('another new UUID', () => { const id = pm.response.headers.get('X-Request-Id'); pm.expect(id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/); pm.expect(id).to.not.eql(pm.collectionVariables.get('firstId')); });"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "LOG-001 03 GET /api/students without a token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(401));",
+									"pm.test('X-Request-Id on a 401 too', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "LOG-001 04 GET /api/students/999999",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/students/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students",
+								"999999"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(404));",
+									"pm.test('X-Request-Id on a 404 too', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "LOG-002 A valid incoming request id is used and echoed back",
+			"description": "Proves: REQ-008.AC1",
+			"item": [
+				{
+					"name": "LOG-002 01 GET /api/students with X-Request-Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Request-Id",
+								"value": "frontend-req-42"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));",
+									"pm.test('echoed', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.eql('frontend-req-42'));"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "LOG-003 An invalid incoming request id is replaced by a new UUID",
+			"description": "Proves: REQ-008.AC1",
+			"item": [
+				{
+					"name": "LOG-003 01 GET /api/students with spaces in X-Request-Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Request-Id",
+								"value": "not ok; drop table"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));",
+									"pm.test('replaced', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "LOG-003 02 GET /api/students with a 65-character X-Request-Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Request-Id",
+								"value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));",
+									"pm.test('replaced', () => pm.expect(pm.response.headers.get('X-Request-Id')).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "LOG-004 A session id header never changes how a request is handled",
+			"description": "Proves: REQ-008.AC2",
+			"item": [
+				{
+					"name": "LOG-004 01 GET /api/students with X-Session-Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Session-Id",
+								"value": "tab-7f3a"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "LOG-004 02 GET /api/students with a 300-character X-Session-Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Session-Id",
+								"value": "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "LOG-005 Browsers from the frontend may send both ids and read the request id",
+			"description": "Proves: REQ-008.AC2",
+			"item": [
+				{
+					"name": "LOG-005 01 OPTIONS /api/students preflight",
+					"request": {
+						"method": "OPTIONS",
+						"header": [
+							{
+								"key": "Origin",
+								"value": "https://sonata-face.vercel.app"
+							},
+							{
+								"key": "Access-Control-Request-Method",
+								"value": "GET"
+							},
+							{
+								"key": "Access-Control-Request-Headers",
+								"value": "authorization,x-request-id,x-session-id"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));",
+									"pm.test('both headers allowed', () => { const h = (pm.response.headers.get('Access-Control-Allow-Headers') || '').toLowerCase(); pm.expect(h).to.include('x-request-id'); pm.expect(h).to.include('x-session-id'); });"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "LOG-005 02 GET /api/students from the frontend origin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Origin",
+								"value": "https://sonata-face.vercel.app"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status', () => pm.response.to.have.status(200));",
+									"pm.test('X-Request-Id exposed', () => pm.expect((pm.response.headers.get('Access-Control-Expose-Headers') || '').toLowerCase()).to.include('x-request-id'));"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
