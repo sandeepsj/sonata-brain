@@ -27,27 +27,17 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByDateBetween(@Param("startDate") LocalDateTime startDate,
                                     @Param("endDate") LocalDateTime endDate);
 
-    // Find payments by date range and course name
-    @Query("SELECT p FROM Payment p WHERE p.date BETWEEN :startDate AND :endDate AND p.courseName = :courseName AND p.isActive = true ORDER BY p.date DESC")
-    List<Payment> findByDateBetweenAndCourseName(@Param("startDate") LocalDateTime startDate,
-                                                 @Param("endDate") LocalDateTime endDate,
-                                                 @Param("courseName") String courseName);
-
     // Find payments by date range and payment type
     @Query("SELECT p FROM Payment p WHERE p.date BETWEEN :startDate AND :endDate AND p.paymentType = :paymentType AND p.isActive = true ORDER BY p.date DESC")
     List<Payment> findByDateBetweenAndPaymentType(@Param("startDate") LocalDateTime startDate,
                                                   @Param("endDate") LocalDateTime endDate,
                                                   @Param("paymentType") Payment.PaymentType paymentType);
 
-    // Find payments by date range and term (fee structure)
-    @Query("SELECT p FROM Payment p WHERE p.date BETWEEN :startDate AND :endDate AND p.feeStructure.id = :termId AND p.isActive = true ORDER BY p.date DESC")
-    List<Payment> findByDateBetweenAndTermId(@Param("startDate") LocalDateTime startDate,
-                                            @Param("endDate") LocalDateTime endDate,
-                                            @Param("termId") Long termId);
-
-    @Query("SELECT p FROM Payment p WHERE p.feeStructure.id = :termId")
-    List<Payment> findByTermId(@Param("termId") Long termId);
-
+    // Find payments by date range and course name
+    @Query("SELECT p FROM Payment p WHERE p.date BETWEEN :startDate AND :endDate AND p.courseName = :courseName AND p.isActive = true ORDER BY p.date DESC")
+    List<Payment> findByDateBetweenAndCourseName(@Param("startDate") LocalDateTime startDate,
+                                                 @Param("endDate") LocalDateTime endDate,
+                                                 @Param("courseName") String courseName);
     @Query("SELECT p FROM Payment p WHERE p.courseName = :courseName")
     List<Payment> findByCourseName(@Param("courseName") String courseName);
 
@@ -60,8 +50,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByStudentAdmissionNoAndPaymentTypeAndIsActive(@Param("studentAdmissionNo") Long studentAdmissionNo,
                                                                    @Param("paymentType") Payment.PaymentType paymentType,
                                                                    @Param("isActive") Boolean isActive);
-
-    // Method to find existing payments for a student and specific term (fee structure)
-    @Query("SELECT p FROM Payment p WHERE p.student.admissionNo = :studentAdmissionNo AND p.feeStructure.id = :termId AND p.paymentType = 'REGULAR' AND p.isActive = true")
-    List<Payment> findActiveRegularPaymentsByStudentAndTerm(@Param("studentAdmissionNo") Long studentAdmissionNo, @Param("termId") Long termId);
 }

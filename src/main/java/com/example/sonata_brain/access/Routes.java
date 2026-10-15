@@ -17,6 +17,7 @@ public final class Routes {
             "/api/student-sessions/**",
             "/api/courses/**",
             "/api/fee-structures/**",
+            "/api/fee-timeline/**",
             "/api/payments/**",
             "/api/discounts/**",
             "/api/dues/**",

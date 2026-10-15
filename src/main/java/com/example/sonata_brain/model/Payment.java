@@ -34,9 +34,6 @@ public class Payment {
     @Column(name = "amount_paid", nullable = false, precision = 10, scale = 2)
     private BigDecimal amountPaid;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "term_id", referencedColumnName = "id")
-    private FeeStructure feeStructure;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_type", nullable = false)
@@ -147,14 +144,6 @@ public class Payment {
 
     public void setAmountPaid(BigDecimal amountPaid) {
         this.amountPaid = amountPaid;
-    }
-
-    public FeeStructure getFeeStructure() {
-        return feeStructure;
-    }
-
-    public void setFeeStructure(FeeStructure feeStructure) {
-        this.feeStructure = feeStructure;
     }
 
     public PaymentType getPaymentType() {

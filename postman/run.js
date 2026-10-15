@@ -9,7 +9,8 @@
 //   node run.js --keep-server         leave the backend running afterwards (for the Postman app)
 //   node run.js --base-url URL        use a backend you started yourself (no build, no database reset)
 //
-// Database settings come from PGHOST, PGPORT, PGUSER, PGPASSWORD and TEST_DB (defaults below).
+// Database settings come from PGHOST, PGPORT, PGUSER, PGPASSWORD and TEST_DB (defaults below); the backend's port
+// from TEST_PORT (default 18080).
 'use strict';
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs');
@@ -29,7 +30,7 @@ const db = {
   password: process.env.PGPASSWORD || 'sonata123',
   name: process.env.TEST_DB || 'sonata-postman',
 };
-const PORT = 18080;
+const PORT = Number(process.env.TEST_PORT || 18080);
 // Kept between cases: migration history and access control, so the bootstrap admin survives.
 const PRESERVED = ['flyway_schema_history', 'account', 'role', 'role_route', 'user_roles'];
 

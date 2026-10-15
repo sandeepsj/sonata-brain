@@ -1,5 +1,7 @@
 package com.example.sonata_brain.dto;
 
+import com.example.sonata_brain.model.Payment;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
@@ -17,17 +19,18 @@ public class PaymentCreateRequest {
 
     private String remarks;
 
-    // Label is optional for regular payments but required for additional payments
+    @NotBlank(message = "Label is required")
     private String label;
+
+    @NotNull(message = "Payment type is required (REGULAR or ADDITIONAL)")
+    private Payment.PaymentType paymentType;
 
     @NotNull(message = "Amount paid is required")
     @PositiveOrZero(message = "Amount paid must be non-negative")
     private BigDecimal amountPaid;
 
-    // Optional - only present for regular payments
-    private Long termId;
 
-    // Optional - course name (required for regular payments, optional for additional)
+    // Required for REGULAR payments, optional for ADDITIONAL (REQ-060.AC14, REQ-061.AC6)
     private String courseName;
 
     // Optional - discounts associated with this payment
@@ -85,9 +88,8 @@ public class PaymentCreateRequest {
         }
     }
 
-    // Helper method to determine payment type
     public boolean isRegularPayment() {
-        return termId != null;
+        return paymentType == Payment.PaymentType.REGULAR;
     }
 
     // Constructors
@@ -131,19 +133,6 @@ public class PaymentCreateRequest {
     public BigDecimal getAmountPaid() {
         return amountPaid;
     }
-
-    public void setAmountPaid(BigDecimal amountPaid) {
-        this.amountPaid = amountPaid;
-    }
-
-    public Long getTermId() {
-        return termId;
-    }
-
-    public void setTermId(Long termId) {
-        this.termId = termId;
-    }
-
     public String getCourseName() {
         return courseName;
     }
@@ -158,5 +147,13 @@ public class PaymentCreateRequest {
 
     public void setDiscounts(List<DiscountCreateRequest> discounts) {
         this.discounts = discounts;
+    }
+
+    public Payment.PaymentType getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(Payment.PaymentType paymentType) {
+        this.paymentType = paymentType;
     }
 }

@@ -80,19 +80,6 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
     List<StudentSession> findAllInactiveSessions();
 
     // Methods for filtering sessions by year and term (simplified - no date overlap checking)
-    @Query("SELECT DISTINCT ss FROM StudentSession ss " +
-           "WHERE ss.course IN (SELECT fs.course FROM FeeStructure fs WHERE fs.year = :year AND fs.term = :termNumber)")
-    List<StudentSession> findSessionsByYearAndTerm(@Param("year") Integer year, @Param("termNumber") Integer termNumber);
 
-    @Query("SELECT DISTINCT ss FROM StudentSession ss " +
-           "WHERE ss.course.name = :courseName " +
-           "AND ss.course IN (SELECT fs.course FROM FeeStructure fs WHERE fs.year = :year AND fs.term = :termNumber)")
-    List<StudentSession> findSessionsByCourseYearAndTerm(@Param("courseName") String courseName,
-                                                         @Param("year") Integer year,
-                                                         @Param("termNumber") Integer termNumber);
 
-    @Query("SELECT DISTINCT ss FROM StudentSession ss " +
-           "WHERE ss.course.name = :courseName " +
-           "AND ss.course IN (SELECT fs.course FROM FeeStructure fs WHERE fs.year = :year)")
-    List<StudentSession> findSessionsByCourseAndYear(@Param("courseName") String courseName, @Param("year") Integer year);
 }

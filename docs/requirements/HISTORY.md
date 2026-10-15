@@ -133,3 +133,9 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - Design: timeline changes and structure edits recalculate everyone before the response returns (simpler and always
   consistent; about 600 students). The rebuild endpoint runs as a background job.
 - `label` is now required on every payment (REQ-060.AC12), fixing the 500 of REQ-060.AC11.
+
+- Same day, after review: waivers were dropped. A term is forgiven with a ₹0 REGULAR payment carrying a discount
+  (REQ-072.AC6), which fills the oldest open term. Legacy "student left" cancellations become such payments
+  (REQ-082.AC6). Retired: REQ-070.AC8, REQ-071.AC6, REQ-072.AC3–AC5, REQ-082.AC3. *(user)*
+- `fee_due` is written by comparing each student's calculated dues with the stored rows (update, insert, delete),
+  not by clearing the table, so unchanged dues keep their ids. *(design, user asked)*

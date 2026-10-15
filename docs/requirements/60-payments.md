@@ -39,7 +39,7 @@ Status: accepted · Source: existing code; user clarification 2026-10-04
 
 - **REQ-061.AC6** [target] `paymentType` is required and is `REGULAR` or `ADDITIONAL` → otherwise 400 with a
   `details` entry for `paymentType`. An ADDITIONAL payment's `courseName` is optional but must exist if given.
-- **REQ-061.AC7** [target] The database refuses a REGULAR payment without a course (CHECK constraint), even if the
+- **REQ-061.AC7** [manual] The database refuses a REGULAR payment without a course (CHECK constraint), even if the
   API is bypassed.
 
 ### REQ-062 Zero-amount payments
@@ -69,10 +69,8 @@ Status: accepted · Source: existing code
 - **REQ-064.AC4** [target] Deactivating an already inactive payment → 409.
 - **REQ-064.AC5** [target] Deactivating a REGULAR payment rebuilds dues, so the period balance goes back up by
   amount + discounts.
-- **REQ-064.AC6** [baseline-defect] Deactivating a REGULAR payment races with the background dues job. Both lazily
-  load the same payment's `discounts` at once, so the request intermittently fails with 500, or the due is not
-  restored ("Illegal pop() with non-matching JdbcValuesSourceProcessingState" in the log). Reproduced in 5 of 6 runs.
-  Fixed by REQ-064.AC7.
+- **REQ-064.AC6** [retired] *(was baseline-defect)* Deactivation raced with the background dues job. Fixed by
+  REQ-064.AC7: dues are now recalculated synchronously in the same transaction.
 - **REQ-064.AC7** [target] Deactivation never fails or loses a dues update because of background work. Repeating
   the deactivate-then-check-dues flow 20 times succeeds every time.
 

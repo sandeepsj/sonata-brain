@@ -2,13 +2,12 @@
 
 Paste the block below into a Claude Code session opened in `~/dev/sonata-face`.
 
-One decision is built in. Some frontend screens use endpoints this backend branch doesn't have: fee timeline, dues
-rebuild, waivers, course close/reopen, payment conversion and fee-structure clone. The prompt tells the agent to
-**disable those screens, not delete them or rewire them to the old endpoints**, until it's decided whether those
-features come back. Change step 7 if that has been decided.
+One decision is built in. Screens whose endpoints this backend branch doesn't have (course close/reopen, payment
+conversion, dues aggregate, waivers, legacy comparison) are **disabled, not deleted or rewired**. Change step 8 if
+that has been decided.
 
 ```text
-The backend (repo ~/dev/sonata-brain, branch `self-service`) changed its auth model and added request logging.
+The backend (repo ~/dev/sonata-brain, branch `dues-timeline`) changed its auth model and added request logging.
 Update this SvelteKit frontend to match. The backend's generated OpenAPI spec is the contract; when it disagrees
 with anything else (including this prompt), the spec wins.
 
@@ -17,7 +16,8 @@ with anything else (including this prompt), the spec wins.
    API calls exist on the backend branch. Start here.
 2. ~/dev/sonata-brain/docs/api/openapi.json — the exact contract (paths, params, bodies, responses, auth, which
    route each operation needs).
-3. ~/dev/sonata-brain/docs/requirements/10-access.md — login, routes, roles, users (REQ-010..REQ-016).
+3. ~/dev/sonata-brain/docs/requirements/10-access.md — login, routes, roles, users (REQ-010..REQ-016);
+   50-fees.md, 60-payments.md and 70-dues.md — fee structures, the timeline, payments and dues.
 4. ~/dev/sonata-brain/docs/requirements/00-platform.md — error body (REQ-005), logging headers (REQ-008),
    API docs (REQ-009).
 5. Real request/response examples: ~/dev/sonata-brain/postman/collections/access.postman_collection.json and
@@ -54,11 +54,20 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
 6. Errors: show `message` from `{status, error, message, details[], timestamp}` and map `details[].field` onto
    form fields. Some older endpoints return an empty body on 400/404 — fall back to a generic message. Payment
    create/deactivate errors use `{error, message, status, timestamp}` without details.
-7. Screens whose endpoints don't exist on the backend branch (see the table at the end of
-   frontend-handoff.md: fee timeline, dues rebuild/schedule/legacy-comparison, waivers, course close/reopen,
-   payment convert-to-course-fee, fee-structure list/clone/edit/delete, the query-param list endpoints for
-   sessions, payments and dues): do NOT delete them and do NOT rewire them to legacy endpoints. Hide them from
-   navigation behind one feature flag and leave the code intact. List them in your final summary.
+7. Fees, timeline, dues and payments (section 4 of frontend-handoff.md):
+   - Fee structures: one form with a name, a term length in months and an amount per course (one row per course).
+     No course selector and no per-term amounts. Delete is disabled while `usedInTimeline`.
+   - Timeline: one school-wide list of `{structure, from}` entries. When adding an entry, offer only valid term
+     starts from `GET /api/fee-timeline/preview` and show the backend's 400 message as is. Show the preview next to
+     the editor.
+   - Dues: show periods as dates (`periodStart` – `periodEnd`), status DUE / PARTIALLY_PAID / PAID, and the summary's
+     `credit`. Add an admin "Recalculate dues" action using the rebuild job.
+   - Payments: remove the term/period picker; send `paymentType`, `courseName` and a required `label`. Explain that a
+     course fee pays the oldest unpaid term first. "Forgive a term" = a ₹0 REGULAR payment with a discount.
+8. Screens whose endpoints don't exist on the backend branch (course close/reopen, payment convert-to-course-fee,
+   dues aggregate, waivers, legacy comparison, the query-param list endpoints for sessions and payments): do NOT
+   delete them and do NOT rewire them to other endpoints. Hide them from navigation behind one feature flag and
+   leave the code intact. List them in your final summary.
 
 ## How to work
 - First, list every API call the app makes and map each one to its operation in openapi.json, or mark it

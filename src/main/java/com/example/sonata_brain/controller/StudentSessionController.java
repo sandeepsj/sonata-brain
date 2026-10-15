@@ -241,49 +241,19 @@ public class StudentSessionController {
     }
 
     /**
-     * Search student sessions with advanced filters
-     * GET /api/student-sessions/search?course=VOCAL&year=2024&termNumber=3
+     * Sessions of a course, active and inactive.
+     * GET /api/student-sessions/search?course=VOCAL
      *
-     * Query Parameters (all optional):
-     * - course: Filter by course name
-     * - year: Filter by term year
-     * - termNumber: Filter by term number
-     *
-     * Returns both active and inactive sessions with joining and disjoining dates
+     * The year and term filters were removed with the legacy terms (terms now come from the fee timeline).
      */
     @GetMapping("/search")
-    public ResponseEntity<List<StudentSession>> searchSessions(
-            @RequestParam(required = false) String course,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer termNumber) {
-
-        List<StudentSession> sessions;
-
-        // Validate required combinations
-        if (year != null && termNumber != null && course != null) {
-            // Course + Year + Term
-            courseRepository.findByName(course)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-            sessions = studentSessionRepository.findSessionsByCourseYearAndTerm(course, year, termNumber);
-        } else if (year != null && termNumber != null) {
-            // Year + Term (all courses)
-            sessions = studentSessionRepository.findSessionsByYearAndTerm(year, termNumber);
-        } else if (course != null && year != null) {
-            // Course + Year (all terms)
-            courseRepository.findByName(course)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-            sessions = studentSessionRepository.findSessionsByCourseAndYear(course, year);
-        } else if (course != null) {
-            // Only course
-            courseRepository.findByName(course)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-            sessions = studentSessionRepository.findAllSessionsByCourseName(course);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "At least one filter parameter (course, year, or termNumber) is required");
+    public ResponseEntity<List<StudentSession>> searchSessions(@RequestParam(required = false) String course) {
+        if (course == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The course filter is required");
         }
-
-        return ResponseEntity.ok(sessions);
+        courseRepository.findByName(course)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+        return ResponseEntity.ok(studentSessionRepository.findAllSessionsByCourseName(course));
     }
 
     /**
@@ -298,62 +268,6 @@ public class StudentSessionController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
 
         List<StudentSession> sessions = studentSessionRepository.findAllSessionsByCourseName(courseName);
-        return ResponseEntity.ok(sessions);
-    }
-
-    /**
-     * Get students enrolled in a specific course during a specific year and term
-     * GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber}
-     *
-     * Returns sessions that were active during the specified term period
-     */
-    @GetMapping("/students/course/{courseName}/year/{year}/term/{termNumber}")
-    public ResponseEntity<List<StudentSession>> getStudentsByCourseYearTerm(
-            @PathVariable String courseName,
-            @PathVariable Integer year,
-            @PathVariable Integer termNumber) {
-
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findSessionsByCourseYearAndTerm(
-            courseName, year, termNumber);
-
-        return ResponseEntity.ok(sessions);
-    }
-
-    /**
-     * Get students enrolled in a specific course during a specific year (all terms)
-     * GET /api/student-sessions/students/course/{courseName}/year/{year}
-     *
-     * Returns sessions that were active during any term in the specified year
-     */
-    @GetMapping("/students/course/{courseName}/year/{year}")
-    public ResponseEntity<List<StudentSession>> getStudentsByCourseYear(
-            @PathVariable String courseName,
-            @PathVariable Integer year) {
-
-        courseRepository.findByName(courseName)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-
-        List<StudentSession> sessions = studentSessionRepository.findSessionsByCourseAndYear(courseName, year);
-
-        return ResponseEntity.ok(sessions);
-    }
-
-    /**
-     * Get all students enrolled during a specific year and term (all courses)
-     * GET /api/student-sessions/students/year/{year}/term/{termNumber}
-     *
-     * Returns sessions from all courses that were active during the specified term
-     */
-    @GetMapping("/students/year/{year}/term/{termNumber}")
-    public ResponseEntity<List<StudentSession>> getStudentsByYearTerm(
-            @PathVariable Integer year,
-            @PathVariable Integer termNumber) {
-
-        List<StudentSession> sessions = studentSessionRepository.findSessionsByYearAndTerm(year, termNumber);
-
         return ResponseEntity.ok(sessions);
     }
 }

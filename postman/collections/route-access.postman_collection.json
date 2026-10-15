@@ -809,7 +809,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2188,7 +2188,7 @@
 		},
 		{
 			"name": "RTE-student-sessions Every /api/student-sessions/** endpoint is guarded by that route",
-			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/student-sessions, PATCH /api/student-sessions/{id}/disjoin, GET /api/student-sessions/{id}, GET /api/student-sessions/active/student/{studentId}, GET /api/student-sessions/active/course/{courseName}, GET /api/student-sessions/all/student/{studentId}, GET /api/student-sessions/all/course/{courseName}, GET /api/student-sessions/all, GET /api/student-sessions/search, GET /api/student-sessions/students/course/{courseName}, GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber}, GET /api/student-sessions/students/course/{courseName}/year/{year}, GET /api/student-sessions/students/year/{year}/term/{termNumber}",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/student-sessions, PATCH /api/student-sessions/{id}/disjoin, GET /api/student-sessions/{id}, GET /api/student-sessions/active/student/{studentId}, GET /api/student-sessions/active/course/{courseName}, GET /api/student-sessions/all/student/{studentId}, GET /api/student-sessions/all/course/{courseName}, GET /api/student-sessions/all, GET /api/student-sessions/search, GET /api/student-sessions/students/course/{courseName}",
 			"item": [
 				{
 					"name": "RTE-student-sessions 01 setup: role for readOnly",
@@ -2576,7 +2576,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5000,670 +5000,6 @@
 							}
 						}
 					]
-				},
-				{
-					"name": "RTE-student-sessions 65 GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 66 GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 67 GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 68 GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 69 GET /api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 70 GET /api/student-sessions/students/course/{courseName}/year/{year} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 71 GET /api/student-sessions/students/course/{courseName}/year/{year} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 72 GET /api/student-sessions/students/course/{courseName}/year/{year} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 73 GET /api/student-sessions/students/course/{courseName}/year/{year} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 74 GET /api/student-sessions/students/course/{courseName}/year/{year} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/course/NoSuchCourse/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"course",
-								"NoSuchCourse",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 75 GET /api/student-sessions/students/year/{year}/term/{termNumber} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 76 GET /api/student-sessions/students/year/{year}/term/{termNumber} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 77 GET /api/student-sessions/students/year/{year}/term/{termNumber} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 78 GET /api/student-sessions/students/year/{year}/term/{termNumber} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-student-sessions 79 GET /api/student-sessions/students/year/{year}/term/{termNumber} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/student-sessions/students/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"student-sessions",
-								"students",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
 				}
 			]
 		},
@@ -6057,7 +5393,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6772,7 +6108,7 @@
 		},
 		{
 			"name": "RTE-fee-structures Every /api/fee-structures/** endpoint is guarded by that route",
-			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/fee-structures, GET /api/fee-structures/by-year/{year}, GET /api/fee-structures/by-course/{courseId}, GET /api/fee-structures/by-course/{courseId}/year/{year}, GET /api/fee-structures/by-course/{courseId}/year/{year}/term/{term}",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: GET /api/fee-structures, GET /api/fee-structures/{id}, POST /api/fee-structures, PUT /api/fee-structures/{id}, DELETE /api/fee-structures/{id}",
 			"item": [
 				{
 					"name": "RTE-fee-structures 01 setup: role for readOnly",
@@ -7160,7 +6496,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -7416,7 +6752,398 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 15 POST /api/fee-structures as anonymous",
+					"name": "RTE-fee-structures 15 GET /api/fee-structures as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 16 GET /api/fee-structures as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 17 GET /api/fee-structures as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 18 GET /api/fee-structures as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 19 GET /api/fee-structures as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 20 GET /api/fee-structures/{id} as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 21 GET /api/fee-structures/{id} as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 22 GET /api/fee-structures/{id} as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 23 GET /api/fee-structures/{id} as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 24 GET /api/fee-structures/{id} as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 25 POST /api/fee-structures as anonymous",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -7463,7 +7190,7 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 16 POST /api/fee-structures as noRoutes",
+					"name": "RTE-fee-structures 26 POST /api/fee-structures as noRoutes",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -7517,7 +7244,7 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 17 POST /api/fee-structures as otherRoutes",
+					"name": "RTE-fee-structures 27 POST /api/fee-structures as otherRoutes",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -7571,7 +7298,7 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 18 POST /api/fee-structures as readOnly",
+					"name": "RTE-fee-structures 28 POST /api/fee-structures as readOnly",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -7625,7 +7352,7 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 19 POST /api/fee-structures as writeOnly",
+					"name": "RTE-fee-structures 29 POST /api/fee-structures as writeOnly",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -7679,20 +7406,287 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 20 GET /api/fee-structures/by-year/{year} as anonymous",
+					"name": "RTE-fee-structures 30 PUT /api/fee-structures/{id} as anonymous",
 					"request": {
-						"method": "GET",
-						"header": [],
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-year/2025",
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"fee-structures",
-								"by-year",
-								"2025"
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 31 PUT /api/fee-structures/{id} as noRoutes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 32 PUT /api/fee-structures/{id} as otherRoutes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 33 PUT /api/fee-structures/{id} as readOnly",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 34 PUT /api/fee-structures/{id} as writeOnly",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 35 DELETE /api/fee-structures/{id} as anonymous",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
 							]
 						},
 						"auth": {
@@ -7714,20 +7708,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 21 GET /api/fee-structures/by-year/{year} as noRoutes",
+					"name": "RTE-fee-structures 36 DELETE /api/fee-structures/{id} as noRoutes",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-year/2025",
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"fee-structures",
-								"by-year",
-								"2025"
+								"999999"
 							]
 						},
 						"auth": {
@@ -7756,20 +7749,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 22 GET /api/fee-structures/by-year/{year} as otherRoutes",
+					"name": "RTE-fee-structures 37 DELETE /api/fee-structures/{id} as otherRoutes",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-year/2025",
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"fee-structures",
-								"by-year",
-								"2025"
+								"999999"
 							]
 						},
 						"auth": {
@@ -7798,20 +7790,860 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 23 GET /api/fee-structures/by-year/{year} as readOnly",
+					"name": "RTE-fee-structures 38 DELETE /api/fee-structures/{id} as readOnly",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-year/2025",
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"fee-structures",
-								"by-year",
-								"2025"
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-structures 39 DELETE /api/fee-structures/{id} as writeOnly",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RTE-fee-timeline Every /api/fee-timeline/** endpoint is guarded by that route",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: GET /api/fee-timeline, POST /api/fee-timeline, PUT /api/fee-timeline/{id}, DELETE /api/fee-timeline/{id}, GET /api/fee-timeline/preview",
+			"item": [
+				{
+					"name": "RTE-fee-timeline 01 setup: role for readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"readOnly-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": false\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('readOnlyRole', pm.response.json().id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 02 setup: sign up readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"readOnly-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('readOnlyId', pm.response.json().id);",
+									"pm.collectionVariables.set('readOnlyEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 03 setup: give readOnly the role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{readOnlyId}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{readOnlyId}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [{{readOnlyRole}}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role assigned', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 04 setup: log in as readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{readOnlyEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('readOnly', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 05 setup: role for writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"writeOnly-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": false,\n      \"write\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('writeOnlyRole', pm.response.json().id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 06 setup: sign up writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"writeOnly-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('writeOnlyId', pm.response.json().id);",
+									"pm.collectionVariables.set('writeOnlyEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 07 setup: give writeOnly the role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{writeOnlyId}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{writeOnlyId}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [{{writeOnlyRole}}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role assigned', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 08 setup: log in as writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{writeOnlyEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('writeOnly', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 09 setup: role for otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('otherRoutesRole', pm.response.json().id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 10 setup: sign up otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"otherRoutes-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('otherRoutesId', pm.response.json().id);",
+									"pm.collectionVariables.set('otherRoutesEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 11 setup: give otherRoutes the role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{otherRoutesId}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{otherRoutesId}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [{{otherRoutesRole}}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role assigned', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 12 setup: log in as otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{otherRoutesEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('otherRoutes', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 13 setup: sign up noRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"noRoutes-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('noRoutesId', pm.response.json().id);",
+									"pm.collectionVariables.set('noRoutesEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 14 setup: log in as noRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{noRoutesEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('noRoutes', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 15 GET /api/fee-timeline as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 16 GET /api/fee-timeline as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 17 GET /api/fee-timeline as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 18 GET /api/fee-timeline as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
 							]
 						},
 						"auth": {
@@ -7840,20 +8672,18 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 24 GET /api/fee-structures/by-year/{year} as writeOnly",
+					"name": "RTE-fee-timeline 19 GET /api/fee-timeline as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-year/2025",
+							"raw": "{{baseUrl}}/api/fee-timeline",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-year",
-								"2025"
+								"fee-timeline"
 							]
 						},
 						"auth": {
@@ -7882,20 +8712,550 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 25 GET /api/fee-structures/by-course/{courseId} as anonymous",
+					"name": "RTE-fee-timeline 20 POST /api/fee-timeline as anonymous",
 					"request": {
-						"method": "GET",
-						"header": [],
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse",
+							"raw": "{{baseUrl}}/api/fee-timeline",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse"
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 21 POST /api/fee-timeline as noRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 22 POST /api/fee-timeline as otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 23 POST /api/fee-timeline as readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 24 POST /api/fee-timeline as writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 25 PUT /api/fee-timeline/{id} as anonymous",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 26 PUT /api/fee-timeline/{id} as noRoutes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 27 PUT /api/fee-timeline/{id} as otherRoutes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 28 PUT /api/fee-timeline/{id} as readOnly",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 29 PUT /api/fee-timeline/{id} as writeOnly",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-fee-timeline 30 DELETE /api/fee-timeline/{id} as anonymous",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"999999"
 							]
 						},
 						"auth": {
@@ -7917,20 +9277,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 26 GET /api/fee-structures/by-course/{courseId} as noRoutes",
+					"name": "RTE-fee-timeline 31 DELETE /api/fee-timeline/{id} as noRoutes",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse",
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse"
+								"fee-timeline",
+								"999999"
 							]
 						},
 						"auth": {
@@ -7959,20 +9318,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 27 GET /api/fee-structures/by-course/{courseId} as otherRoutes",
+					"name": "RTE-fee-timeline 32 DELETE /api/fee-timeline/{id} as otherRoutes",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse",
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse"
+								"fee-timeline",
+								"999999"
 							]
 						},
 						"auth": {
@@ -8001,20 +9359,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 28 GET /api/fee-structures/by-course/{courseId} as readOnly",
+					"name": "RTE-fee-timeline 33 DELETE /api/fee-timeline/{id} as readOnly",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse",
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse"
+								"fee-timeline",
+								"999999"
 							]
 						},
 						"auth": {
@@ -8034,8 +9391,8 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
 									"});"
 								]
 							}
@@ -8043,20 +9400,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 29 GET /api/fee-structures/by-course/{courseId} as writeOnly",
+					"name": "RTE-fee-timeline 34 DELETE /api/fee-timeline/{id} as writeOnly",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse",
+							"raw": "{{baseUrl}}/api/fee-timeline/999999",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse"
+								"fee-timeline",
+								"999999"
 							]
 						},
 						"auth": {
@@ -8076,8 +9432,8 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
 									"});"
 								]
 							}
@@ -8085,22 +9441,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 30 GET /api/fee-structures/by-course/{courseId}/year/{year} as anonymous",
+					"name": "RTE-fee-timeline 35 GET /api/fee-timeline/preview as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025",
+							"raw": "{{baseUrl}}/api/fee-timeline/preview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025"
+								"fee-timeline",
+								"preview"
 							]
 						},
 						"auth": {
@@ -8122,22 +9475,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 31 GET /api/fee-structures/by-course/{courseId}/year/{year} as noRoutes",
+					"name": "RTE-fee-timeline 36 GET /api/fee-timeline/preview as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025",
+							"raw": "{{baseUrl}}/api/fee-timeline/preview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025"
+								"fee-timeline",
+								"preview"
 							]
 						},
 						"auth": {
@@ -8166,22 +9516,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 32 GET /api/fee-structures/by-course/{courseId}/year/{year} as otherRoutes",
+					"name": "RTE-fee-timeline 37 GET /api/fee-timeline/preview as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025",
+							"raw": "{{baseUrl}}/api/fee-timeline/preview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025"
+								"fee-timeline",
+								"preview"
 							]
 						},
 						"auth": {
@@ -8210,22 +9557,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 33 GET /api/fee-structures/by-course/{courseId}/year/{year} as readOnly",
+					"name": "RTE-fee-timeline 38 GET /api/fee-timeline/preview as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025",
+							"raw": "{{baseUrl}}/api/fee-timeline/preview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025"
+								"fee-timeline",
+								"preview"
 							]
 						},
 						"auth": {
@@ -8254,245 +9598,19 @@
 					]
 				},
 				{
-					"name": "RTE-fee-structures 34 GET /api/fee-structures/by-course/{courseId}/year/{year} as writeOnly",
+					"name": "RTE-fee-timeline 39 GET /api/fee-timeline/preview as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025",
+							"raw": "{{baseUrl}}/api/fee-timeline/preview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-fee-structures 35 GET /api/fee-structures/by-course/{courseId}/year/{year}/term/{term} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-fee-structures 36 GET /api/fee-structures/by-course/{courseId}/year/{year}/term/{term} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-fee-structures 37 GET /api/fee-structures/by-course/{courseId}/year/{year}/term/{term} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-fee-structures 38 GET /api/fee-structures/by-course/{courseId}/year/{year}/term/{term} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-fee-structures 39 GET /api/fee-structures/by-course/{courseId}/year/{year}/term/{term} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/NoSuchCourse/year/2025/term/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures",
-								"by-course",
-								"NoSuchCourse",
-								"year",
-								"2025",
-								"term",
-								"1"
+								"fee-timeline",
+								"preview"
 							]
 						},
 						"auth": {
@@ -8524,7 +9642,7 @@
 		},
 		{
 			"name": "RTE-payments Every /api/payments/** endpoint is guarded by that route",
-			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/payments, GET /api/payments, GET /api/payments/{id}, GET /api/payments/student/{studentId}, GET /api/payments/student/{studentId}/type/{paymentType}, GET /api/payments/term/{termId}, PATCH /api/payments/{id}/deactivate, GET /api/payments/active, GET /api/payments/inactive, GET /api/payments/student/{studentId}/active, GET /api/payments/student/{studentId}/status/{isActive}, GET /api/payments/date-range, GET /api/payments/student/{studentId}/date-range, GET /api/payments/date-range/course/{courseName}, GET /api/payments/date-range/type/{paymentType}, GET /api/payments/date-range/term/{termId}",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/payments, GET /api/payments, GET /api/payments/{id}, GET /api/payments/student/{studentId}, GET /api/payments/student/{studentId}/type/{paymentType}, PATCH /api/payments/{id}/deactivate, GET /api/payments/active, GET /api/payments/inactive, GET /api/payments/student/{studentId}/active, GET /api/payments/student/{studentId}/status/{isActive}, GET /api/payments/date-range, GET /api/payments/student/{studentId}/date-range, GET /api/payments/date-range/course/{courseName}, GET /api/payments/date-range/type/{paymentType}",
 			"item": [
 				{
 					"name": "RTE-payments 01 setup: role for readOnly",
@@ -8912,7 +10030,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -10238,210 +11356,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 40 GET /api/payments/term/{termId} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 41 GET /api/payments/term/{termId} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 42 GET /api/payments/term/{termId} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 43 GET /api/payments/term/{termId} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 44 GET /api/payments/term/{termId} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 45 PATCH /api/payments/{id}/deactivate as anonymous",
+					"name": "RTE-payments 40 PATCH /api/payments/{id}/deactivate as anonymous",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -10490,7 +11405,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 46 PATCH /api/payments/{id}/deactivate as noRoutes",
+					"name": "RTE-payments 41 PATCH /api/payments/{id}/deactivate as noRoutes",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -10546,7 +11461,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 47 PATCH /api/payments/{id}/deactivate as otherRoutes",
+					"name": "RTE-payments 42 PATCH /api/payments/{id}/deactivate as otherRoutes",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -10602,7 +11517,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 48 PATCH /api/payments/{id}/deactivate as readOnly",
+					"name": "RTE-payments 43 PATCH /api/payments/{id}/deactivate as readOnly",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -10658,7 +11573,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 49 PATCH /api/payments/{id}/deactivate as writeOnly",
+					"name": "RTE-payments 44 PATCH /api/payments/{id}/deactivate as writeOnly",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -10714,7 +11629,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 50 GET /api/payments/active as anonymous",
+					"name": "RTE-payments 45 GET /api/payments/active as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10748,7 +11663,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 51 GET /api/payments/active as noRoutes",
+					"name": "RTE-payments 46 GET /api/payments/active as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10789,7 +11704,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 52 GET /api/payments/active as otherRoutes",
+					"name": "RTE-payments 47 GET /api/payments/active as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10830,7 +11745,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 53 GET /api/payments/active as readOnly",
+					"name": "RTE-payments 48 GET /api/payments/active as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10871,7 +11786,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 54 GET /api/payments/active as writeOnly",
+					"name": "RTE-payments 49 GET /api/payments/active as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10912,7 +11827,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 55 GET /api/payments/inactive as anonymous",
+					"name": "RTE-payments 50 GET /api/payments/inactive as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10946,7 +11861,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 56 GET /api/payments/inactive as noRoutes",
+					"name": "RTE-payments 51 GET /api/payments/inactive as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -10987,7 +11902,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 57 GET /api/payments/inactive as otherRoutes",
+					"name": "RTE-payments 52 GET /api/payments/inactive as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11028,7 +11943,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 58 GET /api/payments/inactive as readOnly",
+					"name": "RTE-payments 53 GET /api/payments/inactive as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11069,7 +11984,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 59 GET /api/payments/inactive as writeOnly",
+					"name": "RTE-payments 54 GET /api/payments/inactive as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11110,7 +12025,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 60 GET /api/payments/student/{studentId}/active as anonymous",
+					"name": "RTE-payments 55 GET /api/payments/student/{studentId}/active as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11146,7 +12061,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 61 GET /api/payments/student/{studentId}/active as noRoutes",
+					"name": "RTE-payments 56 GET /api/payments/student/{studentId}/active as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11189,7 +12104,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 62 GET /api/payments/student/{studentId}/active as otherRoutes",
+					"name": "RTE-payments 57 GET /api/payments/student/{studentId}/active as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11232,7 +12147,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 63 GET /api/payments/student/{studentId}/active as readOnly",
+					"name": "RTE-payments 58 GET /api/payments/student/{studentId}/active as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11275,7 +12190,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 64 GET /api/payments/student/{studentId}/active as writeOnly",
+					"name": "RTE-payments 59 GET /api/payments/student/{studentId}/active as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11318,7 +12233,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 65 GET /api/payments/student/{studentId}/status/{isActive} as anonymous",
+					"name": "RTE-payments 60 GET /api/payments/student/{studentId}/status/{isActive} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11355,7 +12270,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 66 GET /api/payments/student/{studentId}/status/{isActive} as noRoutes",
+					"name": "RTE-payments 61 GET /api/payments/student/{studentId}/status/{isActive} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11399,7 +12314,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 67 GET /api/payments/student/{studentId}/status/{isActive} as otherRoutes",
+					"name": "RTE-payments 62 GET /api/payments/student/{studentId}/status/{isActive} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11443,7 +12358,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 68 GET /api/payments/student/{studentId}/status/{isActive} as readOnly",
+					"name": "RTE-payments 63 GET /api/payments/student/{studentId}/status/{isActive} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11487,7 +12402,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 69 GET /api/payments/student/{studentId}/status/{isActive} as writeOnly",
+					"name": "RTE-payments 64 GET /api/payments/student/{studentId}/status/{isActive} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11531,7 +12446,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 70 GET /api/payments/date-range as anonymous",
+					"name": "RTE-payments 65 GET /api/payments/date-range as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11565,7 +12480,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 71 GET /api/payments/date-range as noRoutes",
+					"name": "RTE-payments 66 GET /api/payments/date-range as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11606,7 +12521,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 72 GET /api/payments/date-range as otherRoutes",
+					"name": "RTE-payments 67 GET /api/payments/date-range as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11647,7 +12562,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 73 GET /api/payments/date-range as readOnly",
+					"name": "RTE-payments 68 GET /api/payments/date-range as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11688,7 +12603,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 74 GET /api/payments/date-range as writeOnly",
+					"name": "RTE-payments 69 GET /api/payments/date-range as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11729,7 +12644,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 75 GET /api/payments/student/{studentId}/date-range as anonymous",
+					"name": "RTE-payments 70 GET /api/payments/student/{studentId}/date-range as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11765,7 +12680,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 76 GET /api/payments/student/{studentId}/date-range as noRoutes",
+					"name": "RTE-payments 71 GET /api/payments/student/{studentId}/date-range as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11808,7 +12723,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 77 GET /api/payments/student/{studentId}/date-range as otherRoutes",
+					"name": "RTE-payments 72 GET /api/payments/student/{studentId}/date-range as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11851,7 +12766,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 78 GET /api/payments/student/{studentId}/date-range as readOnly",
+					"name": "RTE-payments 73 GET /api/payments/student/{studentId}/date-range as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11894,7 +12809,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 79 GET /api/payments/student/{studentId}/date-range as writeOnly",
+					"name": "RTE-payments 74 GET /api/payments/student/{studentId}/date-range as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11937,7 +12852,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 80 GET /api/payments/date-range/course/{courseName} as anonymous",
+					"name": "RTE-payments 75 GET /api/payments/date-range/course/{courseName} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -11973,7 +12888,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 81 GET /api/payments/date-range/course/{courseName} as noRoutes",
+					"name": "RTE-payments 76 GET /api/payments/date-range/course/{courseName} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12016,7 +12931,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 82 GET /api/payments/date-range/course/{courseName} as otherRoutes",
+					"name": "RTE-payments 77 GET /api/payments/date-range/course/{courseName} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12059,7 +12974,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 83 GET /api/payments/date-range/course/{courseName} as readOnly",
+					"name": "RTE-payments 78 GET /api/payments/date-range/course/{courseName} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12102,7 +13017,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 84 GET /api/payments/date-range/course/{courseName} as writeOnly",
+					"name": "RTE-payments 79 GET /api/payments/date-range/course/{courseName} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12145,7 +13060,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 85 GET /api/payments/date-range/type/{paymentType} as anonymous",
+					"name": "RTE-payments 80 GET /api/payments/date-range/type/{paymentType} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12181,7 +13096,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 86 GET /api/payments/date-range/type/{paymentType} as noRoutes",
+					"name": "RTE-payments 81 GET /api/payments/date-range/type/{paymentType} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12224,7 +13139,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 87 GET /api/payments/date-range/type/{paymentType} as otherRoutes",
+					"name": "RTE-payments 82 GET /api/payments/date-range/type/{paymentType} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12267,7 +13182,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 88 GET /api/payments/date-range/type/{paymentType} as readOnly",
+					"name": "RTE-payments 83 GET /api/payments/date-range/type/{paymentType} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12310,7 +13225,7 @@
 					]
 				},
 				{
-					"name": "RTE-payments 89 GET /api/payments/date-range/type/{paymentType} as writeOnly",
+					"name": "RTE-payments 84 GET /api/payments/date-range/type/{paymentType} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -12325,214 +13240,6 @@
 								"date-range",
 								"type",
 								"REGULAR"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 90 GET /api/payments/date-range/term/{termId} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/date-range/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"date-range",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 91 GET /api/payments/date-range/term/{termId} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/date-range/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"date-range",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 92 GET /api/payments/date-range/term/{termId} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/date-range/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"date-range",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 93 GET /api/payments/date-range/term/{termId} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/date-range/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"date-range",
-								"term",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-payments 94 GET /api/payments/date-range/term/{termId} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/payments/date-range/term/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"payments",
-								"date-range",
-								"term",
-								"999999"
 							]
 						},
 						"auth": {
@@ -12952,7 +13659,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -13805,7 +14512,7 @@
 		},
 		{
 			"name": "RTE-dues Every /api/dues/** endpoint is guarded by that route",
-			"description": "Proves: REQ-011.AC10\n\nEndpoints: GET /api/dues/student/{studentId}, GET /api/dues/summary/{studentId}, GET /api/dues/year/{year}, GET /api/dues/term/{year}/{termNumber}, GET /api/dues/course/{courseName}, GET /api/dues/session/{sessionId}, GET /api/dues/status/{status}, GET /api/dues/student/{studentId}/status/{status}, GET /api/dues/active, GET /api/dues, GET /api/dues/pending, GET /api/dues/aggregate, GET /api/dues/aggregate/pending, GET /api/dues/aggregate/by-course, GET /api/dues/aggregate/by-year, GET /api/dues/aggregate/by-term, PATCH /api/dues/{duesId}/mark-student-left-cancelled",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: GET /api/dues, GET /api/dues/summary, POST /api/dues/rebuild, GET /api/dues/rebuild/{jobId}",
 			"item": [
 				{
 					"name": "RTE-dues 01 setup: role for readOnly",
@@ -14193,7 +14900,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -14449,1844 +15156,7 @@
 					]
 				},
 				{
-					"name": "RTE-dues 15 GET /api/dues/student/{studentId} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 16 GET /api/dues/student/{studentId} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 17 GET /api/dues/student/{studentId} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 18 GET /api/dues/student/{studentId} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 19 GET /api/dues/student/{studentId} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 20 GET /api/dues/summary/{studentId} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"summary",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 21 GET /api/dues/summary/{studentId} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"summary",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 22 GET /api/dues/summary/{studentId} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"summary",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 23 GET /api/dues/summary/{studentId} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"summary",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 24 GET /api/dues/summary/{studentId} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/summary/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"summary",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 25 GET /api/dues/year/{year} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 26 GET /api/dues/year/{year} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 27 GET /api/dues/year/{year} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 28 GET /api/dues/year/{year} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 29 GET /api/dues/year/{year} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/year/2025",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"year",
-								"2025"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 30 GET /api/dues/term/{year}/{termNumber} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/term/2025/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"term",
-								"2025",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 31 GET /api/dues/term/{year}/{termNumber} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/term/2025/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"term",
-								"2025",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 32 GET /api/dues/term/{year}/{termNumber} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/term/2025/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"term",
-								"2025",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 33 GET /api/dues/term/{year}/{termNumber} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/term/2025/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"term",
-								"2025",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 34 GET /api/dues/term/{year}/{termNumber} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/term/2025/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"term",
-								"2025",
-								"1"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 35 GET /api/dues/course/{courseName} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/course/NoSuchCourse",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"course",
-								"NoSuchCourse"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 36 GET /api/dues/course/{courseName} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/course/NoSuchCourse",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"course",
-								"NoSuchCourse"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 37 GET /api/dues/course/{courseName} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/course/NoSuchCourse",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"course",
-								"NoSuchCourse"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 38 GET /api/dues/course/{courseName} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/course/NoSuchCourse",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"course",
-								"NoSuchCourse"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 39 GET /api/dues/course/{courseName} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/course/NoSuchCourse",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"course",
-								"NoSuchCourse"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 40 GET /api/dues/session/{sessionId} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/session/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"session",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 41 GET /api/dues/session/{sessionId} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/session/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"session",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 42 GET /api/dues/session/{sessionId} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/session/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"session",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 43 GET /api/dues/session/{sessionId} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/session/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"session",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 44 GET /api/dues/session/{sessionId} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/session/999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"session",
-								"999999"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 45 GET /api/dues/status/{status} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 46 GET /api/dues/status/{status} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 47 GET /api/dues/status/{status} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 48 GET /api/dues/status/{status} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 49 GET /api/dues/status/{status} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 50 GET /api/dues/student/{studentId}/status/{status} as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 51 GET /api/dues/student/{studentId}/status/{status} as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 52 GET /api/dues/student/{studentId}/status/{status} as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 53 GET /api/dues/student/{studentId}/status/{status} as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 54 GET /api/dues/student/{studentId}/status/{status} as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/student/999999/status/PENDING",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"student",
-								"999999",
-								"status",
-								"PENDING"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 55 GET /api/dues/active as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/active",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"active"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 56 GET /api/dues/active as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/active",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"active"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 57 GET /api/dues/active as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/active",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"active"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 58 GET /api/dues/active as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/active",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"active"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 59 GET /api/dues/active as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/active",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"active"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 60 GET /api/dues as anonymous",
+					"name": "RTE-dues 15 GET /api/dues as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -16319,7 +15189,7 @@
 					]
 				},
 				{
-					"name": "RTE-dues 61 GET /api/dues as noRoutes",
+					"name": "RTE-dues 16 GET /api/dues as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -16359,7 +15229,7 @@
 					]
 				},
 				{
-					"name": "RTE-dues 62 GET /api/dues as otherRoutes",
+					"name": "RTE-dues 17 GET /api/dues as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -16399,7 +15269,7 @@
 					]
 				},
 				{
-					"name": "RTE-dues 63 GET /api/dues as readOnly",
+					"name": "RTE-dues 18 GET /api/dues as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -16439,7 +15309,7 @@
 					]
 				},
 				{
-					"name": "RTE-dues 64 GET /api/dues as writeOnly",
+					"name": "RTE-dues 19 GET /api/dues as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -16479,19 +15349,19 @@
 					]
 				},
 				{
-					"name": "RTE-dues 65 GET /api/dues/pending as anonymous",
+					"name": "RTE-dues 20 GET /api/dues/summary as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/pending",
+							"raw": "{{baseUrl}}/api/dues/summary",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"pending"
+								"summary"
 							]
 						},
 						"auth": {
@@ -16513,19 +15383,19 @@
 					]
 				},
 				{
-					"name": "RTE-dues 66 GET /api/dues/pending as noRoutes",
+					"name": "RTE-dues 21 GET /api/dues/summary as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/pending",
+							"raw": "{{baseUrl}}/api/dues/summary",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"pending"
+								"summary"
 							]
 						},
 						"auth": {
@@ -16554,19 +15424,19 @@
 					]
 				},
 				{
-					"name": "RTE-dues 67 GET /api/dues/pending as otherRoutes",
+					"name": "RTE-dues 22 GET /api/dues/summary as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/pending",
+							"raw": "{{baseUrl}}/api/dues/summary",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"pending"
+								"summary"
 							]
 						},
 						"auth": {
@@ -16595,19 +15465,19 @@
 					]
 				},
 				{
-					"name": "RTE-dues 68 GET /api/dues/pending as readOnly",
+					"name": "RTE-dues 23 GET /api/dues/summary as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/pending",
+							"raw": "{{baseUrl}}/api/dues/summary",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"pending"
+								"summary"
 							]
 						},
 						"auth": {
@@ -16636,19 +15506,19 @@
 					]
 				},
 				{
-					"name": "RTE-dues 69 GET /api/dues/pending as writeOnly",
+					"name": "RTE-dues 24 GET /api/dues/summary as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/pending",
+							"raw": "{{baseUrl}}/api/dues/summary",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"pending"
+								"summary"
 							]
 						},
 						"auth": {
@@ -16677,1019 +15547,9 @@
 					]
 				},
 				{
-					"name": "RTE-dues 70 GET /api/dues/aggregate as anonymous",
+					"name": "RTE-dues 25 POST /api/dues/rebuild as anonymous",
 					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 71 GET /api/dues/aggregate as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 72 GET /api/dues/aggregate as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 73 GET /api/dues/aggregate as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 74 GET /api/dues/aggregate as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 75 GET /api/dues/aggregate/pending as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"pending"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 76 GET /api/dues/aggregate/pending as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"pending"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 77 GET /api/dues/aggregate/pending as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"pending"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 78 GET /api/dues/aggregate/pending as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"pending"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 79 GET /api/dues/aggregate/pending as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/pending",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"pending"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 80 GET /api/dues/aggregate/by-course as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-course"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 81 GET /api/dues/aggregate/by-course as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-course"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 82 GET /api/dues/aggregate/by-course as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-course"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 83 GET /api/dues/aggregate/by-course as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-course"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 84 GET /api/dues/aggregate/by-course as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-course",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-course"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 85 GET /api/dues/aggregate/by-year as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-year",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-year"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 86 GET /api/dues/aggregate/by-year as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-year",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-year"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 87 GET /api/dues/aggregate/by-year as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-year",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-year"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 88 GET /api/dues/aggregate/by-year as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-year",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-year"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 89 GET /api/dues/aggregate/by-year as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-year",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-year"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 90 GET /api/dues/aggregate/by-term as anonymous",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-term",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-term"
-							]
-						},
-						"auth": {
-							"type": "noauth"
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"no token \\u2192 401\", () => {",
-									"  pm.response.to.have.status(401);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 91 GET /api/dues/aggregate/by-term as noRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-term",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-term"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{noRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with no routes \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 92 GET /api/dues/aggregate/by-term as otherRoutes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-term",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-term"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{otherRoutes}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"user with every other route \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 93 GET /api/dues/aggregate/by-term as readOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-term",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-term"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{readOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"read-only is let through\", () => {",
-									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 94 GET /api/dues/aggregate/by-term as writeOnly",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/dues/aggregate/by-term",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"dues",
-								"aggregate",
-								"by-term"
-							]
-						},
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{writeOnly}}",
-									"type": "string"
-								}
-							]
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"write-only \\u2192 403\", () => {",
-									"  pm.response.to.have.status(403);",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "RTE-dues 95 PATCH /api/dues/{duesId}/mark-student-left-cancelled as anonymous",
-					"request": {
-						"method": "PATCH",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -17697,15 +15557,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/999999/mark-student-left-cancelled",
+							"raw": "{{baseUrl}}/api/dues/rebuild",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"999999",
-								"mark-student-left-cancelled"
+								"rebuild"
 							]
 						},
 						"auth": {
@@ -17736,9 +15595,9 @@
 					]
 				},
 				{
-					"name": "RTE-dues 96 PATCH /api/dues/{duesId}/mark-student-left-cancelled as noRoutes",
+					"name": "RTE-dues 26 POST /api/dues/rebuild as noRoutes",
 					"request": {
-						"method": "PATCH",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -17746,15 +15605,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/999999/mark-student-left-cancelled",
+							"raw": "{{baseUrl}}/api/dues/rebuild",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"999999",
-								"mark-student-left-cancelled"
+								"rebuild"
 							]
 						},
 						"auth": {
@@ -17792,9 +15650,9 @@
 					]
 				},
 				{
-					"name": "RTE-dues 97 PATCH /api/dues/{duesId}/mark-student-left-cancelled as otherRoutes",
+					"name": "RTE-dues 27 POST /api/dues/rebuild as otherRoutes",
 					"request": {
-						"method": "PATCH",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -17802,15 +15660,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/999999/mark-student-left-cancelled",
+							"raw": "{{baseUrl}}/api/dues/rebuild",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"999999",
-								"mark-student-left-cancelled"
+								"rebuild"
 							]
 						},
 						"auth": {
@@ -17848,9 +15705,9 @@
 					]
 				},
 				{
-					"name": "RTE-dues 98 PATCH /api/dues/{duesId}/mark-student-left-cancelled as readOnly",
+					"name": "RTE-dues 28 POST /api/dues/rebuild as readOnly",
 					"request": {
-						"method": "PATCH",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -17858,15 +15715,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/999999/mark-student-left-cancelled",
+							"raw": "{{baseUrl}}/api/dues/rebuild",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"999999",
-								"mark-student-left-cancelled"
+								"rebuild"
 							]
 						},
 						"auth": {
@@ -17904,9 +15760,9 @@
 					]
 				},
 				{
-					"name": "RTE-dues 99 PATCH /api/dues/{duesId}/mark-student-left-cancelled as writeOnly",
+					"name": "RTE-dues 29 POST /api/dues/rebuild as writeOnly",
 					"request": {
-						"method": "PATCH",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -17914,15 +15770,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/dues/999999/mark-student-left-cancelled",
+							"raw": "{{baseUrl}}/api/dues/rebuild",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"dues",
-								"999999",
-								"mark-student-left-cancelled"
+								"rebuild"
 							]
 						},
 						"auth": {
@@ -17953,6 +15808,209 @@
 								"exec": [
 									"pm.test(\"write-only is let through\", () => {",
 									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-dues 30 GET /api/dues/rebuild/{jobId} as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/no-such-job",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"no-such-job"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-dues 31 GET /api/dues/rebuild/{jobId} as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/no-such-job",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"no-such-job"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-dues 32 GET /api/dues/rebuild/{jobId} as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/no-such-job",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"no-such-job"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-dues 33 GET /api/dues/rebuild/{jobId} as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/no-such-job",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"no-such-job"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-dues 34 GET /api/dues/rebuild/{jobId} as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues/rebuild/no-such-job",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues",
+								"rebuild",
+								"no-such-job"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
 									"});"
 								]
 							}
@@ -18351,7 +16409,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -19464,7 +17522,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -21231,7 +19289,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"

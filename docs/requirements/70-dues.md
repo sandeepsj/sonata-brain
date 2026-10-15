@@ -1,6 +1,7 @@
 # Dues
 
-Dues are **derived**: dues = terms of the fee timeline × students' sessions − active REGULAR payments − waivers. The
+Dues are **derived**: dues = terms of the fee timeline × students' sessions − active REGULAR payments (with their
+discounts). The
 `fee_due` table is a projection. It can be deleted and recalculated at any time without losing information.
 
 ### REQ-070 Dues are derived and recalculable
@@ -11,17 +12,18 @@ Status: accepted · Source: user ("recalculate dues for the entire institute whe
 - **REQ-070.AC3** [retired] Statuses including `OVERPAID`. Replaced by REQ-070.AC8 (overpayment is credit,
   REQ-071.AC7).
 - **REQ-070.AC4** [target] Recalculating twice in a row changes nothing (same rows, same values).
-- **REQ-070.AC5** [target] Deleting every `fee_due` row and recalculating everything reproduces identical dues.
+- **REQ-070.AC5** [manual] Deleting every `fee_due` row and recalculating everything reproduces identical dues.
 - **REQ-070.AC6** [target] A student is billed for every term (REQ-059) that has started (REQ-075.AC2) and overlaps
   one of their sessions in a course on at least one day, when that term's structure has an amount for the course.
   There is one due per (student, course, term), even when sessions overlap.
 - **REQ-070.AC7** [target] Each due exposes `{id, studentId, studentName, courseName, periodStart, periodEnd,
   feeStructureId, feeStructureName, amount, paidAmount, discountAmount, balance, status}`, with
   `balance = amount − paidAmount − discountAmount`.
-- **REQ-070.AC8** [target] Status is `DUE` when nothing is applied, `PARTIALLY_PAID` when the balance is between 0
-  and the amount, `PAID` when the balance is 0, and `WAIVED` when a waiver exists (balance 0, nothing applied).
+- **REQ-070.AC8** [retired] Statuses including `WAIVED`. Replaced by REQ-070.AC10 (waivers were dropped, REQ-072).
 - **REQ-070.AC9** [target] Joining or leaving in the middle of a term bills that whole term. Terms that start after
   the leaving date aren't billed. *(user, 2026-10-15)*
+- **REQ-070.AC10** [target] Status is `DUE` when nothing is applied, `PARTIALLY_PAID` when the balance is between 0
+  and the amount, and `PAID` when the balance is 0.
 
 ### REQ-071 Applying payments to dues
 Status: accepted · Source: user ("oldest due first"), 2026-10-15
@@ -31,24 +33,31 @@ Status: accepted · Source: user ("oldest due first"), 2026-10-15
 - **REQ-071.AC3** [retired] Leftover kept on the latest due as `OVERPAID`. Replaced by REQ-071.AC7.
 - **REQ-071.AC4** [target] Several payments add up. A payment's discounts count towards what it pays.
 - **REQ-071.AC5** [target] Inactive payments and ADDITIONAL payments are ignored.
-- **REQ-071.AC6** [target] A student's active REGULAR payments for a course are applied in payment-date order (then
-  by id), each one (amount + discounts) filling that student's dues for the course from the oldest term with a
-  balance. Waived dues are skipped.
+- **REQ-071.AC6** [retired] Oldest-first allocation that skipped waived dues. Replaced by REQ-071.AC8.
 - **REQ-071.AC7** [target] Money left after every due of that course is paid is **credit** for that student and
   course. It shows in the summary (REQ-076.AC7) and pays new terms as they start.
+- **REQ-071.AC8** [target] A student's active REGULAR payments for a course are applied in payment-date order (then
+  by id), each one filling that student's dues for the course from the oldest term with a balance: its discounts
+  first (shown as `discountAmount`), then its amount (shown as `paidAmount`). A discount left over after every due is
+  paid is not credit.
 
-### REQ-072 Waivers
-Status: accepted · Source: existing code (`mark-student-left-cancelled`), reworked 2026-10-04 and 2026-10-15
+### REQ-072 Forgiving a term
+Status: accepted · Source: existing code (`mark-student-left-cancelled`); user ("drop waivers, use discounts"), 2026-10-15
+
+There is no waiver record. A term is forgiven with a ₹0 REGULAR payment carrying a discount, which already exists
+(REQ-062.AC1, REQ-063).
 
 - **REQ-072.AC1** [retired] *(was baseline)* `PATCH /api/dues/{id}/mark-student-left-cancelled`. Removed with the
   legacy dues; replaced by REQ-072.AC5. Legacy cancellations are migrated (REQ-082.AC3).
 - **REQ-072.AC2** [retired] Waiver by `sessionId`, only for disjoined sessions. Replaced by REQ-072.AC5.
-- **REQ-072.AC3** [target] Waivers survive recalculation. `DELETE /api/dues/waivers/{id}` → 204, and the due returns
+- **REQ-072.AC3** [retired] *(dropped with waivers)* Waivers survive recalculation. `DELETE /api/dues/waivers/{id}` → 204, and the due returns
   to its calculated status. An unknown id → 404.
-- **REQ-072.AC4** [target] `GET /api/dues/waivers?studentId=` lists waivers with their reason, author and date.
-- **REQ-072.AC5** [target] `POST /api/dues/waivers` `{studentId, courseName, periodStart, reason}` → 201 `{id,
+- **REQ-072.AC4** [retired] *(dropped with waivers)* `GET /api/dues/waivers?studentId=` lists waivers with their reason, author and date.
+- **REQ-072.AC5** [retired] *(dropped with waivers)* `POST /api/dues/waivers` `{studentId, courseName, periodStart, reason}` → 201 `{id,
   studentId, courseName, periodStart, reason, createdBy, createdAt}`, and that due becomes `WAIVED`. No due for that
   student, course and term → 400. A waiver that already exists → 409. A blank reason → 400.
+- **REQ-072.AC6** [target] A ₹0 REGULAR payment with a discount of D clears D from the oldest open term of that
+  course, which shows it as `discountAmount`; a discount equal to the balance makes the term `PAID`.
 
 ### REQ-077 How dues were generated by the legacy code
 Status: superseded by REQ-070 to REQ-075 · Source: existing code, characterised 2026-10-04
@@ -82,7 +91,7 @@ Status: accepted · Source: user + design, 2026-10-04, reworked 2026-10-15
 - **REQ-074.AC2** [retired] Rebuild per course. Replaced by REQ-074.AC7.
 - **REQ-074.AC3** [retired] Rebuild endpoint with `COURSE` scope and `dryRun`. Replaced by REQ-074.AC8.
 - **REQ-074.AC4** [retired] `dryRun`. Dropped.
-- **REQ-074.AC5** [target] A failure for one student is recorded in the job's `errors` and doesn't stop the others.
+- **REQ-074.AC5** [manual] A failure for one student is recorded in the job's `errors` and doesn't stop the others.
 - **REQ-074.AC6** [retired] Schedule endpoint. Replaced by REQ-074.AC9.
 - **REQ-074.AC7** [target] Everyone's dues are recalculated, before the response is returned, after any timeline
   change and after an edit to a structure that is on the timeline.

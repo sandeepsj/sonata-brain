@@ -51,9 +51,11 @@ that matches their legacy term.
   `<year>-01-01`. A year whose amounts and term length equal the previous year's reuses that structure (no new entry).
 - **REQ-082.AC2** [manual] `payments.term_id` is dropped. No payment row is lost or changes amount, date, student,
   course, discounts or active flag.
-- **REQ-082.AC3** [manual] Legacy dues with status `STUDENT_LEFT_DUE_CANCELLED` become waivers for that student,
-  course and term start, with reason "Migrated: student left".
+- **REQ-082.AC3** [retired] Legacy cancellations became waivers. Replaced by REQ-082.AC6 (waivers were dropped).
 - **REQ-082.AC4** [manual] The legacy tables are kept as `legacy_fee_structure` and `legacy_fee_dues`, read-only.
+- **REQ-082.AC6** [manual] Each legacy due with status `STUDENT_LEFT_DUE_CANCELLED` (87 in production) becomes a ₹0
+  REGULAR payment for that student and course, dated the legacy term's start, with one discount equal to the
+  cancelled `due_amount` labelled "Forgiven: student left (migrated)".
 - **REQ-082.AC5** [manual] After the migration, everyone's dues are calculated on first startup, and calculating
   again changes nothing.
 

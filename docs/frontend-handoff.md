@@ -1,4 +1,4 @@
-# Frontend handoff (backend branch `self-service`)
+# Frontend handoff (backend branch `dues-timeline`)
 
 ## The contract
 - **`docs/api/openapi.json`** is the source of truth: an OpenAPI 3 spec generated from the backend code. It is
@@ -27,9 +27,9 @@ the user has some access to:
 ```
 - `GET` (and `HEAD`) on a path needs `read`; `POST`, `PUT`, `PATCH` and `DELETE` need `write`. The two are independent.
 - **Show a screen** when its route has `read`. **Show create/edit/delete buttons** when it has `write`.
-- **Route list:** there are 10 paths in total: `/api/students/**`, `/api/student-sessions/**`, `/api/courses/**`,
-  `/api/fee-structures/**`, `/api/payments/**`, `/api/discounts/**`, `/api/dues/**`, `/api/users/**`,
-  `/api/roles/**`, `/api/logging/**`. Each operation in the spec says which route it needs.
+- **Route list:** there are 11 paths in total: `/api/students/**`, `/api/student-sessions/**`, `/api/courses/**`,
+  `/api/fee-structures/**`, `/api/fee-timeline/**`, `/api/payments/**`, `/api/discounts/**`, `/api/dues/**`,
+  `/api/users/**`, `/api/roles/**`, `/api/logging/**`. Each operation in the spec says which route it needs.
 - **A "Teacher":** this is just a role that has `read` on the data routes and `write` on none.
 - **Role-editor screen:** the role body is now `{ name, description, routes: [{ path, read, write }] }`.
   `GET /api/roles` returns every route, with `false` flags where nothing is granted. Unknown or repeated paths → 400.
@@ -64,31 +64,60 @@ the user has some access to:
   currently `https://sonata-face.vercel.app`. A local dev frontend (`localhost:5173`) needs a dev proxy, or that
   origin added to the backend's CORS config.
 
+### 4. Fees, the timeline and dues
+This branch replaces the per-year, per-term fee rows with three ideas. Read `docs/requirements/50-fees.md` and
+`70-dues.md` for the exact rules.
+
+- **Fee structure:** `{ id, name, termMonths, amounts: [{ courseName, amount }], usedInTimeline }`. One structure
+  covers every subject; a subject left out isn't billed while that structure applies.
+  - CRUD at `/api/fee-structures`. Delete gives 409 while the structure is on the timeline.
+  - Editing a structure that is on the timeline is allowed, and recalculates everyone's dues. Changing `termMonths`
+    gives 409 when it would break the timeline.
+- **Timeline:** one for the whole school. Each entry is `{ id, feeStructureId, feeStructureName, termMonths,
+  effectiveFrom, effectiveTo }` and runs until the next entry starts.
+  - `GET/POST/PUT/DELETE /api/fee-timeline`.
+  - **A new structure may start only at the beginning of a term** of the one before it. Otherwise → 400, and the
+    message names the nearest valid dates, so show it as is. Offer a date picker of valid term starts: use the preview.
+  - `GET /api/fee-timeline/preview?from=&to=` lists the terms `[{ periodStart, periodEnd, feeStructureName,
+    amounts }]` without saving anything. Show it next to the editor.
+  - Every change recalculates all dues before the response returns (a few seconds at most).
+- **Dues** are calculated, never edited:
+  - `GET /api/dues?studentId=&courseName=&status=&from=&to=` returns `{ studentId, studentName, courseName,
+    periodStart, periodEnd, feeStructureName, amount, paidAmount, discountAmount, balance, status }`, where status
+    is `DUE`, `PARTIALLY_PAID` or `PAID`. Show periods as dates; there are no term numbers.
+  - `GET /api/dues/summary?studentId=` returns per course and in total the `amount`, `paid`, `discount`, `balance`
+    and `credit`. Credit is money paid beyond what is due, and it pays new terms as they start.
+  - Admin: `POST /api/dues/rebuild?scope=ALL|STUDENT&id=` → 202 `{ jobId }`; poll `GET /api/dues/rebuild/{jobId}`.
+- **Payments** have no term:
+  - `POST /api/payments` takes `{ studentId, paymentType: "REGULAR"|"ADDITIONAL", courseName, amountPaid, label,
+    date?, remarks?, discounts? }`. `paymentType` and `label` are required; REGULAR needs `courseName` and a session
+    in that course.
+  - A REGULAR payment pays the student's **oldest unpaid term** of that course first, then the next. There's no
+    period picker and no upper limit.
+  - To **forgive** a term (for example, a student left early), record a ₹0 REGULAR payment with a discount labelled
+    with the reason. Dues are recalculated straight away.
+
 ## Known gaps in the spec
 - **Untyped success responses.** These say "object" because the controllers return untyped maps:
   - `POST /api/payments`: really 201 with the payment
   - `PATCH /api/payments/{id}/deactivate`
-  - `PATCH /api/dues/{duesId}/mark-student-left-cancelled`
 
   The Postman payments cases show their real shape.
-- **Create status codes.** The spec lists 200 for creates that answer 200 today (students, courses, sessions, fee
-  structures). Only sign-up and roles answer 201.
+- **Create status codes.** The spec lists 200 for creates that answer 200 today (students, courses, sessions).
+  Fee structures, timeline entries, sign-up and roles answer 201.
 
 ## ⚠ sonata-face currently targets a different API
-`sonata-face` was written against the old rewrite branch (`design/fee-timeline-and-permissions`). This branch is
-`main`'s API plus routes and logging. The frontend's calls today:
+`sonata-face` was written against the old rewrite branch (`design/fee-timeline-and-permissions`), which had
+per-course structures. This branch has school-wide ones, so the fee screens need changing. The frontend's calls today:
 
-| Frontend calls | On `self-service` |
+| Frontend calls | On `dues-timeline` |
 |---|---|
 | `POST /api/auth/login`, `/api/auth/refresh`, `GET /api/users/me` | Exist; `permissions` became `routes` (section 1) |
 | `GET/POST/PUT/DELETE /api/roles`, `GET /api/users`, `PUT /api/users/{id}/roles`, `POST /api/users/signup` | Exist; role body uses `routes` |
 | `GET/POST /api/students`, `GET /api/students/search` | Exist |
 | `GET/POST /api/courses` | Exist. `PATCH /api/courses/{name}/close` and `/reopen` and `?status=` **don't** |
-| `POST /api/student-sessions`, `PATCH /api/student-sessions/{id}/disjoin` | Exist. The list `GET /api/student-sessions?studentId=&courseName=…` **doesn't**; use `/all`, `/search`, `/active/*` |
-| `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with the **legacy** shape (`termId`, no `periodDate`, no filter params). `convert-to-course-fee` **doesn't** |
-| `/api/fee-structures` (list, clone, edit, delete, new shape) | **Legacy only**: `POST {courseId, year, numberOfTerms, termFees}` and the `/by-*` lookups |
-| `/api/fee-timeline/**` | **Don't exist** |
-| `/api/dues?…`, `/api/dues/summary?…`, `/api/dues/aggregate?groupBy=`, `/api/dues/waivers`, `/api/dues/rebuild*`, `/api/dues/legacy-comparison` | **Don't exist**; legacy `/api/dues/student/{id}`, `/summary/{id}`, `/aggregate/*`, `/{id}/mark-student-left-cancelled` instead |
-
-Until the backend decides whether those features come to this branch, the frontend can rely on the auth, roles,
-users, students and logging parts above.
+| `POST /api/student-sessions`, `PATCH /api/student-sessions/{id}/disjoin` | Exist. The list `GET /api/student-sessions?studentId=&courseName=…` **doesn't**; use `/all`, `/search?course=`, `/active/*` |
+| `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with `paymentType` and **no** `periodDate` or `termId` (section 4). `convert-to-course-fee` and the filter params **don't** |
+| `/api/fee-structures` | Exist in the **new school-wide shape** (section 4). No `courseName`, `termsPerYear` or clone |
+| `/api/fee-timeline`, `/api/fee-timeline/preview` | Exist, **school-wide** (no `courseName`), boundary-only (section 4) |
+| `/api/dues?…`, `/api/dues/summary?studentId=`, `/api/dues/rebuild*` | Exist (section 4). `/api/dues/aggregate`, `/api/dues/waivers` and `/api/dues/legacy-comparison` **don't** (waivers were replaced by ₹0 discount payments) |
