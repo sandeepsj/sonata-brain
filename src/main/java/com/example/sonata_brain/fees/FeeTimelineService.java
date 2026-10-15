@@ -2,11 +2,14 @@ package com.example.sonata_brain.fees;
 
 import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.dues.DuesService;
+import com.example.sonata_brain.dues.DuesDtos.Impact;
+import com.example.sonata_brain.fees.FeeDtos.EntryChange;
 import com.example.sonata_brain.fees.FeeDtos.EntryRequest;
 import com.example.sonata_brain.fees.FeeDtos.EntryResponse;
 import com.example.sonata_brain.fees.FeeDtos.PreviewTerm;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,7 +44,7 @@ public class FeeTimelineService {
         return result;
     }
 
-    public EntryResponse create(EntryRequest request) {
+    public EntryChange create(EntryRequest request, boolean dryRun) {
         FeeStructure structure = validStructure(request);
         List<TimelineEntry> entries = timeline.findAllByOrderByEffectiveFromAsc();
         rejectSameDate(entries, request.effectiveFrom(), null);
@@ -49,11 +52,11 @@ public class FeeTimelineService {
         proposed.add(new Timeline.Entry(request.effectiveFrom(), structure));
         check(proposed);
         TimelineEntry saved = timeline.saveAndFlush(new TimelineEntry(structure, request.effectiveFrom()));
-        dues.recalculateAll();
-        return response(saved.getId());
+        Impact impact = dues.recalculateAll(dryRun);
+        return finish(EntryChange.of(response(saved.getId()), dryRun, impact));
     }
 
-    public EntryResponse update(Long id, EntryRequest request) {
+    public EntryChange update(Long id, EntryRequest request, boolean dryRun) {
         TimelineEntry entry = find(id);
         FeeStructure structure = validStructure(request);
         List<TimelineEntry> entries = timeline.findAllByOrderByEffectiveFromAsc();
@@ -65,18 +68,27 @@ public class FeeTimelineService {
         entry.setStructure(structure);
         entry.setEffectiveFrom(request.effectiveFrom());
         timeline.saveAndFlush(entry);
-        dues.recalculateAll();
-        return response(id);
+        Impact impact = dues.recalculateAll(dryRun);
+        return finish(EntryChange.of(response(id), dryRun, impact));
     }
 
-    public void delete(Long id) {
+    public EntryChange delete(Long id, boolean dryRun) {
         TimelineEntry entry = find(id);
         List<Timeline.Entry> proposed = new ArrayList<>(timeline.findAllByOrderByEffectiveFromAsc().stream()
                 .filter(e -> !e.getId().equals(id)).map(TimelineEntry::toEntry).toList());
         check(proposed);
         timeline.delete(entry);
         timeline.flush();
-        dues.recalculateAll();
+        Impact impact = dues.recalculateAll(dryRun);
+        return finish(EntryChange.removal(dryRun, impact));
+    }
+
+    /** A dry run did everything for real so far; roll it all back (REQ-058.AC11). */
+    private static EntryChange finish(EntryChange change) {
+        if (change.dryRun()) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return change;
     }
 
     /** REQ-059.AC2: the terms overlapping [from, to]; writes nothing. */

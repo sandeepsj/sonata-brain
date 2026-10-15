@@ -5,15 +5,12 @@ import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.dues.DuesDtos.Changes;
 import com.example.sonata_brain.dues.DuesDtos.CourseSummary;
 import com.example.sonata_brain.dues.DuesDtos.DueResponse;
+import com.example.sonata_brain.dues.DuesDtos.Impact;
 import com.example.sonata_brain.dues.DuesDtos.Summary;
 import com.example.sonata_brain.fees.Timeline;
 import com.example.sonata_brain.fees.TimelineEntry;
 import com.example.sonata_brain.fees.TimelineEntryRepository;
-import com.example.sonata_brain.model.Payment;
-import com.example.sonata_brain.model.Student;
-import com.example.sonata_brain.model.StudentSession;
-import com.example.sonata_brain.repository.PaymentRepository;
-import com.example.sonata_brain.repository.StudentSessionRepository;
+import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -32,7 +29,8 @@ import java.util.TreeMap;
 /**
  * Keeps {@code fee_due} equal to what {@link DuesCalculator} says (REQ-070, REQ-074). A student's stored dues are
  * compared with the calculated ones by (course, term start): changed rows are updated, new ones inserted, stale ones
- * deleted. Unchanged rows keep their ids, so recalculating twice changes nothing.
+ * deleted. Unchanged rows keep their ids, so recalculating twice changes nothing. Reads and writes go through
+ * {@link DuesStore} in bulk.
  */
 @Service
 @Transactional
@@ -42,38 +40,48 @@ public class DuesService {
 
     private final FeeDueRepository dues;
     private final TimelineEntryRepository timeline;
-    private final StudentSessionRepository sessions;
-    private final PaymentRepository payments;
     private final StudentRepository students;
+    private final DuesStore store;
+    private final EntityManager entities;
 
-    public DuesService(FeeDueRepository dues, TimelineEntryRepository timeline, StudentSessionRepository sessions,
-                       PaymentRepository payments, StudentRepository students) {
+    public DuesService(FeeDueRepository dues, TimelineEntryRepository timeline, StudentRepository students,
+                       DuesStore store, EntityManager entities) {
         this.dues = dues;
         this.timeline = timeline;
-        this.sessions = sessions;
-        this.payments = payments;
         this.students = students;
+        this.store = store;
+        this.entities = entities;
     }
 
     /** Recalculates one student (REQ-074.AC1). */
     public Changes recalculateStudent(Long admissionNo) {
-        return recalculate(admissionNo, startedTerms());
+        entities.flush(); // facts saved through JPA earlier in this transaction must be visible to the SQL reads
+        return recalculate(List.of(admissionNo), startedTerms(), store.sessions(admissionNo),
+                store.payments(admissionNo), store.dues(admissionNo), false).changes();
     }
 
-    /** Recalculates everyone in the current transaction (REQ-074.AC7). */
+    /**
+     * Recalculates everyone in the current transaction (REQ-074.AC7): every fact is read in one query each and the
+     * changes are written in batches, so the cost doesn't grow with round trips per student.
+     */
     public Changes recalculateAll() {
-        List<Timeline.Term> terms = startedTerms();
-        Changes total = new Changes(0, 0, 0);
-        for (Long id : studentIds()) {
-            total = total.plus(recalculate(id, terms));
-        }
-        log.info("Recalculated dues for everyone: {}", total);
-        return total;
+        return recalculateAll(false).changes();
+    }
+
+    /** Everyone, reporting the impact; with {@code dryRun} nothing is written (REQ-058.AC10, AC11). */
+    public Impact recalculateAll(boolean dryRun) {
+        entities.flush();
+        List<Long> ids = store.studentIds();
+        Impact impact = recalculate(ids, startedTerms(), store.sessions(null), store.payments(null), store.dues(null),
+                dryRun);
+        log.info("{} dues for {} students in {} ms: {}", dryRun ? "Dry run of" : "Recalculated", ids.size(),
+                impact.durationMs(), impact);
+        return impact;
     }
 
     @Transactional(readOnly = true)
     public List<Long> studentIds() {
-        return students.findAll(Sort.by("admissionNo")).stream().map(Student::getAdmissionNo).toList();
+        return store.studentIds();
     }
 
     @Transactional(readOnly = true)
@@ -135,49 +143,63 @@ public class DuesService {
         return new Summary(studentId, courses, total[0], total[1], total[2], total[3], credit);
     }
 
-    private Changes recalculate(Long admissionNo, List<Timeline.Term> terms) {
-        Student student = students.getReferenceById(admissionNo);
-        DuesCalculator.Result result = calculate(admissionNo, terms);
-        Map<String, FeeDue> stored = new HashMap<>();
-        dues.findByStudent_AdmissionNo(admissionNo).forEach(d -> stored.put(key(d.getCourseName(), d.getPeriodStart()), d));
-        int inserted = 0;
-        int updated = 0;
-        List<FeeDue> toSave = new ArrayList<>();
-        for (DuesCalculator.Due due : result.dues()) {
-            FeeDue row = stored.remove(key(due.course(), due.term().start()));
-            if (row == null) {
-                row = new FeeDue(student, due.course(), due.term().start());
-                row.apply(due);
-                toSave.add(row);
-                inserted++;
-            } else if (row.apply(due)) {
-                toSave.add(row);
-                updated++;
+    /** Compares the calculated dues of these students with the stored ones and writes only the differences. */
+    private Impact recalculate(List<Long> ids, List<Timeline.Term> terms,
+                               Map<Long, List<DuesCalculator.Session>> sessions,
+                               Map<Long, List<DuesCalculator.Payment>> payments,
+                               Map<Long, List<DuesStore.Stored>> dues, boolean dryRun) {
+        long started = System.currentTimeMillis();
+        BigDecimal before = BigDecimal.ZERO;
+        BigDecimal after = BigDecimal.ZERO;
+        int affected = 0;
+        List<DuesStore.Row> inserts = new ArrayList<>();
+        List<DuesStore.Row> updates = new ArrayList<>();
+        List<Long> deletes = new ArrayList<>();
+        for (Long id : ids) {
+            DuesCalculator.Result result = DuesCalculator.calculate(terms, sessions.getOrDefault(id, List.of()),
+                    payments.getOrDefault(id, List.of()));
+            int changesBefore = inserts.size() + updates.size() + deletes.size();
+            for (DuesStore.Stored d : dues.getOrDefault(id, List.of())) {
+                before = before.add(d.balance());
+            }
+            for (DuesCalculator.Due d : result.dues()) {
+                after = after.add(d.balance());
+            }
+            Map<String, DuesStore.Stored> stored = new HashMap<>();
+            dues.getOrDefault(id, List.of()).forEach(d -> stored.put(key(d.course(), d.periodStart()), d));
+            for (DuesCalculator.Due due : result.dues()) {
+                DuesStore.Stored existing = stored.remove(key(due.course(), due.term().start()));
+                DuesStore.Row row = new DuesStore.Row(existing == null ? null : existing.id(), id, due.course(),
+                        due.term().start(), due.term().end(), due.term().structure().getId(), due.amount(),
+                        due.paid(), due.discount(), due.balance(), due.status());
+                if (existing == null) {
+                    inserts.add(row);
+                } else if (differs(existing, row)) {
+                    updates.add(row);
+                }
+            }
+            stored.values().forEach(d -> deletes.add(d.id()));
+            if (inserts.size() + updates.size() + deletes.size() > changesBefore) {
+                affected++;
             }
         }
-        dues.deleteAll(stored.values());
-        dues.saveAll(toSave);
-        return new Changes(inserted, updated, stored.size());
+        if (!dryRun) {
+            store.write(inserts, updates, deletes);
+        }
+        return new Impact(affected, inserts.size(), updates.size(), deletes.size(), before, after,
+                after.subtract(before), System.currentTimeMillis() - started);
+    }
+
+    private static boolean differs(DuesStore.Stored a, DuesStore.Row b) {
+        return !a.periodEnd().equals(b.periodEnd()) || a.structureId() != b.structureId()
+                || a.amount().compareTo(b.amount()) != 0 || a.paid().compareTo(b.paid()) != 0
+                || a.discount().compareTo(b.discount()) != 0 || a.balance().compareTo(b.balance()) != 0
+                || a.status() != b.status();
     }
 
     private DuesCalculator.Result calculate(Long admissionNo, List<Timeline.Term> terms) {
-        List<DuesCalculator.Session> spans = sessions.findAllSessionsByStudentId(admissionNo).stream()
-                .filter(s -> s.getCourse() != null)
-                .map(DuesService::span)
-                .toList();
-        List<DuesCalculator.Payment> paid = payments
-                .findByStudentAdmissionNoAndPaymentTypeAndIsActive(admissionNo, Payment.PaymentType.REGULAR, true)
-                .stream()
-                .filter(p -> p.getCourseName() != null)
-                .map(p -> new DuesCalculator.Payment(p.getId(), p.getCourseName(), p.getDate(), p.getAmountPaid(),
-                        p.getDiscountAmount()))
-                .toList();
-        return DuesCalculator.calculate(terms, spans, paid);
-    }
-
-    private static DuesCalculator.Session span(StudentSession s) {
-        return new DuesCalculator.Session(s.getCourse().getName(), s.getDateOfJoining().toLocalDate(),
-                s.getDateOfDisjoining() == null ? null : s.getDateOfDisjoining().toLocalDate());
+        return DuesCalculator.calculate(terms, store.sessions(admissionNo).getOrDefault(admissionNo, List.of()),
+                store.payments(admissionNo).getOrDefault(admissionNo, List.of()));
     }
 
     /** Terms that have started (REQ-075.AC2). */

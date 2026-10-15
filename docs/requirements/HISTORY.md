@@ -148,3 +148,19 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 
 - REQ-065.AC5 retired (it referred to periods); the conversion is audited with `originalType`, `convertedAt` and
   `convertedBy` (REQ-065.AC8, design).
+
+## 2026-10-16: Fast full recalculation (branch `fast-recalculation`)
+
+- Performance only, no requirement changed. On production a full recalculation took about 20 minutes (about 2.3 s per
+  student of round trips to Neon), so REQ-074.AC7 (timeline and structure changes recalculate everyone before
+  responding) would time out. The facts are now read in one query each and `fee_due` is written in JDBC batches:
+  600 students in about 0.15–0.35 s locally, with identical results on the production copy.
+
+## 2026-10-16: Impact of fee changes (branch `fee-change-impact`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Adding or changing a fee structure on the timeline starts the dues calculation; the frontend must see its status and ask for a double confirmation. The backend helps with an impact preview (dry run) and the result in the response. | User (options chosen) | REQ-057.AC9, REQ-058.AC9–AC11 |
+
+- The recalculation stays inside the request (it takes seconds since `fast-recalculation`), so the request itself is
+  the status. Timeline delete now answers 200 with its recalculation instead of 204 (REQ-058.AC5 retired).

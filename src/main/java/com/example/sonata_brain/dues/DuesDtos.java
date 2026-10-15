@@ -37,6 +37,17 @@ public final class DuesDtos {
         }
     }
 
+    /**
+     * What a recalculation of everyone changes (REQ-058.AC10): students whose dues change, due rows inserted, updated
+     * and deleted, and the total outstanding balance before and after.
+     */
+    public record Impact(int students, int inserted, int updated, int deleted, BigDecimal outstandingBefore,
+                         BigDecimal outstandingAfter, BigDecimal outstandingChange, long durationMs) {
+        Changes changes() {
+            return new Changes(inserted, updated, deleted);
+        }
+    }
+
     public record Job(String jobId, String scope, String status, int students, Changes changes, List<String> errors,
                       LocalDateTime startedAt, LocalDateTime finishedAt) {
     }

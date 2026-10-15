@@ -3,11 +3,14 @@ package com.example.sonata_brain.fees;
 import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.dues.DuesService;
 import com.example.sonata_brain.fees.FeeDtos.AmountRequest;
+import com.example.sonata_brain.dues.DuesDtos.Impact;
+import com.example.sonata_brain.fees.FeeDtos.StructureChange;
 import com.example.sonata_brain.fees.FeeDtos.StructureRequest;
 import com.example.sonata_brain.fees.FeeDtos.StructureResponse;
 import com.example.sonata_brain.repository.CourseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -51,7 +54,7 @@ public class FeeStructureService {
     }
 
     /** REQ-057.AC6/AC7: allowed while on the timeline, unless a later entry would fall off a term boundary. */
-    public StructureResponse update(Long id, StructureRequest request) {
+    public StructureChange update(Long id, StructureRequest request, boolean dryRun) {
         FeeStructure structure = find(id);
         Valid valid = validate(request);
         if (structures.existsByNameIgnoreCaseAndIdNot(valid.name(), id)) {
@@ -71,10 +74,12 @@ public class FeeStructureService {
         }
         structure.replace(valid.name(), valid.termMonths(), valid.amounts());
         structures.saveAndFlush(structure);
-        if (used) {
-            dues.recalculateAll();
+        Impact impact = used ? dues.recalculateAll(dryRun) : null;
+        StructureChange change = StructureChange.of(response(structure), dryRun, impact);
+        if (dryRun) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); // REQ-057.AC9: save nothing
         }
-        return response(structure);
+        return change;
     }
 
     public void delete(Long id) {

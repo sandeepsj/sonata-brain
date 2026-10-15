@@ -80,7 +80,21 @@ This branch replaces the per-year, per-term fee rows with three ideas. Read `doc
     message names the nearest valid dates, so show it as is. Offer a date picker of valid term starts: use the preview.
   - `GET /api/fee-timeline/preview?from=&to=` lists the terms `[{ periodStart, periodEnd, feeStructureName,
     amounts }]` without saving anything. Show it next to the editor.
-  - Every change recalculates all dues before the response returns (a few seconds at most).
+  - Every change recalculates all dues before the response returns (a second or two). If anything fails, the change
+    and the recalculation are both rolled back, so there is no half-applied state. The request itself is the
+    status: show a blocking "Updating fees and recalculating dues…" state until it returns.
+  - **Confirm before changing fees.** Add, change and delete accept `?dryRun=true`: the backend runs every check and
+    the whole recalculation, then saves nothing, and answers 200 with the impact. Use it for a two-step confirmation:
+    1. Call with `dryRun=true` and show the preview terms plus the impact: "From 1 Oct 2026 · 412 students' dues
+       change · outstanding ₹35,89,950 → ₹36,38,550 (+₹48,600)".
+    2. Make the admin confirm explicitly (tick "I understand" or type the start date), then send the same request
+       without `dryRun`.
+    3. Show the `recalculation` from the real response as the result.
+  - Every response carries `recalculation: { students, inserted, updated, deleted, outstandingBefore,
+    outstandingAfter, outstandingChange, durationMs }` and `dryRun`. Delete now answers 200 with that body (not 204).
+  - `PUT /api/fee-structures/{id}` works the same when the structure is on the timeline (`usedInTimeline: true`):
+    same `dryRun` and `recalculation`. For an unused structure, `recalculation` is `null` and no confirmation is
+    needed.
 - **Dues** are calculated, never edited:
   - `GET /api/dues?studentId=&courseName=&status=&from=&to=` returns `{ studentId, studentName, courseName,
     periodStart, periodEnd, feeStructureName, amount, paidAmount, discountAmount, balance, status }`, where status

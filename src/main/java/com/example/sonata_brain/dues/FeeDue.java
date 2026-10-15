@@ -16,9 +16,8 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
-/** A calculated due: one per (student, course, term). Written only by {@link DuesService} (REQ-070). */
+/** A calculated due: one per (student, course, term). Read-only here; written by {@link DuesStore} (REQ-070). */
 @Entity
 @Table(name = "fee_due")
 public class FeeDue {
@@ -61,32 +60,6 @@ public class FeeDue {
     private DueStatus status;
 
     protected FeeDue() {
-    }
-
-    FeeDue(Student student, String courseName, LocalDate periodStart) {
-        this.student = student;
-        this.courseName = courseName;
-        this.periodStart = periodStart;
-    }
-
-    /** Copies the calculated values; returns whether anything changed. */
-    boolean apply(DuesCalculator.Due due) {
-        boolean changed = !Objects.equals(periodEnd, due.term().end())
-                || structure == null || !Objects.equals(structure.getId(), due.term().structure().getId())
-                || differs(amount, due.amount()) || differs(paidAmount, due.paid())
-                || differs(discountAmount, due.discount()) || differs(balance, due.balance()) || status != due.status();
-        periodEnd = due.term().end();
-        structure = due.term().structure();
-        amount = due.amount();
-        paidAmount = due.paid();
-        discountAmount = due.discount();
-        balance = due.balance();
-        status = due.status();
-        return changed;
-    }
-
-    private static boolean differs(BigDecimal a, BigDecimal b) {
-        return a == null || b == null || a.compareTo(b) != 0;
     }
 
     public Long getId() {
