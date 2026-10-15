@@ -140,6 +140,15 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - `fee_due` is written by comparing each student's calculated dues with the stored rows (update, insert, delete),
   not by clearing the table, so unchanged dues keep their ids. *(design, user asked)*
 
+## 2026-10-16: Convert an additional payment into a course fee (branch `payment-conversion`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Convert an ADDITIONAL payment into a REGULAR one, and the conversion must bring the dues in sync. | User | REQ-065.AC7, REQ-065.AC9 |
+
+- REQ-065.AC5 retired (it referred to periods); the conversion is audited with `originalType`, `convertedAt` and
+  `convertedBy` (REQ-065.AC8, design).
+
 ## 2026-10-16: Fast full recalculation (branch `fast-recalculation`)
 
 - Performance only, no requirement changed. On production a full recalculation took about 20 minutes (about 2.3 s per

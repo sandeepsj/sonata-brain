@@ -4383,6 +4383,130 @@
         ]
       }
     },
+    "/api/payments/{id}/convert-to-course-fee": {
+      "post": {
+        "description": "Needs **write** on route `/api/payments/**`.",
+        "operationId": "convertToCourseFee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "payment-controller"
+        ]
+      }
+    },
     "/api/payments/{id}/deactivate": {
       "patch": {
         "description": "Needs **write** on route `/api/payments/**`.",
@@ -7820,6 +7944,13 @@
           "amountPaid": {
             "type": "number"
           },
+          "convertedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "convertedBy": {
+            "type": "string"
+          },
           "courseName": {
             "type": "string"
           },
@@ -7852,6 +7983,13 @@
           },
           "label": {
             "type": "string"
+          },
+          "originalType": {
+            "type": "string",
+            "enum": [
+              "REGULAR",
+              "ADDITIONAL"
+            ]
           },
           "paymentType": {
             "type": "string",
