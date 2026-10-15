@@ -30,10 +30,21 @@ What a run does:
 
 ## In the Postman app
 
-Import every file in `collections/` plus `local.postman_environment.json`, and select the "Sonata local"
-environment. Start a backend with `node run.js --keep-server`, or point `baseUrl` at your own. Run `00 Setup`
-first (and `00 Before each` if the collection has one), then any case folder. Some cases count records, for
-example "12 students give 2 pages", so they only pass on an empty database. `run.js` takes care of that.
+1. **Import** every file in `collections/` plus `local.postman_environment.json`, and select the "Sonata local"
+   environment.
+2. **Start a backend.** `node run.js --keep-server RTE-open` gives you a fresh database on
+   http://localhost:18080. To use your own server instead, change `baseUrl`, `adminEmail` and `adminPassword` in
+   the environment.
+3. **Run.** Right-click a collection and choose **Run collection**. For a single case, tick only `00 Setup`,
+   `00 Before each` (if the collection has one) and that case.
+   - `00 Setup` logs in as the admin. Run it again after 30 minutes, when the token expires.
+   - **Route access** runs fine end to end, because each case creates its own users.
+   - **Feature collections:** some cases need an empty database, for example "first admission number is 1" or
+     "12 students give 2 pages". So a whole feature collection run in the app can fail where `run.js`, which empties
+     the tables before every case, passes.
+   - The Dues "retry until updated" requests only retry inside the Collection Runner.
+4. **Keep changes.** If you edit in the app, export the collection (**⋯ → Export → v2.1**) over its file in
+   `collections/`, so git and `npm test` see the change.
 
 ## Writing a case
 
@@ -65,6 +76,11 @@ example "12 students give 2 pages", so they only pass on an empty database. `run
   pattern from any `DUE-L` case: `pm.execution.setNextRequest(pm.info.requestName)`, up to 30 times.
 - **Error bodies:** where a case expects the standard error body, it checks `status`, `error`, `message`,
   `details` and `timestamp`.
+
+**Route access** (`route-access.postman_collection.json`) has one case per catalogue route. It calls every endpoint
+of that route without a token and as four users: read-only on the route, write-only on the route, every other route,
+and no routes. When you add an endpoint, add its five requests to its route's case. Copy them from a sibling
+endpoint and use an unknown id such as 999999, so an allowed call changes nothing.
 
 For a new feature, add the requirement to `docs/requirements` first, then the cases, then the code. `npm test`
 must be green before every commit.

@@ -60,6 +60,12 @@ Status: implemented · Source: user, 2026-10-04; changed 2026-10-15
   user with neither flag gets 403 on both.
 - **REQ-011.AC9** [target] Access is decided from the token alone. A role change applies when the user next logs in
   or refreshes; until then their current access token keeps its old routes (at most 30 minutes).
+- **REQ-011.AC10** [target] Every endpoint under a catalogue path is guarded by that route alone: without a token → 401;
+  a user with no routes, or with read and write on every *other* route → 403; `read` on the route lets its `GET`
+  endpoints through and gets 403 on its writes; `write` lets its writes through and gets 403 on its `GET`s.
+- **REQ-011.AC11** [target] The open endpoints (`POST /api/auth/login`, `POST /api/auth/refresh`,
+  `POST /api/users/signup`, `GET /heartbeat`) work without an access token. `GET /api/users/me` needs a valid access
+  token but no route.
 
 ### REQ-012 Named roles
 Status: implemented · Source: user, 2026-10-04; changed 2026-10-15

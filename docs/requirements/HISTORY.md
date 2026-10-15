@@ -96,3 +96,9 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - All 112 cases that were green in the YAML suite were ported, keeping their IDs and `Proves:` citations. Not ported:
   PLT-T01 and PLT-T02 (still red, REQ-005.AC1/AC2), PLT-T05 (a SQL check; a failed migration already stops the
   runner), and the fee-timeline migration specs (that feature is not on this branch).
+
+## 2026-10-15: Route-based auth tested on every endpoint
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Make test cases that check the route-based auth works for each of the APIs. | User | REQ-011.AC10, REQ-011.AC11 |
