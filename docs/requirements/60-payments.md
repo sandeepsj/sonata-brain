@@ -82,10 +82,17 @@ Status: accepted · Source: user ("admin staff sometimes mark payments as additi
 - **REQ-065.AC3** [retired] `periodDate` checks on conversion. Replaced by REQ-065.AC7.
 - **REQ-065.AC4** [target] Converting a payment that is already REGULAR → 409. An inactive payment → 409. An unknown
   payment → 404.
-- **REQ-065.AC5** [target] After conversion, the student's dues show the payment applied to that period.
+- **REQ-065.AC5** [retired] Dues show the payment applied to "that period". Payments have no period; replaced by
+  REQ-065.AC9.
 - **REQ-065.AC6** [target] The payment ID, amount, date, discounts and remarks are unchanged by conversion.
-- **REQ-065.AC7** [target] `POST /api/payments/{id}/convert-to-course-fee` `{courseName?}` → 200; the payment becomes
-  REGULAR with the same checks as REQ-060.AC14, and dues are recalculated. *(not built yet)*
+- **REQ-065.AC7** [target] `POST /api/payments/{id}/convert-to-course-fee` `{courseName?}` → 200 with the payment; it
+  becomes REGULAR with the same checks as REQ-060.AC14: the course must exist and the student must have (or have had)
+  a session in it → otherwise 400, and nothing changes. A `courseName` in the body replaces the payment's course.
+- **REQ-065.AC8** [target] The converted payment shows `originalType: "ADDITIONAL"`, `convertedAt` (when) and
+  `convertedBy` (the email of the user who converted it). Payments that were never converted show `null` for all
+  three.
+- **REQ-065.AC9** [target] The student's dues are recalculated before the response returns: the converted amount and its
+  discounts fill the oldest open term of that course like any REGULAR payment (REQ-071.AC8).
 
 ### REQ-066 Query payments
 Status: accepted · Source: existing code

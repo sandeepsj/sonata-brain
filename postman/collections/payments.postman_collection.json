@@ -3937,6 +3937,1049 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "PAY-060 An additional payment with a course becomes a course fee, keeps its details and pays dues at once",
+			"description": "Proves: REQ-065.AC7, REQ-065.AC8, REQ-065.AC9, REQ-065.AC6",
+			"item": [
+				{
+					"name": "PAY-060 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 1000,\n  \"label\": \"Exam fee\",\n  \"remarks\": \"cash\",\n  \"date\": \"2025-02-10T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"courseName\": \"Violin\", \"amountPaid\": 1000, \"label\": \"Exam fee\", \"remarks\": \"cash\", \"date\": \"2025-02-10T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.originalType, \"originalType\").to.eql(null);",
+									"  pm.expect(b?.convertedAt, \"convertedAt\").to.eql(null);",
+									"  pm.expect(b?.convertedBy, \"convertedBy\").to.eql(null);",
+									"});",
+									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-060 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}&status=PAID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "status",
+									"value": "PAID"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(0);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-060 03 POST /api/payments/{{pid}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"pid\"));",
+									"  pm.expect(b?.paymentType, \"paymentType\").to.eql(\"REGULAR\");",
+									"  pm.expect(b?.courseName, \"courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.amountPaid, \"amountPaid\").to.eql(1000);",
+									"  pm.expect(b?.label, \"label\").to.eql(\"Exam fee\");",
+									"  pm.expect(b?.remarks, \"remarks\").to.eql(\"cash\");",
+									"  pm.expect(b?.date, \"date\").to.eql(\"2025-02-10T10:00:00\");",
+									"  pm.expect(b?.isActive, \"isActive\").to.eql(true);",
+									"  pm.expect(b?.originalType, \"originalType\").to.eql(\"ADDITIONAL\");",
+									"  pm.expect(b?.convertedBy, \"convertedBy\").to.eql(\"root@sonata.test\");",
+									"  pm.expect(b?.convertedAt, \"convertedAt\").to.match(new RegExp(pm.variables.replaceIn(\"^{{today}}T\"), \"\"));",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-060 04 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[0]?.paidAmount, \"[0].paidAmount\").to.eql(1000);",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-060 05 GET /api/payments/{{pid}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.paymentType, \"paymentType\").to.eql(\"REGULAR\");",
+									"  pm.expect(b?.originalType, \"originalType\").to.eql(\"ADDITIONAL\");",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-061 The course can be given when converting, and the payment's discounts come along",
+			"description": "Proves: REQ-065.AC2, REQ-065.AC6, REQ-065.AC9",
+			"item": [
+				{
+					"name": "PAY-061 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 1400,\n  \"label\": \"Misc\",\n  \"discounts\": [\n    {\n      \"discountAmount\": 100,\n      \"label\": \"Sibling\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 1400, \"label\": \"Misc\", \"discounts\": [{\"discountAmount\": 100, \"label\": \"Sibling\"}]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.courseName, \"courseName\").to.eql(null);",
+									"});",
+									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-061 02 POST /api/payments/{{pid}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseName\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.paymentType, \"paymentType\").to.eql(\"REGULAR\");",
+									"  pm.expect(b?.courseName, \"courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.amountPaid, \"amountPaid\").to.eql(1400);",
+									"  pm.expect(b?.discountAmount, \"discountAmount\").to.eql(100);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-061 03 GET /api/discounts/payment/{{pid}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/discounts/payment/{{pid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"discounts",
+								"payment",
+								"{{pid}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.discountAmount, \"[0].discountAmount\").to.eql(100);",
+									"  pm.expect(b?.[0]?.label, \"[0].label\").to.eql(\"Sibling\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-061 04 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect(b?.[0]?.periodStart, \"[0].periodStart\").to.eql(\"2025-01-01\");",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"PAID\");",
+									"  pm.expect(b?.[0]?.paidAmount, \"[0].paidAmount\").to.eql(900);",
+									"  pm.expect(b?.[0]?.discountAmount, \"[0].discountAmount\").to.eql(100);",
+									"  pm.expect(b?.[1]?.periodStart, \"[1].periodStart\").to.eql(\"2025-04-01\");",
+									"  pm.expect(b?.[1]?.status, \"[1].status\").to.eql(\"PARTIALLY_PAID\");",
+									"  pm.expect(b?.[1]?.paidAmount, \"[1].paidAmount\").to.eql(500);",
+									"  pm.expect(b?.[1]?.balance, \"[1].balance\").to.eql(500);",
+									"  pm.expect(b?.[2]?.periodStart, \"[2].periodStart\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.[2]?.status, \"[2].status\").to.eql(\"DUE\");",
+									"  pm.expect(b?.[3]?.periodStart, \"[3].periodStart\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.[3]?.status, \"[3].status\").to.eql(\"DUE\");",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-062 Converting needs a known course the student is enrolled in; otherwise nothing changes",
+			"description": "Proves: REQ-065.AC2, REQ-065.AC7",
+			"item": [
+				{
+					"name": "PAY-062 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"amountPaid\": 500,\n  \"label\": \"Misc\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"amountPaid\": 500, \"label\": \"Misc\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"pid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-062 02 POST /api/payments/{{pid}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"courseName\"))), \"details includes {\\\"field\\\": \\\"courseName\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-062 03 POST /api/payments/{{pid}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseName\": \"Cello\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"Cello\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"Cello\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-062 04 POST /api/payments/{{pid}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"courseName\": \"Piano\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"no session\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"no session\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-062 05 GET /api/payments/{{pid}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{pid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{pid}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.paymentType, \"paymentType\").to.eql(\"ADDITIONAL\");",
+									"  pm.expect(b?.courseName, \"courseName\").to.eql(null);",
+									"  pm.expect(b?.originalType, \"originalType\").to.eql(null);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PAY-063 Only an active additional payment can be converted",
+			"description": "Proves: REQ-065.AC4",
+			"item": [
+				{
+					"name": "PAY-063 01 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"regular\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-063 02 POST /api/payments/{{regular}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{regular}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{regular}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-063 03 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 100,\n  \"label\": \"Misc\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"courseName\": \"Violin\", \"amountPaid\": 100, \"label\": \"Misc\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"deactivated\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-063 04 PATCH /api/payments/{{deactivated}}/deactivate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{deactivated}}/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{deactivated}}",
+								"deactivate"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-063 05 POST /api/payments/{{deactivated}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{deactivated}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{deactivated}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PAY-063 06 POST /api/payments/999999/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/999999/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"999999",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
 		}
 	]
 }

@@ -2,8 +2,8 @@
 
 Paste the block below into a Claude Code session opened in `~/dev/sonata-face`.
 
-One decision is built in. Screens whose endpoints this backend branch doesn't have (course close/reopen, payment
-conversion, dues aggregate, waivers, legacy comparison) are **disabled, not deleted or rewired**. Change step 8 if
+One decision is built in. Screens whose endpoints this backend branch doesn't have (course close/reopen, dues aggregate,
+waivers, legacy comparison) are **disabled, not deleted or rewired**. Change step 8 if
 that has been decided.
 
 ```text
@@ -64,7 +64,9 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
      `credit`. Add an admin "Recalculate dues" action using the rebuild job.
    - Payments: remove the term/period picker; send `paymentType`, `courseName` and a required `label`. Explain that a
      course fee pays the oldest unpaid term first. "Forgive a term" = a ₹0 REGULAR payment with a discount.
-8. Screens whose endpoints don't exist on the backend branch (course close/reopen, payment convert-to-course-fee,
+   - "Convert to course fee" action on ADDITIONAL payments: `POST /api/payments/{id}/convert-to-course-fee`
+     `{ courseName? }`; refresh the student's dues afterwards.
+8. Screens whose endpoints don't exist on the backend branch (course close/reopen,
    dues aggregate, waivers, legacy comparison, the query-param list endpoints for sessions and payments): do NOT
    delete them and do NOT rewire them to other endpoints. Hide them from navigation behind one feature flag and
    leave the code intact. List them in your final summary.

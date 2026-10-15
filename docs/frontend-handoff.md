@@ -96,6 +96,13 @@ This branch replaces the per-year, per-term fee rows with three ideas. Read `doc
     period picker and no upper limit.
   - To **forgive** a term (for example, a student left early), record a ₹0 REGULAR payment with a discount labelled
     with the reason. Dues are recalculated straight away.
+  - **Convert to course fee:** an ADDITIONAL payment that was really a course fee is converted with
+    `POST /api/payments/{id}/convert-to-course-fee` `{ courseName? }`. It keeps its id, amount, date, label and
+    discounts, and becomes REGULAR. `originalType`, `convertedAt` and `convertedBy` record the conversion. The
+    student's dues update before the response returns.
+    - Leave out `courseName` if the payment already has a course.
+    - 400 when the student isn't enrolled in that course; 409 when the payment is already REGULAR or deactivated.
+    - Offer this as an action on ADDITIONAL payments.
 
 ## Known gaps in the spec
 - **Untyped success responses.** These say "object" because the controllers return untyped maps:
@@ -117,7 +124,7 @@ per-course structures. This branch has school-wide ones, so the fee screens need
 | `GET/POST /api/students`, `GET /api/students/search` | Exist |
 | `GET/POST /api/courses` | Exist. `PATCH /api/courses/{name}/close` and `/reopen` and `?status=` **don't** |
 | `POST /api/student-sessions`, `PATCH /api/student-sessions/{id}/disjoin` | Exist. The list `GET /api/student-sessions?studentId=&courseName=…` **doesn't**; use `/all`, `/search?course=`, `/active/*` |
-| `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with `paymentType` and **no** `periodDate` or `termId` (section 4). `convert-to-course-fee` and the filter params **don't** |
+| `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with `paymentType` and **no** `periodDate` or `termId` (section 4). `convert-to-course-fee` exists (`{ courseName? }`); the filter params **don't** |
 | `/api/fee-structures` | Exist in the **new school-wide shape** (section 4). No `courseName`, `termsPerYear` or clone |
 | `/api/fee-timeline`, `/api/fee-timeline/preview` | Exist, **school-wide** (no `courseName`), boundary-only (section 4) |
 | `/api/dues?…`, `/api/dues/summary?studentId=`, `/api/dues/rebuild*` | Exist (section 4). `/api/dues/aggregate`, `/api/dues/waivers` and `/api/dues/legacy-comparison` **don't** (waivers were replaced by ₹0 discount payments) |

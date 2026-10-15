@@ -101,6 +101,13 @@ public class PaymentController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    /** REQ-065: errors use the standard error body (thrown as ApiException, handled globally). */
+    @PostMapping("/{id}/convert-to-course-fee")
+    public Payment convertToCourseFee(@PathVariable Long id,
+                                      @RequestBody(required = false) Map<String, String> body) {
+        return paymentService.convertToCourseFee(id, body == null ? null : body.get("courseName"));
+    }
+
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<?> deactivatePayment(@PathVariable Long id) {
         try {
