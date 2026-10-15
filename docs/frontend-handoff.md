@@ -1,4 +1,4 @@
-# Frontend handoff (backend branch `dues-timeline`)
+# Frontend handoff (backend `main`)
 
 ## The contract
 - **`docs/api/openapi.json`** is the source of truth: an OpenAPI 3 spec generated from the backend code. It is
@@ -117,7 +117,7 @@ This branch replaces the per-year, per-term fee rows with three ideas. Read `doc
 `sonata-face` was written against the old rewrite branch (`design/fee-timeline-and-permissions`), which had
 per-course structures. This branch has school-wide ones, so the fee screens need changing. The frontend's calls today:
 
-| Frontend calls | On `dues-timeline` |
+| Frontend calls | On the backend (`main`) |
 |---|---|
 | `POST /api/auth/login`, `/api/auth/refresh`, `GET /api/users/me` | Exist; `permissions` became `routes` (section 1) |
 | `GET/POST/PUT/DELETE /api/roles`, `GET /api/users`, `PUT /api/users/{id}/roles`, `POST /api/users/signup` | Exist; role body uses `routes` |
