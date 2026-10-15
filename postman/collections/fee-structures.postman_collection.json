@@ -24,10 +24,10 @@
 					"const pad = (n) => String(n).padStart(2, '0');",
 					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
 					"pm.collectionVariables.set('today', day(0));",
-					"for (const n of [-100, -60, -50, -40, -30, -20, -10, -6, -5, 1]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"for (const n of [-60, -40, -20, -10, -6, -5]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
 					"const year = new Date().getFullYear();",
 					"pm.collectionVariables.set('year', year);",
-					"for (const n of [-1, 1]) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+					"for (const n of []) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
 				]
 			}
 		}
@@ -138,15 +138,9 @@
 							}
 						}
 					]
-				}
-			]
-		},
-		{
-			"name": "FEE-L01 A year's fee structure is created as one row per term",
-			"description": "Proves: REQ-050.AC7",
-			"item": [
+				},
 				{
-					"name": "FEE-L01 01 POST /api/fee-structures",
+					"name": "Before 02 POST /api/courses",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -156,76 +150,18 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures",
+							"raw": "{{baseUrl}}/api/courses",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures"
+								"courses"
 							]
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": 2025,\n  \"numberOfTerms\": 4,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 3,\n      \"amount\": 1200\n    },\n    {\n      \"term\": 4,\n      \"amount\": 1200\n    }\n  ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(200);",
-									"});",
-									"pm.test(\"body\", () => {",
-									"  const b = pm.response.json();",
-									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((y?.course !== null && typeof y?.course === 'object' && !Array.isArray(y?.course)) && (y?.course?.name === \"Violin\")) && (y?.year === 2025) && (y?.term === 1) && (y?.amount === 1000) && (y?.isActive === true) && ((Number.isInteger(y?.id))))), \" includes {\\\"course\\\": {\\\"name\\\": \\\"Violin\\\"}, \\\"year\\\": 2025, \\\"term\\\": 1, \\\"amount\\\": 1000, \\\"isActive\\\": true, \\\"id\\\": {\\\"$type\\\": \\\"integer\\\"}}\").to.be.true;",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((y?.course !== null && typeof y?.course === 'object' && !Array.isArray(y?.course)) && (y?.course?.name === \"Violin\")) && (y?.year === 2025) && (y?.term === 2) && (y?.amount === 1000) && (y?.isActive === true))), \" includes {\\\"course\\\": {\\\"name\\\": \\\"Violin\\\"}, \\\"year\\\": 2025, \\\"term\\\": 2, \\\"amount\\\": 1000, \\\"isActive\\\": true}\").to.be.true;",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((y?.course !== null && typeof y?.course === 'object' && !Array.isArray(y?.course)) && (y?.course?.name === \"Violin\")) && (y?.year === 2025) && (y?.term === 3) && (y?.amount === 1200) && (y?.isActive === true))), \" includes {\\\"course\\\": {\\\"name\\\": \\\"Violin\\\"}, \\\"year\\\": 2025, \\\"term\\\": 3, \\\"amount\\\": 1200, \\\"isActive\\\": true}\").to.be.true;",
-									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((y?.course !== null && typeof y?.course === 'object' && !Array.isArray(y?.course)) && (y?.course?.name === \"Violin\")) && (y?.year === 2025) && (y?.term === 4) && (y?.amount === 1200) && (y?.isActive === true))), \" includes {\\\"course\\\": {\\\"name\\\": \\\"Violin\\\"}, \\\"year\\\": 2025, \\\"term\\\": 4, \\\"amount\\\": 1200, \\\"isActive\\\": true}\").to.be.true;",
-									"});"
-								]
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "FEE-L02 A second fee structure for the same course and year is rejected",
-			"description": "Proves: REQ-050.AC7",
-			"item": [
-				{
-					"name": "FEE-L02 01 POST /api/fee-structures",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"fee-structures"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": 2025,\n  \"numberOfTerms\": 1,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 5000\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Piano\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -248,7 +184,51 @@
 					]
 				},
 				{
-					"name": "FEE-L02 02 POST /api/fee-structures",
+					"name": "Before 03 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Guitar\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 04 POST /api/fee-structures",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -269,7 +249,322 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": 2025,\n  \"numberOfTerms\": 1,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 6000\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1000\n    },\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 05 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{std}}\",\n  \"effectiveFrom\": \"2025-01-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"std\"), \"effectiveFrom\": \"2025-01-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"entry\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 06 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Asha\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"asha\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 07 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-01-10T10:00:00\",\n  \"dateOfDisjoining\": \"2025-12-20T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-01-10T10:00:00\", \"dateOfDisjoining\": \"2025-12-20T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Before 08 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Ravi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ravi\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-001 A structure has a name, a term length and an amount per course",
+			"description": "Proves: REQ-057.AC1",
+			"item": [
+				{
+					"name": "FS-001 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Revised 2025\",\n  \"termMonths\": 4,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1250.5\n    },\n    {\n      \"courseName\": \"Guitar\",\n      \"amount\": 0\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((Number.isInteger(b?.id))), \"id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Revised 2025\");",
+									"  pm.expect(b?.termMonths, \"termMonths\").to.eql(4);",
+									"  pm.expect(b?.usedInTimeline, \"usedInTimeline\").to.eql(false);",
+									"  pm.expect(b?.amounts, \"amounts length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.amounts?.[0]?.courseName, \"amounts[0].courseName\").to.eql(\"Guitar\");",
+									"  pm.expect(b?.amounts?.[0]?.amount, \"amounts[0].amount\").to.eql(0);",
+									"  pm.expect(b?.amounts?.[1]?.courseName, \"amounts[1].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.amounts?.[1]?.amount, \"amounts[1].amount\").to.eql(1250.5);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-002 [1] The term length must be a whole number of months from 1 to 12",
+			"description": "Proves: REQ-057.AC2",
+			"item": [
+				{
+					"name": "FS-002 [1] 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bad 0\",\n  \"termMonths\": 0,\n  \"amounts\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -288,7 +583,248 @@
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"already exists\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"already exists\\\"}\").to.be.true;",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"termMonths\"))), \"details includes {\\\"field\\\": \\\"termMonths\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-002 [2] The term length must be a whole number of months from 1 to 12",
+			"description": "Proves: REQ-057.AC2",
+			"item": [
+				{
+					"name": "FS-002 [2] 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bad 13\",\n  \"termMonths\": 13,\n  \"amounts\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"termMonths\"))), \"details includes {\\\"field\\\": \\\"termMonths\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-002 [3] The term length must be a whole number of months from 1 to 12",
+			"description": "Proves: REQ-057.AC2",
+			"item": [
+				{
+					"name": "FS-002 [3] 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bad -3\",\n  \"termMonths\": -3,\n  \"amounts\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"termMonths\"))), \"details includes {\\\"field\\\": \\\"termMonths\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-002 [4] The term length must be a whole number of months from 1 to 12",
+			"description": "Proves: REQ-057.AC2",
+			"item": [
+				{
+					"name": "FS-002 [4] 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bad None\",\n  \"termMonths\": null,\n  \"amounts\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"termMonths\"))), \"details includes {\\\"field\\\": \\\"termMonths\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-003 Blank name, negative amount, unknown course or a repeated course are rejected",
+			"description": "Proves: REQ-057.AC3",
+			"item": [
+				{
+					"name": "FS-003 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"  \",\n  \"termMonths\": 3,\n  \"amounts\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"name\"))), \"details includes {\\\"field\\\": \\\"name\\\"}\").to.be.true;",
 									"});"
 								]
 							}
@@ -296,22 +832,177 @@
 					]
 				},
 				{
-					"name": "FEE-L02 03 GET /api/fee-structures/by-course/Violin/year/2025",
+					"name": "FS-003 02 POST /api/fee-structures",
 					"request": {
-						"method": "GET",
-						"header": [],
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/api/fee-structures/by-course/Violin/year/2025",
+							"raw": "{{baseUrl}}/api/fee-structures",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"fee-structures",
-								"by-course",
-								"Violin",
-								"year",
-								"2025"
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Negative\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": -1\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((typeof y?.field === 'string' && new RegExp(\"^amounts\", \"\").test(y?.field))))), \"details includes {\\\"field\\\": {\\\"$regex\\\": \\\"^amounts\\\"}}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-003 03 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Unknown\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Cello\",\n      \"amount\": 100\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"Cello\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"Cello\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-003 04 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Twice\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 100\n    },\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"Violin\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"Violin\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-003 05 GET /api/fee-structures",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
 							]
 						}
 					},
@@ -327,7 +1018,6 @@
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
 									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
-									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(5000);",
 									"});"
 								]
 							}
@@ -337,11 +1027,11 @@
 			]
 		},
 		{
-			"name": "FEE-L03 Every term from 1 to numberOfTerms must be given",
-			"description": "Proves: REQ-050.AC7",
+			"name": "FS-004 Structure names are unique, ignoring case",
+			"description": "Proves: REQ-057.AC4",
 			"item": [
 				{
-					"name": "FEE-L03 01 POST /api/fee-structures",
+					"name": "FS-004 01 POST /api/fee-structures",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -362,7 +1052,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Violin\",\n  \"year\": 2025,\n  \"numberOfTerms\": 4,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 2,\n      \"amount\": 1000\n    },\n    {\n      \"term\": 4,\n      \"amount\": 1000\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"STANDARD\",\n  \"termMonths\": 6,\n  \"amounts\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -377,11 +1067,15 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
+									"  pm.response.to.have.status(409);",
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"Missing terms: 3\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"Missing terms: 3\\\"}\").to.be.true;",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
 									"});"
 								]
 							}
@@ -391,11 +1085,11 @@
 			]
 		},
 		{
-			"name": "FEE-L04 An unknown course is rejected with 400",
-			"description": "Proves: REQ-050.AC7",
+			"name": "FS-005 Structures are listed by name with usedInTimeline, and fetched by id",
+			"description": "Proves: REQ-057.AC5",
 			"item": [
 				{
-					"name": "FEE-L04 01 POST /api/fee-structures",
+					"name": "FS-005 01 POST /api/fee-structures",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -416,7 +1110,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"courseId\": \"Cello\",\n  \"year\": 2025,\n  \"numberOfTerms\": 1,\n  \"termFees\": [\n    {\n      \"term\": 1,\n      \"amount\": 1000\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Annual\",\n  \"termMonths\": 12,\n  \"amounts\": [\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 4000\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -431,11 +1125,668 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(400);",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"annual\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-005 02 GET /api/fee-structures",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
 									"});",
 									"pm.test(\"body\", () => {",
 									"  const b = pm.response.json();",
-									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"not found\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"not found\\\"}\").to.be.true;",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Annual\");",
+									"  pm.expect(b?.[0]?.usedInTimeline, \"[0].usedInTimeline\").to.eql(false);",
+									"  pm.expect(b?.[1]?.name, \"[1].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[1]?.usedInTimeline, \"[1].usedInTimeline\").to.eql(true);",
+									"  pm.expect(b?.[1]?.termMonths, \"[1].termMonths\").to.eql(3);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-005 03 GET /api/fee-structures/{{annual}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{annual}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{annual}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"annual\"));",
+									"  pm.expect(b?.amounts, \"amounts length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.amounts?.[0]?.courseName, \"amounts[0].courseName\").to.eql(\"Piano\");",
+									"  pm.expect(b?.amounts?.[0]?.amount, \"amounts[0].amount\").to.eql(4000);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-005 04 GET /api/fee-structures/999999",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"999999"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-006 A structure on the timeline can be edited unless its new term length breaks a later boundary",
+			"description": "Proves: REQ-057.AC6",
+			"item": [
+				{
+					"name": "FS-006 01 PUT /api/fee-structures/{{std}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{std}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1100\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.amounts, \"amounts length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.amounts?.[0]?.courseName, \"amounts[0].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.amounts?.[0]?.amount, \"amounts[0].amount\").to.eql(1100);",
+									"  pm.expect(b?.usedInTimeline, \"usedInTimeline\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-006 02 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Later\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 900\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"later\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-006 03 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{later}}\",\n  \"effectiveFrom\": \"2025-07-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"later\"), \"effectiveFrom\": \"2025-07-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-006 04 PUT /api/fee-structures/{{std}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{std}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 4,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1100\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(((typeof b?.message === 'string' && b?.message.toLowerCase().includes(String(\"2025-07-01\").toLowerCase()))), \"message matches {\\\"$contains\\\": \\\"2025-07-01\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-006 05 PUT /api/fee-structures/{{std}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{std}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 6,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1100\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.termMonths, \"termMonths\").to.eql(6);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-006 06 GET /api/fee-structures/{{std}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{std}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.termMonths, \"termMonths\").to.eql(6);",
+									"  pm.expect(b?.amounts, \"amounts length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.amounts?.[0]?.courseName, \"amounts[0].courseName\").to.eql(\"Violin\");",
+									"  pm.expect(b?.amounts?.[0]?.amount, \"amounts[0].amount\").to.eql(1100);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-007 Editing a structure on the timeline recalculates the dues",
+			"description": "Proves: REQ-057.AC7, REQ-074.AC7",
+			"item": [
+				{
+					"name": "FS-007 01 PUT /api/fee-structures/{{std}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{std}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1100\n    },\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-007 02 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.amount === 1100) && (y?.balance === 1100))), \": every item matches {\\\"amount\\\": 1100, \\\"balance\\\": 1100}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "FS-008 Only a structure that isn't on the timeline can be deleted",
+			"description": "Proves: REQ-057.AC8",
+			"item": [
+				{
+					"name": "FS-008 01 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Spare\",\n  \"termMonths\": 1,\n  \"amounts\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"spare\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-008 02 DELETE /api/fee-structures/{{spare}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{spare}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{spare}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-008 03 DELETE /api/fee-structures/{{std}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{std}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "FS-008 04 DELETE /api/fee-structures/{{spare}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures/{{spare}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures",
+								"{{spare}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
 									"});"
 								]
 							}

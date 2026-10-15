@@ -6,12 +6,10 @@ import com.example.sonata_brain.model.Discount;
 import com.example.sonata_brain.model.Payment;
 import com.example.sonata_brain.repository.DiscountRepository;
 import com.example.sonata_brain.repository.PaymentRepository;
-import com.example.sonata_brain.service.payment.AdditionalPaymentStrategy;
-import com.example.sonata_brain.service.payment.PaymentStrategy;
-import com.example.sonata_brain.service.payment.RegularPaymentStrategy;
-import com.example.sonata_brain.service.dues.events.DuesTrackerEventPublisher;
-import com.example.sonata_brain.service.dues.events.PaymentCreatedEvent;
-import com.example.sonata_brain.service.dues.events.PaymentDeactivatedEvent;
+import com.example.sonata_brain.Repository.StudentRepository;
+import com.example.sonata_brain.dues.DuesService;
+import com.example.sonata_brain.repository.CourseRepository;
+import com.example.sonata_brain.repository.StudentSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,32 +29,36 @@ public class PaymentService {
     private DiscountRepository discountRepository;
 
     @Autowired
-    private RegularPaymentStrategy regularPaymentStrategy;
+    private StudentRepository studentRepository;
 
     @Autowired
-    private AdditionalPaymentStrategy additionalPaymentStrategy;
+    private CourseRepository courseRepository;
 
     @Autowired
-    private DuesTrackerEventPublisher eventPublisher;
+    private StudentSessionRepository studentSessionRepository;
+
+    @Autowired
+    private DuesService duesService;
 
     // Using generic ApplicationLoggerFactory instead of payment-specific logger
     private final ApplicationLoggerFactory logger = ApplicationLoggerFactory.getInstance();
 
     public Payment createPayment(PaymentCreateRequest request) {
-        String paymentType = request.isRegularPayment() ? "REGULAR" : "ADDITIONAL";
+        String paymentType = String.valueOf(request.getPaymentType());
 
         logger.logOperationStart("PAYMENT_CREATION", "Student:" + request.getStudentId(), "Type: " + paymentType);
 
         try {
-            // Choose strategy based on payment type
-            PaymentStrategy strategy = request.isRegularPayment() ? regularPaymentStrategy : additionalPaymentStrategy;
-
-            logger.logStrategySelection(strategy.getClass().getSimpleName(),
-                    request.isRegularPayment() ? "termId present" : "termId not present");
-
-            // Process payment using the appropriate strategy
-            logger.logDatabaseOperation("SAVE", "Payment", "Saving payment entity");
-            Payment payment = strategy.processPayment(request);
+            validate(request);
+            Payment payment = new Payment();
+            payment.setStudent(studentRepository.getReferenceById(request.getStudentId()));
+            payment.setDate(request.getDate() != null ? request.getDate() : java.time.LocalDateTime.now());
+            payment.setRemarks(request.getRemarks());
+            payment.setLabel(request.getLabel().trim());
+            payment.setAmountPaid(request.getAmountPaid());
+            payment.setPaymentType(request.getPaymentType());
+            payment.setCourseName(blankToNull(request.getCourseName()));
+            payment.setDiscountAmount(BigDecimal.ZERO);
 
             // Save the payment first
             payment = paymentRepository.save(payment);
@@ -89,10 +91,10 @@ public class PaymentService {
                 logger.logDatabaseOperation("UPDATE", "Payment", "Updated payment with discount amount: " + totalDiscountAmount);
             }
 
-            // Publish event for dues tracking (only for regular payments)
+            // Dues are recalculated before the response returns (REQ-074.AC1)
             if (payment.getPaymentType() == Payment.PaymentType.REGULAR) {
-                eventPublisher.publishEvent(new PaymentCreatedEvent(this, payment));
-                logger.logInfo("DUES_EVENT_PUBLISHED", "Published dues tracking event for payment ID: " + payment.getId());
+                paymentRepository.flush();
+                duesService.recalculateStudent(request.getStudentId());
             }
 
             logger.logOperationSuccess("PAYMENT_CREATION", "Student:" + request.getStudentId(), "Payment ID: " + payment.getId());
@@ -114,10 +116,6 @@ public class PaymentService {
 
     public Optional<Payment> getPaymentById(Long paymentId) {
         return paymentRepository.findById(paymentId);
-    }
-
-    public List<Payment> getPaymentsByTermId(Long termId) {
-        return paymentRepository.findByTermId(termId);
     }
 
     public List<Payment> getAllPayments() {
@@ -149,10 +147,10 @@ public class PaymentService {
         payment.setIsActive(false);
         Payment savedPayment = paymentRepository.save(payment);
 
-        // Publish event for dues tracking (only for regular payments)
+        // Dues are recalculated before the response returns (REQ-064.AC5, REQ-074.AC1)
         if (savedPayment.getPaymentType() == Payment.PaymentType.REGULAR) {
-            eventPublisher.publishEvent(new PaymentDeactivatedEvent(this, savedPayment));
-            logger.logInfo("DUES_EVENT_PUBLISHED", "Published dues tracking event for deactivated payment ID: " + savedPayment.getId());
+            paymentRepository.flush();
+            duesService.recalculateStudent(savedPayment.getStudent().getAdmissionNo());
         }
 
         logger.logOperationSuccess("PAYMENT_DEACTIVATION", "Payment:" + paymentId, "Payment deactivated successfully");
@@ -198,8 +196,30 @@ public class PaymentService {
         return paymentRepository.findByDateBetweenAndPaymentType(startDate, endDate, paymentType);
     }
 
-    public List<Payment> getPaymentsByDateRangeAndTerm(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, Long termId) {
-        return paymentRepository.findByDateBetweenAndTermId(startDate, endDate, termId);
+    /** REQ-060.AC14, REQ-061.AC6, REQ-062. Messages are part of the contract (tests match on them). */
+    private void validate(PaymentCreateRequest request) {
+        if (!request.isValidZeroPayment()) {
+            throw new IllegalArgumentException("Zero amount payments are only allowed when discounts are provided");
+        }
+        if (!studentRepository.existsById(request.getStudentId())) {
+            throw new IllegalArgumentException("Student not found with ID: " + request.getStudentId());
+        }
+        String course = blankToNull(request.getCourseName());
+        if (request.isRegularPayment() && course == null) {
+            throw new IllegalArgumentException("Course name is required for a REGULAR payment");
+        }
+        if (course != null && !courseRepository.existsById(course)) {
+            throw new IllegalArgumentException("Course not found: " + course);
+        }
+        if (request.isRegularPayment()
+                && studentSessionRepository.findAllSessionsByStudentIdAndCourseName(request.getStudentId(), course).isEmpty()) {
+            throw new IllegalArgumentException("Student " + request.getStudentId() + " has no session in " + course
+                    + ", so there is no course fee to pay");
+        }
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s.trim();
     }
 
     // Delete and update methods removed - payments are immutable once created except for deactivation

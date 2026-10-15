@@ -9,6 +9,7 @@ The catalogue:
 | `/api/student-sessions/**` | enrolments |
 | `/api/courses/**` | courses |
 | `/api/fee-structures/**` | fee structures |
+| `/api/fee-timeline/**` | the fee timeline (granted like fee structures on migration) |
 | `/api/payments/**` | payments |
 | `/api/discounts/**` | discounts |
 | `/api/dues/**` | dues |

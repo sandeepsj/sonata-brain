@@ -753,1277 +753,54 @@
     "/api/dues": {
       "get": {
         "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getAllDues",
+        "operationId": "list_4",
         "parameters": [
           {
             "in": "query",
-            "name": "statuses",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "year",
+            "name": "studentId",
             "required": false,
             "schema": {
               "type": "integer",
-              "format": "int32"
+              "format": "int64"
             }
           },
           {
             "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "course",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/active": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getActiveDues",
-        "parameters": [
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/aggregate": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesAggregate",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "statuses",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "year",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "course",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {}
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/aggregate/by-course": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesAggregateGroupedByCourse",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "statuses",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "year",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": {}
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/aggregate/by-term": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesAggregateGroupedByTerm",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "statuses",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "course",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": {}
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/aggregate/by-year": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesAggregateGroupedByYear",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "statuses",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "course",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": {}
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/aggregate/pending": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getPendingDuesAggregate",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "year",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "course",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {}
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/course/{courseName}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesByCourse",
-        "parameters": [
-          {
-            "in": "path",
             "name": "courseName",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/pending": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getPendingDues",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "year",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "course",
             "required": false,
             "schema": {
               "type": "string"
             }
           },
           {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/session/{sessionId}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesBySession",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "sessionId",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/status/{status}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesByStatus",
-        "parameters": [
-          {
-            "in": "path",
+            "in": "query",
             "name": "status",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "DUE",
+                "PARTIALLY_PAID",
+                "PAID"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
             }
           },
           {
@@ -2054,7 +831,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
+                    "$ref": "#/components/schemas/DueResponse"
                   }
                 }
               }
@@ -2123,611 +900,148 @@
           }
         },
         "tags": [
-          "fee-dues-controller"
+          "dues-controller"
         ]
       }
     },
-    "/api/dues/student/{studentId}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesByStudent",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "studentId",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/student/{studentId}/status/{status}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesByStudentAndStatus",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "studentId",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "in": "path",
-            "name": "status",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/summary/{studentId}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesSummary",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "studentId",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DuesSummaryDTO"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/term/{year}/{termNumber}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesByTerm",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "year",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "path",
-            "name": "termNumber",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/year/{year}": {
-      "get": {
-        "description": "Needs **read** on route `/api/dues/**`.",
-        "operationId": "getDuesByYear",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "year",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeDuesTrackerDTO"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-dues-controller"
-        ]
-      }
-    },
-    "/api/dues/{duesId}/mark-student-left-cancelled": {
-      "patch": {
+    "/api/dues/rebuild": {
+      "post": {
         "description": "Needs **write** on route `/api/dues/**`.",
-        "operationId": "markDueAsStudentLeftCancelled",
+        "operationId": "rebuild",
         "parameters": [
           {
-            "in": "path",
-            "name": "duesId",
+            "in": "query",
+            "name": "scope",
             "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ALL",
+                "STUDENT"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "dues-controller"
+        ]
+      }
+    },
+    "/api/dues/rebuild/{jobId}": {
+      "get": {
+        "description": "Needs **read** on route `/api/dues/**`.",
+        "operationId": "job",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -2756,7 +1070,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/Job"
                 }
               }
             },
@@ -2824,14 +1138,230 @@
           }
         },
         "tags": [
-          "fee-dues-controller"
+          "dues-controller"
+        ]
+      }
+    },
+    "/api/dues/summary": {
+      "get": {
+        "description": "Needs **read** on route `/api/dues/**`.",
+        "operationId": "summary",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "studentId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "dues-controller"
         ]
       }
     },
     "/api/fee-structures": {
+      "get": {
+        "description": "Needs **read** on route `/api/fee-structures/**`.",
+        "operationId": "list_2",
+        "parameters": [
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StructureResponse"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "fee-structure-controller"
+        ]
+      },
       "post": {
         "description": "Needs **write** on route `/api/fee-structures/**`.",
-        "operationId": "createFeeStructure",
+        "operationId": "create_2",
         "parameters": [
           {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
@@ -2858,7 +1388,342 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FeeStructureCreateRequest"
+                "$ref": "#/components/schemas/StructureRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructureResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "fee-structure-controller"
+        ]
+      }
+    },
+    "/api/fee-structures/{id}": {
+      "delete": {
+        "description": "Needs **write** on route `/api/fee-structures/**`.",
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "fee-structure-controller"
+        ]
+      },
+      "get": {
+        "description": "Needs **read** on route `/api/fee-structures/**`.",
+        "operationId": "get_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructureResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "fee-structure-controller"
+        ]
+      },
+      "put": {
+        "description": "Needs **write** on route `/api/fee-structures/**`.",
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructureRequest"
               }
             }
           },
@@ -2869,10 +1734,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeStructure"
-                  }
+                  "$ref": "#/components/schemas/StructureResponse"
                 }
               }
             },
@@ -2944,19 +1806,11 @@
         ]
       }
     },
-    "/api/fee-structures/by-course/{courseId}": {
+    "/api/fee-timeline": {
       "get": {
-        "description": "Needs **read** on route `/api/fee-structures/**`.",
-        "operationId": "getFeeStructuresByCourse",
+        "description": "Needs **read** on route `/api/fee-timeline/**`.",
+        "operationId": "list_1",
         "parameters": [
-          {
-            "in": "path",
-            "name": "courseId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
             "in": "header",
@@ -2985,7 +1839,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/FeeStructure"
+                    "$ref": "#/components/schemas/EntryResponse"
                   }
                 }
               }
@@ -3054,30 +1908,142 @@
           }
         },
         "tags": [
-          "fee-structure-controller"
+          "fee-timeline-controller"
         ]
-      }
-    },
-    "/api/fee-structures/by-course/{courseId}/year/{year}": {
-      "get": {
-        "description": "Needs **read** on route `/api/fee-structures/**`.",
-        "operationId": "getFeeStructuresByCourseAndYear",
+      },
+      "post": {
+        "description": "Needs **write** on route `/api/fee-timeline/**`.",
+        "operationId": "create_1",
         "parameters": [
           {
-            "in": "path",
-            "name": "courseId",
-            "required": true,
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
             }
           },
           {
-            "in": "path",
-            "name": "year",
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "fee-timeline-controller"
+        ]
+      }
+    },
+    "/api/fee-timeline/preview": {
+      "get": {
+        "description": "Needs **read** on route `/api/fee-timeline/**`.",
+        "operationId": "preview",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
             }
           },
           {
@@ -3108,7 +2074,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/FeeStructure"
+                    "$ref": "#/components/schemas/PreviewTerm"
                   }
                 }
               }
@@ -3177,39 +2143,22 @@
           }
         },
         "tags": [
-          "fee-structure-controller"
+          "fee-timeline-controller"
         ]
       }
     },
-    "/api/fee-structures/by-course/{courseId}/year/{year}/term/{term}": {
-      "get": {
-        "description": "Needs **read** on route `/api/fee-structures/**`.",
-        "operationId": "getFeeStructureByCourseYearAndTerm",
+    "/api/fee-timeline/{id}": {
+      "delete": {
+        "description": "Needs **write** on route `/api/fee-timeline/**`.",
+        "operationId": "delete_1",
         "parameters": [
           {
             "in": "path",
-            "name": "courseId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "year",
+            "name": "id",
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "path",
-            "name": "term",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
+              "format": "int64"
             }
           },
           {
@@ -3234,11 +2183,124 @@
           }
         ],
         "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Invalid request; `details` lists field problems"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Missing, invalid or expired access token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "The token's routes don't allow this call"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict, e.g. a duplicate"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected error; quote the X-Request-Id when reporting it"
+          }
+        },
+        "tags": [
+          "fee-timeline-controller"
+        ]
+      },
+      "put": {
+        "description": "Needs **write** on route `/api/fee-timeline/**`.",
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
+            "in": "header",
+            "name": "X-Request-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,64}$"
+            }
+          },
+          {
+            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
           "200": {
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeeStructure"
+                  "$ref": "#/components/schemas/EntryResponse"
                 }
               }
             },
@@ -3306,122 +2368,7 @@
           }
         },
         "tags": [
-          "fee-structure-controller"
-        ]
-      }
-    },
-    "/api/fee-structures/by-year/{year}": {
-      "get": {
-        "description": "Needs **read** on route `/api/fee-structures/**`.",
-        "operationId": "getFeeStructuresByYear",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "year",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeeStructure"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "fee-structure-controller"
+          "fee-timeline-controller"
         ]
       }
     },
@@ -4430,137 +3377,6 @@
         ]
       }
     },
-    "/api/payments/date-range/term/{termId}": {
-      "get": {
-        "description": "Needs **read** on route `/api/payments/**`.",
-        "operationId": "getPaymentsByDateRangeAndTerm",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "termId",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "in": "query",
-            "name": "startDate",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "endDate",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Payment"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "payment-controller"
-        ]
-      }
-    },
     "/api/payments/date-range/type/{paymentType}": {
       "get": {
         "description": "Needs **read** on route `/api/payments/**`.",
@@ -5309,121 +4125,6 @@
                 "REGULAR",
                 "ADDITIONAL"
               ]
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Payment"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "payment-controller"
-        ]
-      }
-    },
-    "/api/payments/term/{termId}": {
-      "get": {
-        "description": "Needs **read** on route `/api/payments/**`.",
-        "operationId": "getPaymentsByTermId",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "termId",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
             }
           },
           {
@@ -7027,24 +5728,6 @@
             }
           },
           {
-            "in": "query",
-            "name": "year",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "query",
-            "name": "termNumber",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
             "in": "header",
             "name": "X-Request-Id",
@@ -7156,385 +5839,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StudentSession"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "student-session-controller"
-        ]
-      }
-    },
-    "/api/student-sessions/students/course/{courseName}/year/{year}": {
-      "get": {
-        "description": "Needs **read** on route `/api/student-sessions/**`.",
-        "operationId": "getStudentsByCourseYear",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "courseName",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "year",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StudentSession"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "student-session-controller"
-        ]
-      }
-    },
-    "/api/student-sessions/students/course/{courseName}/year/{year}/term/{termNumber}": {
-      "get": {
-        "description": "Needs **read** on route `/api/student-sessions/**`.",
-        "operationId": "getStudentsByCourseYearTerm",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "courseName",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "year",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "path",
-            "name": "termNumber",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
-            "in": "header",
-            "name": "X-Request-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9-]{1,64}$"
-            }
-          },
-          {
-            "description": "Optional client session id, e.g. one per browser tab. Only used for logging.",
-            "in": "header",
-            "name": "X-Session-Id",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 128
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StudentSession"
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Invalid request; `details` lists field problems"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Missing, invalid or expired access token"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "The token's routes don't allow this call"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Conflict, e.g. a duplicate"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            },
-            "description": "Unexpected error; quote the X-Request-Id when reporting it"
-          }
-        },
-        "tags": [
-          "student-session-controller"
-        ]
-      }
-    },
-    "/api/student-sessions/students/year/{year}/term/{termNumber}": {
-      "get": {
-        "description": "Needs **read** on route `/api/student-sessions/**`.",
-        "operationId": "getStudentsByYearTerm",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "year",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "in": "path",
-            "name": "termNumber",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
             }
           },
           {
@@ -8505,7 +6809,7 @@
     "/api/users": {
       "get": {
         "description": "Needs **read** on route `/api/users/**`.",
-        "operationId": "list_1",
+        "operationId": "list_3",
         "parameters": [
           {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
@@ -9011,6 +7315,17 @@
   },
   "components": {
     "schemas": {
+      "AmountRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "courseName": {
+            "type": "string"
+          }
+        }
+      },
       "ApiError": {
         "properties": {
           "details": {
@@ -9034,6 +7349,23 @@
           }
         }
       },
+      "Changes": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inserted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "Course": {
         "type": "object",
         "properties": {
@@ -9042,6 +7374,29 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "CourseSummary": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "balance": {
+            "type": "number"
+          },
+          "courseName": {
+            "type": "string"
+          },
+          "credit": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "number"
+          },
+          "paid": {
+            "type": "number"
           }
         }
       },
@@ -9090,86 +7445,49 @@
           "label"
         ]
       },
-      "DuesSummaryDTO": {
+      "DueResponse": {
         "type": "object",
         "properties": {
-          "cancelledAmount": {
+          "amount": {
             "type": "number"
           },
-          "cancelledCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "dueAmount": {
+          "balance": {
             "type": "number"
           },
-          "dueCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "paidAmount": {
-            "type": "number"
-          },
-          "paidCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "partiallyPaidAmount": {
-            "type": "number"
-          },
-          "partiallyPaidCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "studentId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "studentName": {
-            "type": "string"
-          },
-          "totalCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalDueAmount": {
-            "type": "number"
-          }
-        }
-      },
-      "FeeDuesTrackerDTO": {
-        "type": "object",
-        "properties": {
           "courseName": {
             "type": "string"
           },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dueAmount": {
+          "discountAmount": {
             "type": "number"
           },
           "feeStructureId": {
             "type": "integer",
             "format": "int64"
           },
+          "feeStructureName": {
+            "type": "string"
+          },
           "id": {
             "type": "integer",
             "format": "int64"
           },
-          "sessionId": {
-            "type": "integer",
-            "format": "int64"
+          "paidAmount": {
+            "type": "number"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
           },
           "status": {
             "type": "string",
             "enum": [
               "DUE",
-              "CANCELLED",
-              "PAID",
               "PARTIALLY_PAID",
-              "STUDENT_LEFT_DUE_CANCELLED"
+              "PAID"
             ]
           },
           "studentId": {
@@ -9178,78 +7496,60 @@
           },
           "studentName": {
             "type": "string"
-          },
-          "termNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "termYear": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
-      "FeeStructure": {
+      "EntryRequest": {
         "type": "object",
         "properties": {
-          "amount": {
-            "type": "number"
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
           },
-          "course": {
-            "$ref": "#/components/schemas/Course"
+          "feeStructureId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "EntryResponse": {
+        "type": "object",
+        "properties": {
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "feeStructureId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "feeStructureName": {
+            "type": "string"
           },
           "id": {
             "type": "integer",
             "format": "int64"
           },
-          "isActive": {
-            "type": "boolean"
-          },
-          "term": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "year": {
+          "termMonths": {
             "type": "integer",
             "format": "int32"
           }
         }
       },
-      "FeeStructureCreateRequest": {
+      "FeeAmount": {
         "type": "object",
         "properties": {
-          "courseId": {
+          "amount": {
+            "type": "number"
+          },
+          "courseName": {
             "type": "string"
-          },
-          "numberOfTerms": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1
-          },
-          "termFees": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TermFee"
-            },
-            "maxItems": 2147483647,
-            "minItems": 1
-          },
-          "year": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 2000
           }
-        },
-        "required": [
-          "courseId",
-          "numberOfTerms",
-          "termFees",
-          "year"
-        ]
+        }
       },
       "FieldProblem": {
         "properties": {
@@ -9258,6 +7558,41 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "$ref": "#/components/schemas/Changes"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "jobId": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "students": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -9394,9 +7729,6 @@
               "$ref": "#/components/schemas/Discount"
             }
           },
-          "feeStructure": {
-            "$ref": "#/components/schemas/FeeStructure"
-          },
           "finalAmount": {
             "type": "number"
           },
@@ -9449,7 +7781,15 @@
             }
           },
           "label": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
+          },
+          "paymentType": {
+            "type": "string",
+            "enum": [
+              "REGULAR",
+              "ADDITIONAL"
+            ]
           },
           "regularPayment": {
             "type": "boolean"
@@ -9461,18 +7801,42 @@
             "type": "integer",
             "format": "int64"
           },
-          "termId": {
-            "type": "integer",
-            "format": "int64"
-          },
           "validZeroPayment": {
             "type": "boolean"
           }
         },
         "required": [
           "amountPaid",
+          "label",
+          "paymentType",
           "studentId"
         ]
+      },
+      "PreviewTerm": {
+        "type": "object",
+        "properties": {
+          "amounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeeAmount"
+            }
+          },
+          "feeStructureId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "feeStructureName": {
+            "type": "string"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          }
+        }
       },
       "RoleRef": {
         "type": "object",
@@ -9601,6 +7965,49 @@
           }
         }
       },
+      "StructureRequest": {
+        "type": "object",
+        "properties": {
+          "amounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AmountRequest"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "termMonths": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StructureResponse": {
+        "type": "object",
+        "properties": {
+          "amounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeeAmount"
+            }
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "termMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usedInTimeline": {
+            "type": "boolean"
+          }
+        }
+      },
       "Student": {
         "type": "object",
         "properties": {
@@ -9698,23 +8105,35 @@
           "studentId"
         ]
       },
-      "TermFee": {
+      "Summary": {
         "type": "object",
         "properties": {
           "amount": {
-            "type": "number",
-            "minimum": 0
+            "type": "number"
           },
-          "term": {
+          "balance": {
+            "type": "number"
+          },
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourseSummary"
+            }
+          },
+          "credit": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "number"
+          },
+          "paid": {
+            "type": "number"
+          },
+          "studentId": {
             "type": "integer",
-            "format": "int32",
-            "minimum": 1
+            "format": "int64"
           }
-        },
-        "required": [
-          "amount",
-          "term"
-        ]
+        }
       },
       "TokenResponse": {
         "type": "object",

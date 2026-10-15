@@ -1,10 +1,8 @@
 package com.example.sonata_brain.service;
 
+import com.example.sonata_brain.dues.DuesService;
 import com.example.sonata_brain.model.StudentSession;
 import com.example.sonata_brain.repository.StudentSessionRepository;
-import com.example.sonata_brain.service.dues.events.DuesTrackerEventPublisher;
-import com.example.sonata_brain.service.dues.events.StudentSessionCreatedEvent;
-import com.example.sonata_brain.service.dues.events.StudentSessionUpdatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,7 @@ public class StudentSessionService {
     private StudentSessionRepository studentSessionRepository;
 
     @Autowired
-    private DuesTrackerEventPublisher eventPublisher;
+    private DuesService duesService;
 
     /**
      * Create a new student session and publish dues tracking event
@@ -35,10 +33,8 @@ public class StudentSessionService {
 
         StudentSession savedSession = studentSessionRepository.save(studentSession);
 
-        // Publish event for dues tracking
-        eventPublisher.publishEvent(new StudentSessionCreatedEvent(this, savedSession));
-
-        logger.info("Created student session ID: {} and published dues tracking event", savedSession.getId());
+        recalculate(savedSession);
+        logger.info("Created student session ID: {} and recalculated the student's dues", savedSession.getId());
         return savedSession;
     }
 
@@ -66,9 +62,7 @@ public class StudentSessionService {
         // Publish event if disjoin date changed
         LocalDateTime newDisjoinDate = savedSession.getDateOfDisjoining();
         if (isDisjoinDateChanged(previousDisjoinDate, newDisjoinDate)) {
-            eventPublisher.publishEvent(new StudentSessionUpdatedEvent(
-                this, savedSession, previousDisjoinDate, newDisjoinDate));
-            logger.info("Published dues tracking event for session disjoin update");
+            recalculate(savedSession);
         }
 
         logger.info("Updated student session ID: {}", savedSession.getId());
@@ -95,18 +89,18 @@ public class StudentSessionService {
         }
 
         StudentSession existingSession = existingSessionOpt.get();
-        LocalDateTime previousDisjoinDate = existingSession.getDateOfDisjoining();
-
         existingSession.setDateOfDisjoining(disjoinDate);
         StudentSession savedSession = studentSessionRepository.save(existingSession);
 
-        // Publish event for dues tracking
-        eventPublisher.publishEvent(new StudentSessionUpdatedEvent(
-            this, savedSession, previousDisjoinDate, disjoinDate));
-
-        logger.info("Set disjoin date for student session ID: {} and published dues tracking event",
-                   savedSession.getId());
+        recalculate(savedSession);
+        logger.info("Set disjoin date for student session ID: {} and recalculated the student's dues", savedSession.getId());
         return savedSession;
+    }
+
+    /** REQ-030.AC8, REQ-031.AC4, REQ-074.AC1: before the response returns. */
+    private void recalculate(StudentSession session) {
+        studentSessionRepository.flush();
+        duesService.recalculateStudent(session.getStudent().getAdmissionNo());
     }
 
     private boolean isDisjoinDateChanged(LocalDateTime previous, LocalDateTime current) {

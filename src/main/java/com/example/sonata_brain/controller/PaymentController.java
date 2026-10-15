@@ -101,17 +101,6 @@ public class PaymentController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    @GetMapping("/term/{termId}")
-    public ResponseEntity<List<Payment>> getPaymentsByTermId(@PathVariable Long termId) {
-        try {
-            List<Payment> payments = paymentService.getPaymentsByTermId(termId);
-            return new ResponseEntity<>(payments, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<?> deactivatePayment(@PathVariable Long id) {
         try {
@@ -237,21 +226,6 @@ public class PaymentController {
             LocalDateTime start = LocalDateTime.parse(startDate);
             LocalDateTime end = LocalDateTime.parse(endDate);
             List<Payment> payments = paymentService.getPaymentsByDateRangeAndType(start, end, paymentType);
-            return new ResponseEntity<>(payments, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/date-range/term/{termId}")
-    public ResponseEntity<List<Payment>> getPaymentsByDateRangeAndTerm(
-            @PathVariable Long termId,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
-        try {
-            LocalDateTime start = LocalDateTime.parse(startDate);
-            LocalDateTime end = LocalDateTime.parse(endDate);
-            List<Payment> payments = paymentService.getPaymentsByDateRangeAndTerm(start, end, termId);
             return new ResponseEntity<>(payments, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
