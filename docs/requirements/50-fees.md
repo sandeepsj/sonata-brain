@@ -87,6 +87,9 @@ Status: accepted · Source: user ("fee structure name, each subject how much, an
 - **REQ-057.AC7** [target] Editing a structure that is on the timeline recalculates everyone's dues (REQ-074.AC7).
 - **REQ-057.AC8** [target] `DELETE /api/fee-structures/{id}` → 204 when it isn't on the timeline, 409 when it is,
   404 when unknown.
+- **REQ-057.AC9** [target] `PUT /api/fee-structures/{id}` returns the structure plus `recalculation` (REQ-058.AC10)
+  when it is on the timeline, and `recalculation: null` when it isn't. `?dryRun=true` validates and calculates the
+  same impact but saves nothing → 200 with `dryRun: true`; the structure and the dues stay as they were.
 
 ### REQ-058 One school-wide timeline, changed only at term boundaries
 Status: accepted · Source: user ("at what time follow which fee structure"; "a new fee structure can come in force only at the beginning of the term"), 2026-10-15
@@ -100,9 +103,19 @@ Status: accepted · Source: user ("at what time follow which fee structure"; "a 
 - **REQ-058.AC3** [target] Two entries on the same date → 409. An unknown structure → 400.
 - **REQ-058.AC4** [target] `GET /api/fee-timeline` lists the entries ordered by `effectiveFrom`, with `effectiveTo`
   filled in.
-- **REQ-058.AC5** [target] `PUT /api/fee-timeline/{id}` changes the structure or the date and `DELETE
-  /api/fee-timeline/{id}` → 204, both with the boundary checks of AC2 for the entries around it. An unknown id → 404.
+- **REQ-058.AC5** [retired] `DELETE /api/fee-timeline/{id}` → 204. Replaced by REQ-058.AC9 (the delete reports its
+  recalculation).
 - **REQ-058.AC6** [target] Every timeline change recalculates everyone's dues (REQ-074.AC7).
+- **REQ-058.AC9** [target] `PUT /api/fee-timeline/{id}` changes the structure or the date and `DELETE
+  /api/fee-timeline/{id}` → 200 `{dryRun, recalculation}`, both with the boundary checks of AC2 for the entries around
+  it. An unknown id → 404.
+- **REQ-058.AC10** [target] Add, change and delete return `recalculation: {students, inserted, updated, deleted,
+  outstandingBefore, outstandingAfter, outstandingChange, durationMs}`: how many students' dues changed, how many due
+  rows were inserted, updated and deleted, and the total outstanding balance before and after. *(user: the frontend
+  shows what happened)*
+- **REQ-058.AC11** [target] `?dryRun=true` on add, change and delete runs every check and the whole recalculation, then
+  saves nothing → 200 with `dryRun: true` and the same `recalculation` the real change would report. The timeline and
+  the dues stay as they were. *(user: double confirmation before the heavy recalculation)*
 
 ### REQ-059 Terms
 Status: accepted · Source: user ("how many months is a term", terms counted from the timeline entry), 2026-10-15

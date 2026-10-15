@@ -24,7 +24,7 @@
 					"const pad = (n) => String(n).padStart(2, '0');",
 					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
 					"pm.collectionVariables.set('today', day(0));",
-					"for (const n of [-60, -40, -20, -10, -6, -5]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"for (const n of []) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
 					"const year = new Date().getFullYear();",
 					"pm.collectionVariables.set('year', year);",
 					"for (const n of []) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
@@ -1229,7 +1229,7 @@
 		},
 		{
 			"name": "TL-004 Entries can be changed and deleted, keeping every later entry on a boundary",
-			"description": "Proves: REQ-058.AC5",
+			"description": "Proves: REQ-058.AC9",
 			"item": [
 				{
 					"name": "TL-004 01 POST /api/fee-timeline",
@@ -1500,7 +1500,11 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(204);",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(false);",
 									"});"
 								]
 							}
@@ -1634,7 +1638,7 @@
 		},
 		{
 			"name": "TL-005 Deleting an entry that would leave the next one off a boundary is rejected",
-			"description": "Proves: REQ-058.AC5",
+			"description": "Proves: REQ-058.AC9",
 			"item": [
 				{
 					"name": "TL-005 01 POST /api/fee-timeline",
@@ -2435,7 +2439,11 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"status\", () => {",
-									"  pm.response.to.have.status(204);",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(false);",
 									"});"
 								]
 							}
@@ -2477,6 +2485,654 @@
 									"  const b = pm.response.json();",
 									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
 									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.amount === 1000))), \": every item matches {\\\"amount\\\": 1000}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "TL-009 A dry run reports the impact of adding an entry and saves nothing; the real add reports the same",
+			"description": "Proves: REQ-058.AC11, REQ-058.AC10",
+			"item": [
+				{
+					"name": "TL-009 01 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline?dryRun=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							],
+							"query": [
+								{
+									"key": "dryRun",
+									"value": "true"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-10-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-10-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(true);",
+									"  pm.expect(b?.effectiveFrom, \"effectiveFrom\").to.eql(\"2025-10-01\");",
+									"  pm.expect(b?.feeStructureName, \"feeStructureName\").to.eql(\"Revised\");",
+									"  pm.expect(b?.recalculation?.students, \"recalculation.students\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.inserted, \"recalculation.inserted\").to.eql(0);",
+									"  pm.expect(b?.recalculation?.updated, \"recalculation.updated\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.deleted, \"recalculation.deleted\").to.eql(0);",
+									"  pm.expect(b?.recalculation?.outstandingBefore, \"recalculation.outstandingBefore\").to.eql(4000);",
+									"  pm.expect(b?.recalculation?.outstandingAfter, \"recalculation.outstandingAfter\").to.eql(4200);",
+									"  pm.expect(b?.recalculation?.outstandingChange, \"recalculation.outstandingChange\").to.eql(200);",
+									"  pm.expect(((Number.isInteger(b?.recalculation?.durationMs))), \"recalculation.durationMs matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-009 02 GET /api/fee-timeline",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-009 03 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.amount === 1000))), \": every item matches {\\\"amount\\\": 1000}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-009 04 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline?dryRun=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							],
+							"query": [
+								{
+									"key": "dryRun",
+									"value": "true"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-10-15\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-10-15\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-009 05 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-10-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-10-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(false);",
+									"  pm.expect(((Number.isInteger(b?.id))), \"id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
+									"  pm.expect(b?.recalculation?.students, \"recalculation.students\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.updated, \"recalculation.updated\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.outstandingChange, \"recalculation.outstandingChange\").to.eql(200);",
+									"});",
+									"pm.collectionVariables.set(\"oct\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-009 06 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues?studentId={{asha}}&from=2025-10-01",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "{{asha}}"
+								},
+								{
+									"key": "from",
+									"value": "2025-10-01"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.amount, \"[0].amount\").to.eql(1200);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "TL-010 Changing and deleting an entry can be tried first; both report what they change",
+			"description": "Proves: REQ-058.AC11, REQ-058.AC10, REQ-058.AC9",
+			"item": [
+				{
+					"name": "TL-010 01 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-10-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-10-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"oct\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-010 02 PUT /api/fee-timeline/{{oct}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/{{oct}}?dryRun=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"{{oct}}"
+							],
+							"query": [
+								{
+									"key": "dryRun",
+									"value": "true"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{revised}}\",\n  \"effectiveFrom\": \"2025-07-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"revised\"), \"effectiveFrom\": \"2025-07-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(true);",
+									"  pm.expect(b?.effectiveFrom, \"effectiveFrom\").to.eql(\"2025-07-01\");",
+									"  pm.expect(b?.recalculation?.updated, \"recalculation.updated\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.outstandingChange, \"recalculation.outstandingChange\").to.eql(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-010 03 GET /api/fee-timeline",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (JSON.stringify(y?.id) === JSON.stringify(V(\"oct\"))) && (y?.effectiveFrom === \"2025-10-01\"))), \" includes {\\\"id\\\": \\\"{{oct}}\\\", \\\"effectiveFrom\\\": \\\"2025-10-01\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-010 04 DELETE /api/fee-timeline/{{oct}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/{{oct}}?dryRun=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"{{oct}}"
+							],
+							"query": [
+								{
+									"key": "dryRun",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(true);",
+									"  pm.expect(b?.recalculation?.updated, \"recalculation.updated\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.outstandingChange, \"recalculation.outstandingChange\").to.eql(-200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-010 05 GET /api/fee-timeline",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-010 06 DELETE /api/fee-timeline/{{oct}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline/{{oct}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline",
+								"{{oct}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.dryRun, \"dryRun\").to.eql(false);",
+									"  pm.expect(b?.recalculation?.updated, \"recalculation.updated\").to.eql(1);",
+									"  pm.expect(b?.recalculation?.outstandingBefore, \"recalculation.outstandingBefore\").to.eql(4200);",
+									"  pm.expect(b?.recalculation?.outstandingAfter, \"recalculation.outstandingAfter\").to.eql(4000);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "TL-010 07 GET /api/fee-timeline",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
 									"});"
 								]
 							}

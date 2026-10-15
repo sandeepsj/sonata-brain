@@ -5,6 +5,7 @@ import com.example.sonata_brain.common.error.ApiException;
 import com.example.sonata_brain.dues.DuesDtos.Changes;
 import com.example.sonata_brain.dues.DuesDtos.CourseSummary;
 import com.example.sonata_brain.dues.DuesDtos.DueResponse;
+import com.example.sonata_brain.dues.DuesDtos.Impact;
 import com.example.sonata_brain.dues.DuesDtos.Summary;
 import com.example.sonata_brain.fees.Timeline;
 import com.example.sonata_brain.fees.TimelineEntry;
@@ -56,7 +57,7 @@ public class DuesService {
     public Changes recalculateStudent(Long admissionNo) {
         entities.flush(); // facts saved through JPA earlier in this transaction must be visible to the SQL reads
         return recalculate(List.of(admissionNo), startedTerms(), store.sessions(admissionNo),
-                store.payments(admissionNo), store.dues(admissionNo));
+                store.payments(admissionNo), store.dues(admissionNo), false).changes();
     }
 
     /**
@@ -64,13 +65,18 @@ public class DuesService {
      * changes are written in batches, so the cost doesn't grow with round trips per student.
      */
     public Changes recalculateAll() {
+        return recalculateAll(false).changes();
+    }
+
+    /** Everyone, reporting the impact; with {@code dryRun} nothing is written (REQ-058.AC10, AC11). */
+    public Impact recalculateAll(boolean dryRun) {
         entities.flush();
-        long started = System.currentTimeMillis();
         List<Long> ids = store.studentIds();
-        Changes changes = recalculate(ids, startedTerms(), store.sessions(null), store.payments(null), store.dues(null));
-        log.info("Recalculated dues for {} students in {} ms: {}", ids.size(), System.currentTimeMillis() - started,
-                changes);
-        return changes;
+        Impact impact = recalculate(ids, startedTerms(), store.sessions(null), store.payments(null), store.dues(null),
+                dryRun);
+        log.info("{} dues for {} students in {} ms: {}", dryRun ? "Dry run of" : "Recalculated", ids.size(),
+                impact.durationMs(), impact);
+        return impact;
     }
 
     @Transactional(readOnly = true)
@@ -138,16 +144,27 @@ public class DuesService {
     }
 
     /** Compares the calculated dues of these students with the stored ones and writes only the differences. */
-    private Changes recalculate(List<Long> ids, List<Timeline.Term> terms,
-                                Map<Long, List<DuesCalculator.Session>> sessions,
-                                Map<Long, List<DuesCalculator.Payment>> payments,
-                                Map<Long, List<DuesStore.Stored>> dues) {
+    private Impact recalculate(List<Long> ids, List<Timeline.Term> terms,
+                               Map<Long, List<DuesCalculator.Session>> sessions,
+                               Map<Long, List<DuesCalculator.Payment>> payments,
+                               Map<Long, List<DuesStore.Stored>> dues, boolean dryRun) {
+        long started = System.currentTimeMillis();
+        BigDecimal before = BigDecimal.ZERO;
+        BigDecimal after = BigDecimal.ZERO;
+        int affected = 0;
         List<DuesStore.Row> inserts = new ArrayList<>();
         List<DuesStore.Row> updates = new ArrayList<>();
         List<Long> deletes = new ArrayList<>();
         for (Long id : ids) {
             DuesCalculator.Result result = DuesCalculator.calculate(terms, sessions.getOrDefault(id, List.of()),
                     payments.getOrDefault(id, List.of()));
+            int changesBefore = inserts.size() + updates.size() + deletes.size();
+            for (DuesStore.Stored d : dues.getOrDefault(id, List.of())) {
+                before = before.add(d.balance());
+            }
+            for (DuesCalculator.Due d : result.dues()) {
+                after = after.add(d.balance());
+            }
             Map<String, DuesStore.Stored> stored = new HashMap<>();
             dues.getOrDefault(id, List.of()).forEach(d -> stored.put(key(d.course(), d.periodStart()), d));
             for (DuesCalculator.Due due : result.dues()) {
@@ -162,8 +179,15 @@ public class DuesService {
                 }
             }
             stored.values().forEach(d -> deletes.add(d.id()));
+            if (inserts.size() + updates.size() + deletes.size() > changesBefore) {
+                affected++;
+            }
         }
-        return store.write(inserts, updates, deletes);
+        if (!dryRun) {
+            store.write(inserts, updates, deletes);
+        }
+        return new Impact(affected, inserts.size(), updates.size(), deletes.size(), before, after,
+                after.subtract(before), System.currentTimeMillis() - started);
     }
 
     private static boolean differs(DuesStore.Stored a, DuesStore.Row b) {

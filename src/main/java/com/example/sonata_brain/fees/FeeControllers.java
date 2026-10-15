@@ -1,12 +1,15 @@
 package com.example.sonata_brain.fees;
 
+import com.example.sonata_brain.fees.FeeDtos.EntryChange;
 import com.example.sonata_brain.fees.FeeDtos.EntryRequest;
 import com.example.sonata_brain.fees.FeeDtos.EntryResponse;
 import com.example.sonata_brain.fees.FeeDtos.PreviewTerm;
+import com.example.sonata_brain.fees.FeeDtos.StructureChange;
 import com.example.sonata_brain.fees.FeeDtos.StructureRequest;
 import com.example.sonata_brain.fees.FeeDtos.StructureResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,8 +56,9 @@ public final class FeeControllers {
         }
 
         @PutMapping("/{id}")
-        public StructureResponse update(@PathVariable Long id, @RequestBody StructureRequest request) {
-            return structures.update(id, request);
+        public StructureChange update(@PathVariable Long id, @RequestBody StructureRequest request,
+                                      @RequestParam(defaultValue = "false") boolean dryRun) {
+            return structures.update(id, request, dryRun);
         }
 
         @DeleteMapping("/{id}")
@@ -78,21 +82,22 @@ public final class FeeControllers {
             return timeline.list();
         }
 
+        /** 201 when added; 200 for a dry run, which saves nothing (REQ-058.AC11). */
         @PostMapping
-        @ResponseStatus(HttpStatus.CREATED)
-        public EntryResponse create(@RequestBody EntryRequest request) {
-            return timeline.create(request);
+        public ResponseEntity<EntryChange> create(@RequestBody EntryRequest request,
+                                                  @RequestParam(defaultValue = "false") boolean dryRun) {
+            return ResponseEntity.status(dryRun ? HttpStatus.OK : HttpStatus.CREATED).body(timeline.create(request, dryRun));
         }
 
         @PutMapping("/{id}")
-        public EntryResponse update(@PathVariable Long id, @RequestBody EntryRequest request) {
-            return timeline.update(id, request);
+        public EntryChange update(@PathVariable Long id, @RequestBody EntryRequest request,
+                                  @RequestParam(defaultValue = "false") boolean dryRun) {
+            return timeline.update(id, request, dryRun);
         }
 
         @DeleteMapping("/{id}")
-        @ResponseStatus(HttpStatus.NO_CONTENT)
-        public void delete(@PathVariable Long id) {
-            timeline.delete(id);
+        public EntryChange delete(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean dryRun) {
+            return timeline.delete(id, dryRun);
         }
 
         @GetMapping("/preview")

@@ -60,6 +60,12 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
    - Timeline: one school-wide list of `{structure, from}` entries. When adding an entry, offer only valid term
      starts from `GET /api/fee-timeline/preview` and show the backend's 400 message as is. Show the preview next to
      the editor.
+   - Fee changes recalculate everyone's dues, so confirm them twice: for timeline add/change/delete and for editing
+     a structure with `usedInTimeline: true`, first send the request with `?dryRun=true` and show its
+     `recalculation` impact (students affected, outstanding before → after); enable "Apply" only after an explicit
+     confirmation (checkbox or typing the start date); then send it for real, show a blocking progress state while
+     it runs, and show the returned `recalculation` as the result. Timeline delete answers 200 with
+     `{dryRun, recalculation}`.
    - Dues: show periods as dates (`periodStart` – `periodEnd`), status DUE / PARTIALLY_PAID / PAID, and the summary's
      `credit`. Add an admin "Recalculate dues" action using the rebuild job.
    - Payments: remove the term/period picker; send `paymentType`, `courseName` and a required `label`. Explain that a

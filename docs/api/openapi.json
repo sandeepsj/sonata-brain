@@ -1699,6 +1699,15 @@
             }
           },
           {
+            "in": "query",
+            "name": "dryRun",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
             "in": "header",
             "name": "X-Request-Id",
@@ -1734,7 +1743,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/StructureResponse"
+                  "$ref": "#/components/schemas/StructureChange"
                 }
               }
             },
@@ -1916,6 +1925,15 @@
         "operationId": "create_1",
         "parameters": [
           {
+            "in": "query",
+            "name": "dryRun",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
             "in": "header",
             "name": "X-Request-Id",
@@ -1947,15 +1965,15 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponse"
+                  "$ref": "#/components/schemas/EntryChange"
                 }
               }
             },
-            "description": "Created"
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -2162,6 +2180,15 @@
             }
           },
           {
+            "in": "query",
+            "name": "dryRun",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
             "in": "header",
             "name": "X-Request-Id",
@@ -2183,8 +2210,15 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryChange"
+                }
+              }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -2265,6 +2299,15 @@
             }
           },
           {
+            "in": "query",
+            "name": "dryRun",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "description": "Optional id for this request; echoed back. A new one is made when missing or invalid.",
             "in": "header",
             "name": "X-Request-Id",
@@ -2300,7 +2343,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponse"
+                  "$ref": "#/components/schemas/EntryChange"
                 }
               }
             },
@@ -7499,6 +7542,40 @@
           }
         }
       },
+      "EntryChange": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "feeStructureId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "feeStructureName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recalculation": {
+            "$ref": "#/components/schemas/Impact"
+          },
+          "termMonths": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "EntryRequest": {
         "type": "object",
         "properties": {
@@ -7558,6 +7635,40 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "Impact": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inserted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outstandingAfter": {
+            "type": "number"
+          },
+          "outstandingBefore": {
+            "type": "number"
+          },
+          "outstandingChange": {
+            "type": "number"
+          },
+          "students": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7961,6 +8072,37 @@
             "type": "boolean"
           },
           "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "StructureChange": {
+        "type": "object",
+        "properties": {
+          "amounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeeAmount"
+            }
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "recalculation": {
+            "$ref": "#/components/schemas/Impact"
+          },
+          "termMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usedInTimeline": {
             "type": "boolean"
           }
         }
