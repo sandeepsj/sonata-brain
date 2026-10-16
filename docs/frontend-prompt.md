@@ -23,7 +23,8 @@ with anything else (including this prompt), the spec wins.
 4. ~/dev/sonata-brain/docs/requirements/00-platform.md — error body (REQ-005), logging headers (REQ-008),
    API docs (REQ-009).
 5. Real request/response examples in ~/dev/sonata-brain/postman/collections/ (open as JSON; each request's Tests
-   show the expected response): access, payments, fee-structures, fee-timeline and dues collections.
+   show the expected response): access, courses, sessions, payments, fee-structures, fee-timeline and dues
+   collections.
 
 In this repo, read before changing anything: src/lib/api/client.ts, src/lib/api/types.ts, the auth store in
 src/lib/stores/, src/routes/+layout.svelte, src/routes/(app)/+layout.svelte, src/routes/(app)/no-access,
@@ -94,8 +95,8 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
   write on none);
   sign up a user, assign the role, log in as them and confirm write actions are hidden and that a forced write
   gives the 403 message; confirm requests carry X-Session-Id and error toasts show the request id.
-- Test timeline and fee-structure edits only against the local backend: on production a full dues recalculation
-  is still slow (being fixed) and those requests would time out.
+- Try timeline and fee-structure edits against the local backend first. On production they recalculate every
+  student's dues for real (about a second), so use `dryRun=true` there until the confirmation flow works.
 - Keep the existing look and component patterns. Run the project's type check and build before finishing.
 ```
 
