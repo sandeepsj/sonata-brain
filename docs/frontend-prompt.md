@@ -75,7 +75,9 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
      (REGULAR | ADDITIONAL), `courseName` (required for REGULAR) and a required `label`. Explain that a course fee
      pays the oldest unpaid term first. "Forgive a term" = a ₹0 REGULAR payment with a discount.
    - "Convert to course fee" action on ADDITIONAL payments: `POST /api/payments/{id}/convert-to-course-fee`
-     `{ courseName? }`; refresh the student's dues afterwards.
+     `{ courseName?, amount? }`. Add an editable "amount to convert" field, defaulting to the smaller of the payment
+     and the course's open dues; when it's less than the payment, explain that the rest stays an additional payment
+     (the response is a new REGULAR payment with `convertedFrom`). Refresh the student's dues and payments afterwards.
 8. Courses: show `status`; offer Close / Reopen (`PATCH /api/courses/{name}/close|reopen`) and a status filter
    (`?status=ACTIVE|CLOSED`); leave closed courses out of enrolment and course-fee pickers (the backend answers 409).
    Sessions: "End on a past date" sends `PATCH /api/student-sessions/{id}/disjoin` with `{ "date": "YYYY-MM-DD" }`;

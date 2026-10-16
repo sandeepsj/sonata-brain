@@ -57,6 +57,10 @@ public class Payment {
     @Column(name = "converted_by")
     private String convertedBy;
 
+    // REQ-065.AC10: set on the REGULAR payment split off an ADDITIONAL one
+    @Column(name = "converted_from")
+    private Long convertedFrom;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
@@ -215,6 +219,32 @@ public class Payment {
 
     public String getConvertedBy() {
         return convertedBy;
+    }
+
+    public Long getConvertedFrom() {
+        return convertedFrom;
+    }
+
+    /**
+     * Splits {@code amount} off this ADDITIONAL payment as a new REGULAR payment for {@code course} (REQ-065.AC10).
+     * This payment keeps the rest and its discounts; the new one has none.
+     */
+    public Payment splitAsCourseFee(BigDecimal amount, String course, String by) {
+        Payment part = new Payment();
+        part.student = this.student;
+        part.date = this.date;
+        part.label = this.label;
+        part.remarks = this.remarks;
+        part.amountPaid = amount;
+        part.discountAmount = BigDecimal.ZERO;
+        part.paymentType = PaymentType.REGULAR;
+        part.courseName = course;
+        part.originalType = this.paymentType;
+        part.convertedAt = LocalDateTime.now();
+        part.convertedBy = by;
+        part.convertedFrom = this.id;
+        this.amountPaid = this.amountPaid.subtract(amount);
+        return part;
     }
 
     /** Turns this ADDITIONAL payment into a course fee for {@code course}, recording who did it and when. */

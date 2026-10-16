@@ -174,3 +174,10 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 - A closed course no longer rejects timeline entries (the timeline is school-wide): REQ-042.AC4 retired, REQ-042.AC6
   added. Disjoining twice now answers 409 (REQ-031.AC2 retired, REQ-031.AC5). Course creation still answers 200
   (REQ-040.AC3 not built yet).
+
+## 2026-10-16: Partial conversion and a fast payments list (branch `payments-fast-and-split`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Converting an additional payment that is larger than the term owed: allow converting a partial amount, keeping the rest as an additional payment. | User (option chosen) | REQ-065.AC10 |
+| 2 | The payments list was slow (about 55 s on production): discounts were loaded one query per payment. It is now one query. | User report | REQ-066.AC5 |

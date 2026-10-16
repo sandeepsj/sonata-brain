@@ -1,24 +1,28 @@
 package com.example.sonata_brain.service;
 
-import com.example.sonata_brain.dto.PaymentCreateRequest;
-import com.example.sonata_brain.logging.ApplicationLoggerFactory;
-import com.example.sonata_brain.model.Discount;
-import com.example.sonata_brain.model.Payment;
-import com.example.sonata_brain.repository.DiscountRepository;
-import com.example.sonata_brain.repository.PaymentRepository;
 import com.example.sonata_brain.Repository.StudentRepository;
 import com.example.sonata_brain.common.context.RequestContext;
 import com.example.sonata_brain.common.error.ApiException;
+import com.example.sonata_brain.dto.PaymentCreateRequest;
 import com.example.sonata_brain.dues.DuesService;
+import com.example.sonata_brain.logging.ApplicationLoggerFactory;
+import com.example.sonata_brain.model.Discount;
+import com.example.sonata_brain.model.Payment;
 import com.example.sonata_brain.repository.CourseRepository;
+import com.example.sonata_brain.repository.DiscountRepository;
+import com.example.sonata_brain.repository.PaymentRepository;
 import com.example.sonata_brain.repository.StudentSessionRepository;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,17 +130,39 @@ public class PaymentService {
         return paymentRepository.findAll();
     }
 
-    /** REQ-066.AC5: any combination of filters, newest first. {@code from} and {@code to} are inclusive dates. */
+    /**
+     * REQ-066.AC5: any combination of filters, newest first. {@code from} and {@code to} are inclusive dates. Filtered
+     * in the database, with each payment's student and discounts loaded in the same query (not one query per row).
+     */
+    @Transactional(readOnly = true)
     public List<Payment> findPayments(Long studentId, String courseName, Payment.PaymentType type, Boolean active,
-                                      java.time.LocalDate from, java.time.LocalDate to) {
-        return paymentRepository.findAll(Sort.by(Sort.Order.desc("date"), Sort.Order.desc("id"))).stream()
-                .filter(p -> studentId == null || studentId.equals(p.getStudent().getAdmissionNo()))
-                .filter(p -> courseName == null || courseName.equals(p.getCourseName()))
-                .filter(p -> type == null || type == p.getPaymentType())
-                .filter(p -> active == null || active.equals(p.getIsActive()))
-                .filter(p -> from == null || !p.getDate().toLocalDate().isBefore(from))
-                .filter(p -> to == null || !p.getDate().toLocalDate().isAfter(to))
-                .toList();
+                                      LocalDate from, LocalDate to) {
+        Specification<Payment> spec = (root, query, cb) -> {
+            root.fetch("student", JoinType.INNER);
+            root.fetch("discounts", JoinType.LEFT);
+            query.distinct(true);
+            List<Predicate> where = new ArrayList<>();
+            if (studentId != null) {
+                where.add(cb.equal(root.get("student").get("admissionNo"), studentId));
+            }
+            if (courseName != null) {
+                where.add(cb.equal(root.get("courseName"), courseName));
+            }
+            if (type != null) {
+                where.add(cb.equal(root.get("paymentType"), type));
+            }
+            if (active != null) {
+                where.add(cb.equal(root.get("isActive"), active));
+            }
+            if (from != null) {
+                where.add(cb.greaterThanOrEqualTo(root.get("date"), from.atStartOfDay()));
+            }
+            if (to != null) {
+                where.add(cb.lessThan(root.get("date"), to.plusDays(1).atStartOfDay()));
+            }
+            return cb.and(where.toArray(new Predicate[0]));
+        };
+        return paymentRepository.findAll(spec, Sort.by(Sort.Order.desc("date"), Sort.Order.desc("id")));
     }
 
     /**
@@ -217,7 +243,7 @@ public class PaymentService {
      * REQ-065: converts an active ADDITIONAL payment into a course fee and brings the student's dues in sync before
      * returning. The id, amount, date, label, remarks and discounts are unchanged.
      */
-    public Payment convertToCourseFee(Long paymentId, String requestedCourse) {
+    public Payment convertToCourseFee(Long paymentId, String requestedCourse, BigDecimal amount) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> ApiException.notFound("Payment " + paymentId + " not found"));
         if (payment.getPaymentType() == Payment.PaymentType.REGULAR) {
@@ -241,9 +267,20 @@ public class PaymentService {
             throw ApiException.invalidField("courseName", "Student " + student + " has no session in " + course
                     + ", so there is no course fee to pay");
         }
+        if (amount != null && (amount.signum() <= 0 || amount.compareTo(payment.getAmountPaid()) > 0)) {
+            throw ApiException.invalidField("amount", "amount must be more than 0 and at most the payment's "
+                    + payment.getAmountPaid());
+        }
         String by = RequestContext.current().map(RequestContext.Values::user).orElse(null);
-        payment.convertToCourseFee(course, by);
-        paymentRepository.saveAndFlush(payment);
+        if (amount != null && amount.compareTo(payment.getAmountPaid()) < 0) {
+            // REQ-065.AC10: convert only part; the rest stays an additional payment
+            Payment part = payment.splitAsCourseFee(amount, course, by);
+            paymentRepository.save(payment);
+            payment = paymentRepository.saveAndFlush(part);
+        } else {
+            payment.convertToCourseFee(course, by);
+            paymentRepository.saveAndFlush(payment);
+        }
         duesService.recalculateStudent(student);
         logger.logInfo("PAYMENT_CONVERSION", "Payment " + paymentId + " converted to a course fee for " + course);
         return payment;
