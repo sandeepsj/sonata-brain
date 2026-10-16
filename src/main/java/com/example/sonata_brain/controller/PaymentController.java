@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -107,9 +108,13 @@ public class PaymentController {
     }
     /** REQ-065: errors use the standard error body (thrown as ApiException, handled globally). */
     @PostMapping("/{id}/convert-to-course-fee")
-    public Payment convertToCourseFee(@PathVariable Long id,
-                                      @RequestBody(required = false) Map<String, String> body) {
-        return paymentService.convertToCourseFee(id, body == null ? null : body.get("courseName"));
+    public Payment convertToCourseFee(@PathVariable Long id, @RequestBody(required = false) ConvertRequest body) {
+        return paymentService.convertToCourseFee(id, body == null ? null : body.courseName(),
+                body == null ? null : body.amount());
+    }
+
+    /** REQ-065: the course (optional when the payment has one) and, for a partial conversion, the amount. */
+    public record ConvertRequest(String courseName, BigDecimal amount) {
     }
 
     @PatchMapping("/{id}/deactivate")

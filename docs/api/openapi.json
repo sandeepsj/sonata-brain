@@ -4822,10 +4822,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                }
+                "$ref": "#/components/schemas/ConvertRequest"
               }
             }
           }
@@ -8083,6 +8080,17 @@
           }
         }
       },
+      "ConvertRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "courseName": {
+            "type": "string"
+          }
+        }
+      },
       "Course": {
         "type": "object",
         "properties": {
@@ -8511,6 +8519,10 @@
           },
           "convertedBy": {
             "type": "string"
+          },
+          "convertedFrom": {
+            "type": "integer",
+            "format": "int64"
           },
           "courseName": {
             "type": "string"

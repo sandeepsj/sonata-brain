@@ -115,6 +115,10 @@ This branch replaces the per-year, per-term fee rows with three ideas. Read `doc
     discounts, and becomes REGULAR. `originalType`, `convertedAt` and `convertedBy` record the conversion. The
     student's dues update before the response returns.
     - Leave out `courseName` if the payment already has a course.
+    - **Partial conversion:** send `amount` to convert only part of it, e.g. ₹900 of a ₹1,200 payment. The response
+      is a **new** REGULAR payment for ₹900 with `convertedFrom` = the original id; the original stays ADDITIONAL with
+      ₹300 and keeps its discounts. Without `amount` (or with the full amount) the whole payment converts and its
+      excess over what is owed becomes course credit.
     - 400 when the student isn't enrolled in that course; 409 when the payment is already REGULAR or deactivated.
     - Offer this as an action on ADDITIONAL payments.
 

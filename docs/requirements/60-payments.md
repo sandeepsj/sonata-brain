@@ -93,6 +93,12 @@ Status: accepted · Source: user ("admin staff sometimes mark payments as additi
   three.
 - **REQ-065.AC9** [target] The student's dues are recalculated before the response returns: the converted amount and its
   discounts fill the oldest open term of that course like any REGULAR payment (REQ-071.AC8).
+- **REQ-065.AC10** [target] An optional `amount` converts only part of the payment: `{courseName?, amount}` with
+  0 < `amount` < `amountPaid` leaves the original ADDITIONAL with `amountPaid` reduced by `amount` (its discounts stay
+  on it), and creates a new REGULAR payment for `amount` in that course: same student, date, label and remarks, no
+  discounts, `originalType: "ADDITIONAL"`, `convertedAt`, `convertedBy`, and `convertedFrom` = the original's id. The
+  response is the new payment. `amount` equal to `amountPaid` converts the whole payment (AC7). `amount` ≤ 0 or more
+  than `amountPaid` → 400 with a `details` entry for `amount`. *(user, 2026-10-16)*
 
 ### REQ-066 Query payments
 Status: accepted · Source: existing code
@@ -105,5 +111,6 @@ Status: accepted · Source: existing code
   newest first. `/date-range/course/{name}` and `/date-range/type/{type}` narrow it further.
 - **REQ-066.AC4** [retired] Query endpoint with `periodDate`. Replaced by REQ-066.AC5.
 - **REQ-066.AC5** [target] `GET /api/payments?studentId=&courseName=&type=&active=&from=&to=` filters by any
-  combination (`from` and `to` are dates, inclusive, on the payment date), newest first, each with its discounts.
+  combination (`from` and `to` are dates, inclusive, on the payment date), newest first, each with its discounts, in
+  one database query.
   Without parameters it lists every payment. An invalid `type` or date → 400. The path variants keep working.
