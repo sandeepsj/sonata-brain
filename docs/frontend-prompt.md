@@ -76,8 +76,13 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
      pays the oldest unpaid term first. "Forgive a term" = a ₹0 REGULAR payment with a discount.
    - "Convert to course fee" action on ADDITIONAL payments: `POST /api/payments/{id}/convert-to-course-fee`
      `{ courseName? }`; refresh the student's dues afterwards.
-8. Screens whose endpoints don't exist on the backend branch (course close/reopen,
-   dues aggregate, waivers, legacy comparison, the query-param list endpoints for sessions and payments): do NOT
+8. Courses: show `status`; offer Close / Reopen (`PATCH /api/courses/{name}/close|reopen`) and a status filter
+   (`?status=ACTIVE|CLOSED`); leave closed courses out of enrolment and course-fee pickers (the backend answers 409).
+   Sessions: "End on a past date" sends `PATCH /api/student-sessions/{id}/disjoin` with `{ "date": "YYYY-MM-DD" }`;
+   use `GET /api/student-sessions?studentId=&courseName=&active=&activeOn=` for lists and the roster "as of a date".
+   Payments: use `GET /api/payments?studentId=&courseName=&type=&active=&from=&to=` (newest first) for the payments
+   page.
+9. Screens whose endpoints don't exist on the backend (dues aggregate reports, waivers, legacy comparison): do NOT
    delete them and do NOT rewire them to other endpoints. Hide them from navigation behind one feature flag and
    leave the code intact. List them in your final summary.
 

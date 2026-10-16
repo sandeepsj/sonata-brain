@@ -136,9 +136,9 @@ per-course structures. This branch has school-wide ones, so the fee screens need
 | `POST /api/auth/login`, `/api/auth/refresh`, `GET /api/users/me` | Exist; `permissions` became `routes` (section 1) |
 | `GET/POST/PUT/DELETE /api/roles`, `GET /api/users`, `PUT /api/users/{id}/roles`, `POST /api/users/signup` | Exist; role body uses `routes` |
 | `GET/POST /api/students`, `GET /api/students/search` | Exist |
-| `GET/POST /api/courses` | Exist. `PATCH /api/courses/{name}/close` and `/reopen` and `?status=` **don't** |
-| `POST /api/student-sessions`, `PATCH /api/student-sessions/{id}/disjoin` | Exist. The list `GET /api/student-sessions?studentId=&courseName=…` **doesn't**; use `/all`, `/search?course=`, `/active/*` |
-| `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with `paymentType` and **no** `periodDate` or `termId` (section 4). `convert-to-course-fee` exists (`{ courseName? }`); the filter params **don't** |
+| `GET/POST /api/courses` | Exist, each course with `status` (`ACTIVE`/`CLOSED`) and `closedAt`; `?status=` filters; `GET /api/courses/{name}`; `PATCH /api/courses/{name}/close` and `/reopen` (409 when already in that state). A closed course rejects new sessions, course fees and conversions (409) |
+| `POST /api/student-sessions`, `PATCH /api/student-sessions/{id}/disjoin` | Exist. Disjoin takes an optional `{ "date": "YYYY-MM-DD" }` for a past date; disjoining twice → 409. The list `GET /api/student-sessions?studentId=&courseName=&active=&activeOn=` exists ([] when nothing matches) |
+| `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with `paymentType` and **no** `periodDate` or `termId` (section 4). `convert-to-course-fee` exists (`{ courseName? }`). `GET /api/payments?studentId=&courseName=&type=&active=&from=&to=` lists newest first with discounts |
 | `/api/fee-structures` | Exist in the **new school-wide shape** (section 4). No `courseName`, `termsPerYear` or clone |
 | `/api/fee-timeline`, `/api/fee-timeline/preview` | Exist, **school-wide** (no `courseName`), boundary-only (section 4) |
 | `/api/dues?…`, `/api/dues/summary?studentId=`, `/api/dues/rebuild*` | Exist (section 4). `/api/dues/aggregate`, `/api/dues/waivers` and `/api/dues/legacy-comparison` **don't** (waivers were replaced by ₹0 discount payments) |

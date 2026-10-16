@@ -27,7 +27,7 @@
 					"for (const n of [-100, -60, -50, -40, -30, -20, -10, -6, -5, 1]) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
 					"const year = new Date().getFullYear();",
 					"pm.collectionVariables.set('year', year);",
-					"for (const n of [-1, 1]) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+					"for (const n of []) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
 				]
 			}
 		}
@@ -268,6 +268,1970 @@
 									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
 									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.name === \"Violin\"))), \" includes {\\\"name\\\": \\\"Violin\\\"}\").to.be.true;",
 									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.name === \"Keyboard\"))), \" includes {\\\"name\\\": \\\"Keyboard\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CRS-010 Courses show their status, can be filtered by it, and fetched by name",
+			"description": "Proves: REQ-041.AC1, REQ-041.AC2",
+			"item": [
+				{
+					"name": "CRS-010 01 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Violin\");",
+									"  pm.expect(b?.status, \"status\").to.eql(\"ACTIVE\");",
+									"  pm.expect(b?.closedAt, \"closedAt\").to.eql(null);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 02 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Keyboard\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 03 PATCH /api/courses/Keyboard/close",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Keyboard/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Keyboard",
+								"close"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 04 GET /api/courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses?status=ACTIVE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "ACTIVE"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Violin\");",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"ACTIVE\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 05 GET /api/courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses?status=CLOSED",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "CLOSED"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Keyboard\");",
+									"  pm.expect(b?.[0]?.status, \"[0].status\").to.eql(\"CLOSED\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 06 GET /api/courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 07 GET /api/courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses?status=GONE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "GONE"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 08 GET /api/courses/Violin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Violin\");",
+									"  pm.expect(b?.status, \"status\").to.eql(\"ACTIVE\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-010 09 GET /api/courses/Cello",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Cello",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Cello"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CRS-011 A course can be closed and reopened, but not twice in a row",
+			"description": "Proves: REQ-042.AC1, REQ-042.AC2, REQ-042.AC5",
+			"item": [
+				{
+					"name": "CRS-011 01 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-011 02 PATCH /api/courses/Violin/close",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"close"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Violin\");",
+									"  pm.expect(b?.status, \"status\").to.eql(\"CLOSED\");",
+									"  pm.expect(b?.closedAt, \"closedAt\").to.match(new RegExp(pm.variables.replaceIn(\"^{{today}}T\"), \"\"));",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-011 03 PATCH /api/courses/Violin/close",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"close"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-011 04 PATCH /api/courses/Violin/reopen",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"reopen"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.status, \"status\").to.eql(\"ACTIVE\");",
+									"  pm.expect(b?.closedAt, \"closedAt\").to.eql(null);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-011 05 PATCH /api/courses/Violin/reopen",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"reopen"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-011 06 PATCH /api/courses/Cello/close",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Cello/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Cello",
+								"close"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-011 07 PATCH /api/courses/Cello/reopen",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Cello/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Cello",
+								"reopen"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CRS-012 A closed course takes no new enrolments or course fees; what exists stays as it was",
+			"description": "Proves: REQ-042.AC6, REQ-042.AC3, REQ-033.AC1, REQ-060.AC9",
+			"item": [
+				{
+					"name": "CRS-012 01 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 02 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Piano\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 03 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Guitar\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 04 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1000\n    },\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 05 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{std}}\",\n  \"effectiveFrom\": \"2025-01-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"std\"), \"effectiveFrom\": \"2025-01-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"entry\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 06 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Asha\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"asha\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 07 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-01-10T10:00:00\",\n  \"dateOfDisjoining\": \"2025-12-20T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-01-10T10:00:00\", \"dateOfDisjoining\": \"2025-12-20T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 08 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Ravi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ravi\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 09 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(4);",
+									"});",
+									"pm.collectionVariables.set(\"before\", pm.response.json());"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 10 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 300,\n  \"label\": \"Exam fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"courseName\": \"Violin\", \"amountPaid\": 300, \"label\": \"Exam fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"extra\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 11 PATCH /api/courses/Violin/close",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"close"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 12 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{ravi}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-02-01T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"ravi\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-02-01T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 13 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 500,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 500, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 14 POST /api/payments/{{extra}}/convert-to-course-fee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/{{extra}}/convert-to-course-fee",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"{{extra}}",
+								"convert-to-course-fee"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 15 GET /api/dues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dues",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dues"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \"\").to.eql(V(\"before\"));",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 16 GET /api/student-sessions/{{sid}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions/{{sid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions",
+								"{{sid}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"sid\"));",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 17 PATCH /api/courses/Violin/reopen",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"reopen"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-012 18 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"REGULAR\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 500,\n  \"label\": \"Course fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"REGULAR\", \"courseName\": \"Violin\", \"amountPaid\": 500, \"label\": \"Course fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CRS-013 Closing doesn't stop additional payments that mention the course",
+			"description": "Proves: REQ-042.AC6",
+			"item": [
+				{
+					"name": "CRS-013 01 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Violin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 02 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Piano\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 03 POST /api/courses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Guitar\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 04 POST /api/fee-structures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-structures",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-structures"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Standard\",\n  \"termMonths\": 3,\n  \"amounts\": [\n    {\n      \"courseName\": \"Violin\",\n      \"amount\": 1000\n    },\n    {\n      \"courseName\": \"Piano\",\n      \"amount\": 1200\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 05 POST /api/fee-timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/fee-timeline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"fee-timeline"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"feeStructureId\": \"{{std}}\",\n  \"effectiveFrom\": \"2025-01-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"feeStructureId\": V(\"std\"), \"effectiveFrom\": \"2025-01-01\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"entry\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 06 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Asha\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"asha\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 07 POST /api/student-sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"courseName\": \"Violin\",\n  \"dateOfJoining\": \"2025-01-10T10:00:00\",\n  \"dateOfDisjoining\": \"2025-12-20T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"courseName\": \"Violin\", \"dateOfJoining\": \"2025-01-10T10:00:00\", \"dateOfDisjoining\": \"2025-12-20T10:00:00\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"sid\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 08 POST /api/students",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentName\": \"Ravi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"ravi\", pm.response.json()?.admissionNo);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 09 PATCH /api/courses/Violin/close",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/Violin/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"Violin",
+								"close"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CRS-013 10 POST /api/payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"{{asha}}\",\n  \"paymentType\": \"ADDITIONAL\",\n  \"courseName\": \"Violin\",\n  \"amountPaid\": 300,\n  \"label\": \"Exam fee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"studentId\": V(\"asha\"), \"paymentType\": \"ADDITIONAL\", \"courseName\": \"Violin\", \"amountPaid\": 300, \"label\": \"Exam fee\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
 									"});"
 								]
 							}

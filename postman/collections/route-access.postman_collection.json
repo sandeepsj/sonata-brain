@@ -2188,7 +2188,7 @@
 		},
 		{
 			"name": "RTE-student-sessions Every /api/student-sessions/** endpoint is guarded by that route",
-			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/student-sessions, PATCH /api/student-sessions/{id}/disjoin, GET /api/student-sessions/{id}, GET /api/student-sessions/active/student/{studentId}, GET /api/student-sessions/active/course/{courseName}, GET /api/student-sessions/all/student/{studentId}, GET /api/student-sessions/all/course/{courseName}, GET /api/student-sessions/all, GET /api/student-sessions/search, GET /api/student-sessions/students/course/{courseName}",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: POST /api/student-sessions, PATCH /api/student-sessions/{id}/disjoin, GET /api/student-sessions, GET /api/student-sessions/{id}, GET /api/student-sessions/active/student/{studentId}, GET /api/student-sessions/active/course/{courseName}, GET /api/student-sessions/all/student/{studentId}, GET /api/student-sessions/all/course/{courseName}, GET /api/student-sessions/all, GET /api/student-sessions/search, GET /api/student-sessions/students/course/{courseName}",
 			"item": [
 				{
 					"name": "RTE-student-sessions 01 setup: role for readOnly",
@@ -3368,7 +3368,200 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 25 GET /api/student-sessions/{id} as anonymous",
+					"name": "RTE-student-sessions 25 GET /api/student-sessions as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-student-sessions 26 GET /api/student-sessions as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-student-sessions 27 GET /api/student-sessions as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-student-sessions 28 GET /api/student-sessions as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-student-sessions 29 GET /api/student-sessions as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/student-sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"student-sessions"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-student-sessions 30 GET /api/student-sessions/{id} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3402,7 +3595,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 26 GET /api/student-sessions/{id} as noRoutes",
+					"name": "RTE-student-sessions 31 GET /api/student-sessions/{id} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3443,7 +3636,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 27 GET /api/student-sessions/{id} as otherRoutes",
+					"name": "RTE-student-sessions 32 GET /api/student-sessions/{id} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3484,7 +3677,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 28 GET /api/student-sessions/{id} as readOnly",
+					"name": "RTE-student-sessions 33 GET /api/student-sessions/{id} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3525,7 +3718,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 29 GET /api/student-sessions/{id} as writeOnly",
+					"name": "RTE-student-sessions 34 GET /api/student-sessions/{id} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3566,7 +3759,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 30 GET /api/student-sessions/active/student/{studentId} as anonymous",
+					"name": "RTE-student-sessions 35 GET /api/student-sessions/active/student/{studentId} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3602,7 +3795,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 31 GET /api/student-sessions/active/student/{studentId} as noRoutes",
+					"name": "RTE-student-sessions 36 GET /api/student-sessions/active/student/{studentId} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3645,7 +3838,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 32 GET /api/student-sessions/active/student/{studentId} as otherRoutes",
+					"name": "RTE-student-sessions 37 GET /api/student-sessions/active/student/{studentId} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3688,7 +3881,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 33 GET /api/student-sessions/active/student/{studentId} as readOnly",
+					"name": "RTE-student-sessions 38 GET /api/student-sessions/active/student/{studentId} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3731,7 +3924,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 34 GET /api/student-sessions/active/student/{studentId} as writeOnly",
+					"name": "RTE-student-sessions 39 GET /api/student-sessions/active/student/{studentId} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3774,7 +3967,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 35 GET /api/student-sessions/active/course/{courseName} as anonymous",
+					"name": "RTE-student-sessions 40 GET /api/student-sessions/active/course/{courseName} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3810,7 +4003,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 36 GET /api/student-sessions/active/course/{courseName} as noRoutes",
+					"name": "RTE-student-sessions 41 GET /api/student-sessions/active/course/{courseName} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3853,7 +4046,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 37 GET /api/student-sessions/active/course/{courseName} as otherRoutes",
+					"name": "RTE-student-sessions 42 GET /api/student-sessions/active/course/{courseName} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3896,7 +4089,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 38 GET /api/student-sessions/active/course/{courseName} as readOnly",
+					"name": "RTE-student-sessions 43 GET /api/student-sessions/active/course/{courseName} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3939,7 +4132,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 39 GET /api/student-sessions/active/course/{courseName} as writeOnly",
+					"name": "RTE-student-sessions 44 GET /api/student-sessions/active/course/{courseName} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3982,7 +4175,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 40 GET /api/student-sessions/all/student/{studentId} as anonymous",
+					"name": "RTE-student-sessions 45 GET /api/student-sessions/all/student/{studentId} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4018,7 +4211,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 41 GET /api/student-sessions/all/student/{studentId} as noRoutes",
+					"name": "RTE-student-sessions 46 GET /api/student-sessions/all/student/{studentId} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4061,7 +4254,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 42 GET /api/student-sessions/all/student/{studentId} as otherRoutes",
+					"name": "RTE-student-sessions 47 GET /api/student-sessions/all/student/{studentId} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4104,7 +4297,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 43 GET /api/student-sessions/all/student/{studentId} as readOnly",
+					"name": "RTE-student-sessions 48 GET /api/student-sessions/all/student/{studentId} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4147,7 +4340,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 44 GET /api/student-sessions/all/student/{studentId} as writeOnly",
+					"name": "RTE-student-sessions 49 GET /api/student-sessions/all/student/{studentId} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4190,7 +4383,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 45 GET /api/student-sessions/all/course/{courseName} as anonymous",
+					"name": "RTE-student-sessions 50 GET /api/student-sessions/all/course/{courseName} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4226,7 +4419,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 46 GET /api/student-sessions/all/course/{courseName} as noRoutes",
+					"name": "RTE-student-sessions 51 GET /api/student-sessions/all/course/{courseName} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4269,7 +4462,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 47 GET /api/student-sessions/all/course/{courseName} as otherRoutes",
+					"name": "RTE-student-sessions 52 GET /api/student-sessions/all/course/{courseName} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4312,7 +4505,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 48 GET /api/student-sessions/all/course/{courseName} as readOnly",
+					"name": "RTE-student-sessions 53 GET /api/student-sessions/all/course/{courseName} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4355,7 +4548,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 49 GET /api/student-sessions/all/course/{courseName} as writeOnly",
+					"name": "RTE-student-sessions 54 GET /api/student-sessions/all/course/{courseName} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4398,7 +4591,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 50 GET /api/student-sessions/all as anonymous",
+					"name": "RTE-student-sessions 55 GET /api/student-sessions/all as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4432,7 +4625,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 51 GET /api/student-sessions/all as noRoutes",
+					"name": "RTE-student-sessions 56 GET /api/student-sessions/all as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4473,7 +4666,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 52 GET /api/student-sessions/all as otherRoutes",
+					"name": "RTE-student-sessions 57 GET /api/student-sessions/all as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4514,7 +4707,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 53 GET /api/student-sessions/all as readOnly",
+					"name": "RTE-student-sessions 58 GET /api/student-sessions/all as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4555,7 +4748,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 54 GET /api/student-sessions/all as writeOnly",
+					"name": "RTE-student-sessions 59 GET /api/student-sessions/all as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4596,7 +4789,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 55 GET /api/student-sessions/search as anonymous",
+					"name": "RTE-student-sessions 60 GET /api/student-sessions/search as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4630,7 +4823,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 56 GET /api/student-sessions/search as noRoutes",
+					"name": "RTE-student-sessions 61 GET /api/student-sessions/search as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4671,7 +4864,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 57 GET /api/student-sessions/search as otherRoutes",
+					"name": "RTE-student-sessions 62 GET /api/student-sessions/search as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4712,7 +4905,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 58 GET /api/student-sessions/search as readOnly",
+					"name": "RTE-student-sessions 63 GET /api/student-sessions/search as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4753,7 +4946,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 59 GET /api/student-sessions/search as writeOnly",
+					"name": "RTE-student-sessions 64 GET /api/student-sessions/search as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4794,7 +4987,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 60 GET /api/student-sessions/students/course/{courseName} as anonymous",
+					"name": "RTE-student-sessions 65 GET /api/student-sessions/students/course/{courseName} as anonymous",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4830,7 +5023,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 61 GET /api/student-sessions/students/course/{courseName} as noRoutes",
+					"name": "RTE-student-sessions 66 GET /api/student-sessions/students/course/{courseName} as noRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4873,7 +5066,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 62 GET /api/student-sessions/students/course/{courseName} as otherRoutes",
+					"name": "RTE-student-sessions 67 GET /api/student-sessions/students/course/{courseName} as otherRoutes",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4916,7 +5109,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 63 GET /api/student-sessions/students/course/{courseName} as readOnly",
+					"name": "RTE-student-sessions 68 GET /api/student-sessions/students/course/{courseName} as readOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4959,7 +5152,7 @@
 					]
 				},
 				{
-					"name": "RTE-student-sessions 64 GET /api/student-sessions/students/course/{courseName} as writeOnly",
+					"name": "RTE-student-sessions 69 GET /api/student-sessions/students/course/{courseName} as writeOnly",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -5005,7 +5198,7 @@
 		},
 		{
 			"name": "RTE-courses Every /api/courses/** endpoint is guarded by that route",
-			"description": "Proves: REQ-011.AC10\n\nEndpoints: GET /api/courses, POST /api/courses",
+			"description": "Proves: REQ-011.AC10\n\nEndpoints: GET /api/courses, GET /api/courses/{name}, POST /api/courses, PATCH /api/courses/{name}/close, PATCH /api/courses/{name}/reopen",
 			"item": [
 				{
 					"name": "RTE-courses 01 setup: role for readOnly",
@@ -5842,7 +6035,205 @@
 					]
 				},
 				{
-					"name": "RTE-courses 20 POST /api/courses as anonymous",
+					"name": "RTE-courses 20 GET /api/courses/{name} as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 21 GET /api/courses/{name} as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 22 GET /api/courses/{name} as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 23 GET /api/courses/{name} as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 24 GET /api/courses/{name} as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 25 POST /api/courses as anonymous",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -5889,7 +6280,7 @@
 					]
 				},
 				{
-					"name": "RTE-courses 21 POST /api/courses as noRoutes",
+					"name": "RTE-courses 26 POST /api/courses as noRoutes",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -5943,7 +6334,7 @@
 					]
 				},
 				{
-					"name": "RTE-courses 22 POST /api/courses as otherRoutes",
+					"name": "RTE-courses 27 POST /api/courses as otherRoutes",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -5997,7 +6388,7 @@
 					]
 				},
 				{
-					"name": "RTE-courses 23 POST /api/courses as readOnly",
+					"name": "RTE-courses 28 POST /api/courses as readOnly",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -6051,7 +6442,7 @@
 					]
 				},
 				{
-					"name": "RTE-courses 24 POST /api/courses as writeOnly",
+					"name": "RTE-courses 29 POST /api/courses as writeOnly",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -6068,6 +6459,552 @@
 							"path": [
 								"api",
 								"courses"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 30 PATCH /api/courses/{name}/close as anonymous",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"close"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 31 PATCH /api/courses/{name}/close as noRoutes",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"close"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 32 PATCH /api/courses/{name}/close as otherRoutes",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"close"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 33 PATCH /api/courses/{name}/close as readOnly",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"close"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 34 PATCH /api/courses/{name}/close as writeOnly",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/close",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"close"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 35 PATCH /api/courses/{name}/reopen as anonymous",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"reopen"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 36 PATCH /api/courses/{name}/reopen as noRoutes",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"reopen"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 37 PATCH /api/courses/{name}/reopen as otherRoutes",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"reopen"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 38 PATCH /api/courses/{name}/reopen as readOnly",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"reopen"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-courses 39 PATCH /api/courses/{name}/reopen as writeOnly",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/courses/NoSuchCourse/reopen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"NoSuchCourse",
+								"reopen"
 							]
 						},
 						"auth": {

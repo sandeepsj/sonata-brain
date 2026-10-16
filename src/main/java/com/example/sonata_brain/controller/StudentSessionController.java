@@ -8,6 +8,8 @@ import com.example.sonata_brain.repository.CourseRepository;
 import com.example.sonata_brain.Repository.StudentRepository;
 import com.example.sonata_brain.repository.StudentSessionRepository;
 import com.example.sonata_brain.service.StudentSessionService;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -47,6 +52,10 @@ public class StudentSessionController {
 
         Course course = courseRepository.findByName(request.getCourseName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+        if (course.isClosed()) { // REQ-033.AC1
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Course '" + course.getName() + "' is closed and takes no new enrolments");
+        }
 
         // Validate dates if provided
         LocalDateTime joiningDate = request.getDateOfJoining();
@@ -105,17 +114,66 @@ public class StudentSessionController {
         }
     }
 
+    /**
+     * Ends a session now, or on a past date given as {@code {"date": "YYYY-MM-DD"}} (REQ-031.AC1, AC3, AC5).
+     * Dues are recalculated by the service.
+     */
     @PatchMapping("/{id}/disjoin")
-    public ResponseEntity<StudentSession> updateDisjoiningDate(@PathVariable Long id) {
+    public ResponseEntity<StudentSession> updateDisjoiningDate(@PathVariable Long id,
+                                                               @RequestBody(required = false) Map<String, String> body) {
         StudentSession session = studentSessionRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
 
         if (session.getDateOfDisjoining() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session is already disjoined");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Session is already disjoined");
         }
 
-        // Use service to trigger events for dues recalculation
-        return ResponseEntity.ok(studentSessionService.disjoinStudent(id, LocalDateTime.now()));
+        LocalDateTime when = LocalDateTime.now();
+        String date = body == null ? null : body.get("date");
+        if (date != null) {
+            LocalDate day;
+            try {
+                day = LocalDate.parse(date);
+            } catch (DateTimeParseException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "date must be YYYY-MM-DD");
+            }
+            if (day.isAfter(LocalDate.now())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The disjoining date can't be in the future");
+            }
+            if (day.isBefore(session.getDateOfJoining().toLocalDate())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The disjoining date can't be before the joining date " + session.getDateOfJoining().toLocalDate());
+            }
+            when = day.atStartOfDay().isBefore(session.getDateOfJoining()) ? session.getDateOfJoining() : day.atStartOfDay();
+        }
+        return ResponseEntity.ok(studentSessionService.disjoinStudent(id, when));
+    }
+
+    /**
+     * REQ-032.AC6, AC7: one list with optional filters; [] when nothing matches, 404 only for an unknown student or
+     * course. {@code activeOn} keeps the sessions that include that date.
+     */
+    @GetMapping
+    public ResponseEntity<List<StudentSession>> listSessions(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String courseName,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate activeOn) {
+        if (studentId != null && !studentRepository.existsById(studentId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found");
+        }
+        if (courseName != null && courseRepository.findByName(courseName).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        List<StudentSession> sessions = studentSessionRepository.findAll(Sort.by("id")).stream()
+            .filter(s -> studentId == null || studentId.equals(s.getStudent().getAdmissionNo()))
+            .filter(s -> courseName == null || (s.getCourse() != null && courseName.equals(s.getCourse().getName())))
+            .filter(s -> active == null || active == (s.getDateOfDisjoining() == null || s.getDateOfDisjoining().isAfter(now)))
+            .filter(s -> activeOn == null || (!s.getDateOfJoining().toLocalDate().isAfter(activeOn)
+                && (s.getDateOfDisjoining() == null || !s.getDateOfDisjoining().toLocalDate().isBefore(activeOn))))
+            .toList();
+        return ResponseEntity.ok(sessions);
     }
 
     @GetMapping("/{id}")

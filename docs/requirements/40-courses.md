@@ -12,8 +12,8 @@ Status: accepted · Source: user ("allow the user to add new subject"), 2026-10-
 ### REQ-041 List and get courses
 Status: accepted · Source: user, 2026-10-04
 
-- **REQ-041.AC1** [target] `GET /api/courses` lists all courses. `?status=ACTIVE|CLOSED` filters them. An invalid
-  status → 400.
+- **REQ-041.AC1** [target] `GET /api/courses` lists all courses, each with `status` (`ACTIVE` or `CLOSED`) and
+  `closedAt`. `?status=ACTIVE|CLOSED` filters them. An invalid status → 400.
 - **REQ-041.AC2** [target] `GET /api/courses/{name}` → 200, or 404 if unknown.
 
 ### REQ-042 Close and reopen a course
@@ -24,6 +24,9 @@ Status: accepted · Source: user ("mark some subjects as closed"), 2026-10-04
 - **REQ-042.AC2** [target] `PATCH /api/courses/{name}/reopen` → 200 `{status: "ACTIVE", closedAt: null}`. Reopening
   a course that is already active → 409.
 - **REQ-042.AC3** [target] Closing a course keeps its sessions, payments, fee structures, timeline and dues unchanged.
-- **REQ-042.AC4** [target] A closed course rejects new sessions (REQ-033), new timeline entries (REQ-053) and new
-  REGULAR payments (REQ-060). Each attempt → 409.
+- **REQ-042.AC4** [retired] Also rejected new timeline entries per course. The timeline is school-wide since
+  2026-10-15; replaced by REQ-042.AC6.
 - **REQ-042.AC5** [target] An unknown course → 404.
+- **REQ-042.AC6** [target] A closed course rejects new sessions (REQ-033.AC1), new REGULAR payments (REQ-060.AC9) and
+  conversions of payments into its course fee (REQ-065). Each attempt → 409. Fee structures may still list it; it is
+  only billed to students who have sessions.

@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import org.springframework.data.domain.Sort;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -124,6 +126,19 @@ public class PaymentService {
         return paymentRepository.findAll();
     }
 
+    /** REQ-066.AC5: any combination of filters, newest first. {@code from} and {@code to} are inclusive dates. */
+    public List<Payment> findPayments(Long studentId, String courseName, Payment.PaymentType type, Boolean active,
+                                      java.time.LocalDate from, java.time.LocalDate to) {
+        return paymentRepository.findAll(Sort.by(Sort.Order.desc("date"), Sort.Order.desc("id"))).stream()
+                .filter(p -> studentId == null || studentId.equals(p.getStudent().getAdmissionNo()))
+                .filter(p -> courseName == null || courseName.equals(p.getCourseName()))
+                .filter(p -> type == null || type == p.getPaymentType())
+                .filter(p -> active == null || active.equals(p.getIsActive()))
+                .filter(p -> from == null || !p.getDate().toLocalDate().isBefore(from))
+                .filter(p -> to == null || !p.getDate().toLocalDate().isAfter(to))
+                .toList();
+    }
+
     /**
      * Deactivate a payment - the only update operation allowed on payments
      * Once a payment is deactivated, it cannot be reactivated
@@ -218,6 +233,9 @@ public class PaymentService {
         if (!courseRepository.existsById(course)) {
             throw ApiException.invalidField("courseName", "Course not found: " + course);
         }
+        if (courseRepository.findById(course).map(c -> c.isClosed()).orElse(false)) {
+            throw ApiException.conflict("Course " + course + " is closed and takes no new course fees"); // REQ-042.AC6
+        }
         Long student = payment.getStudent().getAdmissionNo();
         if (studentSessionRepository.findAllSessionsByStudentIdAndCourseName(student, course).isEmpty()) {
             throw ApiException.invalidField("courseName", "Student " + student + " has no session in " + course
@@ -245,6 +263,9 @@ public class PaymentService {
         }
         if (course != null && !courseRepository.existsById(course)) {
             throw new IllegalArgumentException("Course not found: " + course);
+        }
+        if (request.isRegularPayment() && courseRepository.findById(course).map(c -> c.isClosed()).orElse(false)) {
+            throw new IllegalStateException("Course " + course + " is closed and takes no new course fees"); // REQ-060.AC9
         }
         if (request.isRegularPayment()
                 && studentSessionRepository.findAllSessionsByStudentIdAndCourseName(request.getStudentId(), course).isEmpty()) {
