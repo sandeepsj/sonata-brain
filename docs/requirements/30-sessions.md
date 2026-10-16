@@ -21,10 +21,12 @@ Status: accepted · Source: existing code
 Status: accepted · Source: existing code
 
 - **REQ-031.AC1** [baseline] `PATCH /api/student-sessions/{id}/disjoin` sets `dateOfDisjoining` to now → 200.
-- **REQ-031.AC2** [baseline] A session that is already disjoined → 400. An unknown session → 404.
+- **REQ-031.AC2** [retired] *(was baseline)* An already disjoined session → 400. Replaced by REQ-031.AC5.
 - **REQ-031.AC3** [target] An optional body `{date}` sets a past disjoin date, which can't be before
   `dateOfJoining` → 400. An already disjoined session → 409.
 - **REQ-031.AC4** [target] Disjoining triggers a dues rebuild for that student (REQ-074).
+- **REQ-031.AC5** [target] A session that is already disjoined → 409. An unknown session → 404. A `date` in the future
+  → 400.
 
 ### REQ-032 Query sessions
 Status: accepted · Source: existing code
@@ -39,8 +41,11 @@ Status: accepted · Source: existing code
 - **REQ-032.AC5** [baseline] `GET /api/student-sessions/search` with no parameters → 400.
 - **REQ-032.AC6** [target] List endpoints return 200 with `[]` when nothing matches. 404 is only for an unknown
   student or course.
-- **REQ-032.AC7** [target] `GET /api/student-sessions?studentId=&courseName=&active=&activeOn=<date>` replaces the
-  `/all`, `/active/*` and `/students/*` variants. `activeOn` returns the sessions that overlap that date.
+- **REQ-032.AC7** [target] `GET /api/student-sessions?studentId=&courseName=&active=&activeOn=<date>` filters by any
+  combination and returns 200 with `[]` when nothing matches; an unknown student or course → 404. `active=true` means
+  not disjoined (or disjoining in the future), `active=false` the opposite. `activeOn` returns the sessions that
+  include that date (joined on or before it, and not disjoined before it). Ordered by id. The older `/all`,
+  `/active/*` and `/students/*` variants keep working.
 
 ### REQ-033 Closed courses take no new enrolments
 Status: accepted · Source: user, 2026-10-04

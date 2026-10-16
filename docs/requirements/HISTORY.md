@@ -164,3 +164,13 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 
 - The recalculation stays inside the request (it takes seconds since `fast-recalculation`), so the request itself is
   the status. Timeline delete now answers 200 with its recalculation instead of 204 (REQ-058.AC5 retired).
+
+## 2026-10-16: Planned endpoints built (branch `planned-endpoints`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | Build the planned endpoints the frontend needs: payments list with filters, course close/reopen with status, ending a session on a past date, and the sessions list with filters. | User | REQ-066.AC5, REQ-041, REQ-042, REQ-031.AC3, REQ-032.AC7 |
+
+- A closed course no longer rejects timeline entries (the timeline is school-wide): REQ-042.AC4 retired, REQ-042.AC6
+  added. Disjoining twice now answers 409 (REQ-031.AC2 retired, REQ-031.AC5). Course creation still answers 200
+  (REQ-040.AC3 not built yet).

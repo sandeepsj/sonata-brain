@@ -104,5 +104,6 @@ Status: accepted · Source: existing code
 - **REQ-066.AC3** [baseline] `GET /api/payments/date-range?startDate=&endDate=` returns active payments in the range,
   newest first. `/date-range/course/{name}` and `/date-range/type/{type}` narrow it further.
 - **REQ-066.AC4** [retired] Query endpoint with `periodDate`. Replaced by REQ-066.AC5.
-- **REQ-066.AC5** [target] `GET /api/payments?studentId=&courseName=&type=&active=&from=&to=` replaces the path
-  variants, newest first, each with its discounts. *(not built yet)*
+- **REQ-066.AC5** [target] `GET /api/payments?studentId=&courseName=&type=&active=&from=&to=` filters by any
+  combination (`from` and `to` are dates, inclusive, on the payment date), newest first, each with its discounts.
+  Without parameters it lists every payment. An invalid `type` or date → 400. The path variants keep working.

@@ -1,5 +1,7 @@
 package com.example.sonata_brain.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDate;
 import com.example.sonata_brain.dto.PaymentCreateRequest;
 import com.example.sonata_brain.model.Payment;
 import com.example.sonata_brain.service.PaymentService;
@@ -59,14 +61,16 @@ public class PaymentController {
         }
     }
 
+    /** REQ-066.AC5: every payment, or filtered; newest first, each with its discounts. */
     @GetMapping
-    public ResponseEntity<List<Payment>> getAllPayments() {
-        try {
-            List<Payment> payments = paymentService.getAllPayments();
-            return new ResponseEntity<>(payments, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public List<Payment> getPayments(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String courseName,
+            @RequestParam(required = false) Payment.PaymentType type,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return paymentService.findPayments(studentId, courseName, type, active, from, to);
     }
 
     @GetMapping("/{id}")
