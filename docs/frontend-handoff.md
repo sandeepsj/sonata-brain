@@ -27,9 +27,9 @@ the user has some access to:
 ```
 - `GET` (and `HEAD`) on a path needs `read`; `POST`, `PUT`, `PATCH` and `DELETE` need `write`. The two are independent.
 - **Show a screen** when its route has `read`. **Show create/edit/delete buttons** when it has `write`.
-- **Route list:** there are 11 paths in total: `/api/students/**`, `/api/student-sessions/**`, `/api/courses/**`,
+- **Route list:** there are 12 paths in total: `/api/students/**`, `/api/student-sessions/**`, `/api/courses/**`,
   `/api/fee-structures/**`, `/api/fee-timeline/**`, `/api/payments/**`, `/api/discounts/**`, `/api/dues/**`,
-  `/api/users/**`, `/api/roles/**`, `/api/logging/**`. Each operation in the spec says which route it needs.
+  `/api/users/**`, `/api/roles/**`, `/api/logging/**`, `/api/receipt-templates/**` (label it "Receipt templates"). Each operation in the spec says which route it needs.
 - **A "Teacher":** this is just a role that has `read` on the data routes and `write` on none.
 - **Role-editor screen:** the role body is now `{ name, description, routes: [{ path, read, write }] }`.
   `GET /api/roles` returns every route, with `false` flags where nothing is granted. Unknown or repeated paths → 400.
@@ -122,6 +122,45 @@ This branch replaces the per-year, per-term fee rows with three ideas. Read `doc
     - 400 when the student isn't enrolled in that course; 409 when the payment is already REGULAR or deactivated.
     - Offer this as an action on ADDITIONAL payments.
 
+### 5. Receipt templates (REQ-090 to REQ-092, `docs/requirements/90-receipts.md`)
+A receipt is now printed from a **template**: a complete HTML document (CSS and `<script>` allowed) with Handlebars
+variables. The backend only stores templates; the frontend fills in the variables and renders the HTML, and the
+rendered page is the receipt. This replaces the hard-coded layout in `/receipt-print`.
+
+- **Endpoints** (route `/api/receipt-templates/**`; GET needs read, everything else write):
+  - `GET /api/receipt-templates`: the list, built-in first then by name; items have **no `html`**:
+    `{id, name, builtIn, isDefault, createdAt, createdBy, updatedAt, updatedBy}`.
+  - `GET /api/receipt-templates/default` and `GET /api/receipt-templates/{id}`: one template **with `html`**.
+  - `POST /api/receipt-templates {name, html}` → 201; `PUT /api/receipt-templates/{id} {name, html}` → 200;
+    `DELETE /api/receipt-templates/{id}` → 204; `PATCH /api/receipt-templates/{id}/default` → 200.
+  - Errors: blank name, name over 80 characters, or `html` missing, blank or over 1 MB → 400 with `details` (`name`,
+    `html`); duplicate name (ignoring case) → 409; editing or deleting the built-in template → 409.
+  - The built-in **Standard** template reproduces today's receipt and is the default at first. It can't be edited
+    or deleted: offer "Save as new" (POST with its HTML). Deleting the default makes Standard the default again.
+- **Variables:** the frontend owns the list. Build this object from the student and the selected payments, fill the
+  template with Handlebars (`handlebars` npm package), and expose the same object to scripts as `window.receipt`.
+  Amounts are pre-formatted for India without `₹` (`1,23,450`); dates look like `18 Oct 2026`.
+
+  | Variable | Meaning |
+  |---|---|
+  | `receipt.id`, `receipt.printedDate` | receipt number, print date |
+  | `student.name`, `student.admissionNo` | the student |
+  | `payments` (use `{{#each payments}}`) | each with `date`, `courseName` (`Fee Payment` when none), `label`, `fee` (before discount), `discount` (empty when none), `amountPaid`, `hasDiscounts`, `discounts` (`label`, `amount`) |
+  | `totals.fee`, `totals.discount`, `totals.paid` | sums |
+
+  The Standard template uses all of these; read it with `GET /api/receipt-templates/default` as the reference.
+- **Security (REQ-090.AC9):** templates can contain scripts written by any user with write access. Render the
+  preview and the print **only inside a sandboxed iframe**: `<iframe sandbox="allow-scripts allow-modals"
+  srcdoc="…">`, never with `allow-same-origin`. Then the template can't read the token or call the API. Print with
+  a script inside the iframe (inject `window.print()` after load) or let the user print from the preview.
+- **Screens:**
+  - **Templates editor** (a page under settings, shown with read on the route): a template list, an HTML code editor
+    (CodeMirror or Monaco, HTML mode), a variable panel where clicking inserts `{{…}}` at the cursor, and a live
+    preview in the sandboxed iframe filled with sample data. Buttons: Save, Save as new…, Make default, Delete.
+    Write actions need write on the route; for the built-in template only "Save as new" is offered.
+  - **Printing** (`students/[id]/receipts`): a template picker with the default preselected, then render and print
+    through the iframe.
+
 ## Known gaps in the spec
 - **Untyped success responses.** These say "object" because the controllers return untyped maps:
   - `POST /api/payments`: really 201 with the payment
@@ -145,4 +184,5 @@ per-course structures. This branch has school-wide ones, so the fee screens need
 | `POST /api/payments`, `PATCH /api/payments/{id}/deactivate`, `GET /api/payments` | Exist with `paymentType` and **no** `periodDate` or `termId` (section 4). `convert-to-course-fee` exists (`{ courseName? }`). `GET /api/payments?studentId=&courseName=&type=&active=&from=&to=` lists newest first with discounts |
 | `/api/fee-structures` | Exist in the **new school-wide shape** (section 4). No `courseName`, `termsPerYear` or clone |
 | `/api/fee-timeline`, `/api/fee-timeline/preview` | Exist, **school-wide** (no `courseName`), boundary-only (section 4) |
+| (new) `/api/receipt-templates/**` | Exist (section 5). `/receipt-print`'s hard-coded layout is replaced by rendering a template |
 | `/api/dues?…`, `/api/dues/summary?studentId=`, `/api/dues/rebuild*` | Exist (section 4). `/api/dues/aggregate`, `/api/dues/waivers` and `/api/dues/legacy-comparison` **don't** (waivers were replaced by ₹0 discount payments) |

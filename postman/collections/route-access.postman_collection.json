@@ -809,7 +809,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2576,7 +2576,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5586,7 +5586,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -7433,7 +7433,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -9200,7 +9200,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -10967,7 +10967,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -14869,7 +14869,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -16110,7 +16110,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -17619,7 +17619,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -18732,7 +18732,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -20499,7 +20499,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -21680,6 +21680,2244 @@
 									"language": "json"
 								}
 							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RTE-receipt-templates Every /api/receipt-templates/** endpoint is guarded by that route",
+			"description": "Proves: REQ-011.AC10, REQ-092.AC1\n\nEndpoints: GET /api/receipt-templates, GET /api/receipt-templates/default, GET /api/receipt-templates/{id}, POST /api/receipt-templates, PUT /api/receipt-templates/{id}, PATCH /api/receipt-templates/{id}/default, DELETE /api/receipt-templates/{id}",
+			"item": [
+				{
+					"name": "RTE-receipt-templates 01 setup: role for readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"readOnly-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": false\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('readOnlyRole', pm.response.json().id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 02 setup: sign up readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"readOnly-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('readOnlyId', pm.response.json().id);",
+									"pm.collectionVariables.set('readOnlyEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 03 setup: give readOnly the role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{readOnlyId}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{readOnlyId}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [{{readOnlyRole}}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role assigned', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 04 setup: log in as readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{readOnlyEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('readOnly', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 05 setup: role for writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"writeOnly-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": false,\n      \"write\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('writeOnlyRole', pm.response.json().id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 06 setup: sign up writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"writeOnly-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('writeOnlyId', pm.response.json().id);",
+									"pm.collectionVariables.set('writeOnlyEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 07 setup: give writeOnly the role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{writeOnlyId}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{writeOnlyId}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [{{writeOnlyRole}}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role assigned', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 08 setup: log in as writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{writeOnlyEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('writeOnly', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 09 setup: role for otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"otherRoutes-u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/students/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/student-sessions/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-structures/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/fee-timeline/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/discounts/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/dues/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/users/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/roles/**\",\n      \"read\": true,\n      \"write\": true\n    },\n    {\n      \"path\": \"/api/logging/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role created', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('otherRoutesRole', pm.response.json().id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 10 setup: sign up otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"otherRoutes-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('otherRoutesId', pm.response.json().id);",
+									"pm.collectionVariables.set('otherRoutesEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 11 setup: give otherRoutes the role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{otherRoutesId}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{otherRoutesId}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [{{otherRoutesRole}}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('role assigned', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 12 setup: log in as otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{otherRoutesEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('otherRoutes', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 13 setup: sign up noRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"noRoutes-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signed up', () => pm.response.to.have.status(201));",
+									"pm.collectionVariables.set('noRoutesId', pm.response.json().id);",
+									"pm.collectionVariables.set('noRoutesEmail', pm.response.json().email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 14 setup: log in as noRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{noRoutesEmail}}\",\n  \"password\": \"route-test-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('logged in', () => pm.response.to.have.status(200));",
+									"pm.collectionVariables.set('noRoutes', pm.response.json().accessToken);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 15 GET /api/receipt-templates as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 16 GET /api/receipt-templates as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 17 GET /api/receipt-templates as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 18 GET /api/receipt-templates as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 19 GET /api/receipt-templates as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 20 GET /api/receipt-templates/default as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 21 GET /api/receipt-templates/default as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 22 GET /api/receipt-templates/default as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 23 GET /api/receipt-templates/default as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 24 GET /api/receipt-templates/default as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 25 GET /api/receipt-templates/{id} as anonymous",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 26 GET /api/receipt-templates/{id} as noRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 27 GET /api/receipt-templates/{id} as otherRoutes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 28 GET /api/receipt-templates/{id} as readOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 29 GET /api/receipt-templates/{id} as writeOnly",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 30 POST /api/receipt-templates as anonymous",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 31 POST /api/receipt-templates as noRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 32 POST /api/receipt-templates as otherRoutes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 33 POST /api/receipt-templates as readOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 34 POST /api/receipt-templates as writeOnly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 35 PUT /api/receipt-templates/{id} as anonymous",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 36 PUT /api/receipt-templates/{id} as noRoutes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 37 PUT /api/receipt-templates/{id} as otherRoutes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 38 PUT /api/receipt-templates/{id} as readOnly",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 39 PUT /api/receipt-templates/{id} as writeOnly",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 40 PATCH /api/receipt-templates/{id}/default as anonymous",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 41 PATCH /api/receipt-templates/{id}/default as noRoutes",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 42 PATCH /api/receipt-templates/{id}/default as otherRoutes",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 43 PATCH /api/receipt-templates/{id}/default as readOnly",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 44 PATCH /api/receipt-templates/{id}/default as writeOnly",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999",
+								"default"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"write-only is let through\", () => {",
+									"  pm.expect(pm.response.code, 'any status but 401/403').to.not.be.oneOf([401, 403]);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 45 DELETE /api/receipt-templates/{id} as anonymous",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"no token \\u2192 401\", () => {",
+									"  pm.response.to.have.status(401);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 46 DELETE /api/receipt-templates/{id} as noRoutes",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{noRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with no routes \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 47 DELETE /api/receipt-templates/{id} as otherRoutes",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{otherRoutes}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"user with every other route \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 48 DELETE /api/receipt-templates/{id} as readOnly",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readOnly}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"read-only \\u2192 403\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RTE-receipt-templates 49 DELETE /api/receipt-templates/{id} as writeOnly",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{writeOnly}}",
+									"type": "string"
+								}
+							]
 						}
 					},
 					"event": [

@@ -16,6 +16,7 @@ Single source of truth for what the Sonata Brain backend must do. Code and tests
 | [60-payments.md](60-payments.md) | Payments, discounts, deactivation, conversion. |
 | [70-dues.md](70-dues.md) | Derived dues, rebuilds, waivers, queries. |
 | [80-migration.md](80-migration.md) | Moving production data to the new model. |
+| [90-receipts.md](90-receipts.md) | Receipt templates: HTML with variables, rendered by the frontend. |
 
 ## Format
 

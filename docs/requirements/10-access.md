@@ -16,6 +16,7 @@ The catalogue:
 | `/api/users/**` | user administration |
 | `/api/roles/**` | role administration |
 | `/api/logging/**` | logging settings |
+| `/api/receipt-templates/**` | receipt templates (granted like payments on migration) |
 
 Always open: `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/users/signup`, `/heartbeat`, `OPTIONS`.
 `GET /api/users/me` needs only a valid access token.

@@ -181,3 +181,17 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
 |---|---|---|---|
 | 1 | Converting an additional payment that is larger than the term owed: allow converting a partial amount, keeping the rest as an additional payment. | User (option chosen) | REQ-065.AC10 |
 | 2 | The payments list was slow (about 55 s on production): discounts were loaded one query per payment. It is now one query. | User report | REQ-066.AC5 |
+
+## 2026-10-18: Receipt templates (branch `receipt-templates`)
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | When printing a receipt, format it completely and save the format as a named template to reuse (frontend requirement `sonata-face/docs/receipt-templates-requirement.md`: per-element colours, fonts, bold, italic as a JSON document). | User | REQ-090, REQ-091, REQ-092 |
+| 2 | Replaced the same day, before anything was built: a template is a complete **HTML document** (CSS and JavaScript allowed) edited in an editor mode, with variables the frontend fills in at print time. The rendered HTML is the receipt. Users keep a list of templates and pick one when printing. | User | REQ-090.AC3, AC7, AC8 |
+| 3 | Variables use Handlebars syntax (`{{student.name}}`, `{{#each payments}}`). The frontend owns the list of variables and shows it in the editor. | User (options chosen) | REQ-090 (variables reference) |
+
+- The backend only stores templates: no parsing, sanitising or rendering of the HTML.
+- Because templates may contain scripts, the frontend must render them only in a sandboxed iframe without
+  `allow-same-origin` (design, REQ-090.AC9).
+- A new catalogue route `/api/receipt-templates/**` (12 routes now). The migration grants every existing role the same
+  read and write on it as on `/api/payments/**` (REQ-092.AC3).
