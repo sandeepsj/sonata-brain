@@ -434,7 +434,7 @@
 									"  const b = pm.response.json();",
 									"  pm.expect(b?.accessToken, \"accessToken\").to.be.a('string').and.match(/\\S/);",
 									"  pm.expect(b?.refreshToken, \"refreshToken\").to.be.a('string').and.match(/\\S/);",
-									"  pm.expect(b?.routes, \"routes length\").to.have.lengthOf(11);",
+									"  pm.expect(b?.routes, \"routes length\").to.have.lengthOf(12);",
 									"  pm.expect((b?.routes || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.read === true) && (y?.write === true))), \"routes: every item matches {\\\"read\\\": true, \\\"write\\\": true}\").to.be.true;",
 									"  pm.expect((b?.routes || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.path === \"/api/students/**\"))), \"routes includes {\\\"path\\\": \\\"/api/students/**\\\"}\").to.be.true;",
 									"  pm.expect((b?.routes || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.path === \"/api/roles/**\"))), \"routes includes {\\\"path\\\": \\\"/api/roles/**\\\"}\").to.be.true;",
@@ -1088,7 +1088,7 @@
 									"  const b = pm.response.json();",
 									"  pm.expect(b?.accessToken, \"accessToken\").to.be.a('string').and.match(/\\S/);",
 									"  pm.expect(b?.refreshToken, \"refreshToken\").to.eql(V(\"rootRefresh\"));",
-									"  pm.expect(b?.routes, \"routes length\").to.have.lengthOf(11);",
+									"  pm.expect(b?.routes, \"routes length\").to.have.lengthOf(12);",
 									"});"
 								]
 							}
@@ -8177,6 +8177,645 @@
 			]
 		},
 		{
+			"name": "ACC-T05 [12] For every route: read-only can GET but not write; neither flag gets 403 on both",
+			"description": "Proves: REQ-011.AC6, REQ-011.AC8",
+			"item": [
+				{
+					"name": "ACC-T05 [12] 01 POST /api/roles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"reader-role-u{{$randomUUID}}\",\n  \"description\": \"Role for a contract case\",\n  \"routes\": [\n    {\n      \"path\": \"/api/receipt-templates/**\",\n      \"read\": true,\n      \"write\": false\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"_role\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 02 POST /api/users/signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"reader-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"staff-password-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"_uid\", pm.response.json()?.id);",
+									"pm.collectionVariables.set(\"_email\", pm.response.json()?.email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 03 PUT /api/users/{{_uid}}/roles",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{_uid}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{_uid}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [\n    \"{{_role}}\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"roleIds\": [V(\"_role\")]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 04 POST /api/auth/login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{_email}}\",\n  \"password\": \"staff-password-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"email\": V(\"_email\"), \"password\": \"staff-password-1\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"_token\", pm.response.json()?.accessToken);",
+									"pm.collectionVariables.set(\"_refresh\", pm.response.json()?.refreshToken);",
+									"pm.collectionVariables.set(\"reader\", V(\"_token\"));",
+									"pm.collectionVariables.set(\"readerRefresh\", V(\"_refresh\"));",
+									"pm.collectionVariables.set(\"readerId\", V(\"_uid\"));",
+									"pm.collectionVariables.set(\"readerRoleId\", V(\"_role\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 05 POST /api/roles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"outsider-role-u{{$randomUUID}}\",\n  \"description\": \"Role for a contract case\",\n  \"routes\": [\n    {\n      \"path\": \"/api/courses/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"_role\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 06 POST /api/users/signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"outsider-u{{$randomUUID}}@sonata.test\",\n  \"password\": \"staff-password-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"_uid\", pm.response.json()?.id);",
+									"pm.collectionVariables.set(\"_email\", pm.response.json()?.email);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 07 PUT /api/users/{{_uid}}/roles",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{_uid}}/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{_uid}}",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleIds\": [\n    \"{{_role}}\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"roleIds\": [V(\"_role\")]});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 08 POST /api/auth/login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{_email}}\",\n  \"password\": \"staff-password-1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"// Typed values (numbers, lists) can't be written as {{...}} in raw JSON, so the body is built here.",
+									"pm.request.body.raw = JSON.stringify({\"email\": V(\"_email\"), \"password\": \"staff-password-1\"});"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"_token\", pm.response.json()?.accessToken);",
+									"pm.collectionVariables.set(\"_refresh\", pm.response.json()?.refreshToken);",
+									"pm.collectionVariables.set(\"outsider\", V(\"_token\"));",
+									"pm.collectionVariables.set(\"outsiderRefresh\", V(\"_refresh\"));",
+									"pm.collectionVariables.set(\"outsiderId\", V(\"_uid\"));",
+									"pm.collectionVariables.set(\"outsiderRoleId\", V(\"_role\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 09 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{reader}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 10 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{reader}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(b?.status, \"status\").to.eql(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 11 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{outsider}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "ACC-T05 [12] 12 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{outsider}}",
+									"type": "string"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(403);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "ACC-T06 Read and write are independent - write-only can write but not read",
 			"description": "Proves: REQ-011.AC7",
 			"item": [
@@ -10015,7 +10654,7 @@
 									"  pm.expect(b?.name, \"name\").to.match(new RegExp(\"^Accountant u\", \"\"));",
 									"  pm.expect(b?.description, \"description\").to.eql(\"Takes payments, reads students\");",
 									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(false);",
-									"  pm.expect(b?.routes, \"routes length\").to.have.lengthOf(11);",
+									"  pm.expect(b?.routes, \"routes length\").to.have.lengthOf(12);",
 									"  pm.expect(b?.routes?.[0]?.path, \"routes[0].path\").to.eql(\"/api/students/**\");",
 									"  pm.expect(b?.routes?.[0]?.read, \"routes[0].read\").to.eql(true);",
 									"  pm.expect(b?.routes?.[0]?.write, \"routes[0].write\").to.eql(false);",
@@ -11505,7 +12144,7 @@
 									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
 									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"ADMIN\");",
 									"  pm.expect(b?.[0]?.builtIn, \"[0].builtIn\").to.eql(true);",
-									"  pm.expect(b?.[0]?.routes, \"[0].routes length\").to.have.lengthOf(11);",
+									"  pm.expect(b?.[0]?.routes, \"[0].routes length\").to.have.lengthOf(12);",
 									"  pm.expect((b?.[0]?.routes || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.read === true) && (y?.write === true))), \"[0].routes: every item matches {\\\"read\\\": true, \\\"write\\\": true}\").to.be.true;",
 									"});"
 								]

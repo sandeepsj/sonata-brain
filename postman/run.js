@@ -31,8 +31,9 @@ const db = {
   name: process.env.TEST_DB || 'sonata-postman',
 };
 const PORT = Number(process.env.TEST_PORT || 18080);
-// Kept between cases: migration history and access control, so the bootstrap admin survives.
-const PRESERVED = ['flyway_schema_history', 'account', 'role', 'role_route', 'user_roles'];
+// Kept between cases: migration history and access control, so the bootstrap admin survives. Receipt templates are
+// reset to the seeded built-in one instead of emptied (REQ-091.AC1).
+const PRESERVED = ['flyway_schema_history', 'account', 'role', 'role_route', 'user_roles', 'receipt_template'];
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -88,6 +89,7 @@ function cleanDatabase() {
   const tables = psql(db.name, "SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
     .split('\n').filter((t) => t && !PRESERVED.includes(t));
   if (tables.length) psql(db.name, `TRUNCATE ${tables.map((t) => `"${t}"`).join(', ')} CASCADE`);
+  psql(db.name, 'DELETE FROM receipt_template WHERE NOT built_in; UPDATE receipt_template SET is_default = true WHERE built_in');
 }
 
 function runCase(collectionFile, folders, baseUrl) {

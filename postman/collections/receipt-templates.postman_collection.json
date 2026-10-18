@@ -1,0 +1,2725 @@
+{
+	"info": {
+		"name": "Sonata API - Receipt templates",
+		"description": "Run with postman/run.js (fresh database, clean slate per case) or in the Postman app. See postman/README.md.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{admin}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Date helpers for the tests: {{today}}, {{today_m40d}} (40 days ago), {{today_p1d}}, {{year}}, {{year_m1}}, ...",
+					"const pad = (n) => String(n).padStart(2, '0');",
+					"const day = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };",
+					"pm.collectionVariables.set('today', day(0));",
+					"for (const n of []) pm.collectionVariables.set(`today_${n > 0 ? 'p' : 'm'}${Math.abs(n)}d`, day(n));",
+					"const year = new Date().getFullYear();",
+					"pm.collectionVariables.set('year', year);",
+					"for (const n of []) pm.collectionVariables.set(`year_${n > 0 ? 'p' : 'm'}${Math.abs(n)}`, year + n);"
+				]
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "00 Setup",
+			"description": "Logs in as the bootstrap administrator. run.js runs this before every case.",
+			"item": [
+				{
+					"name": "Setup 01 POST /api/auth/login (bootstrap admin)",
+					"request": {
+						"method": "POST",
+						"auth": {
+							"type": "noauth"
+						},
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('admin can log in', () => pm.response.to.have.status(200));",
+									"const b = pm.response.json();",
+									"// 'root' and 'admin' are the same bootstrap administrator.",
+									"pm.collectionVariables.set('admin', b.accessToken);",
+									"pm.collectionVariables.set('adminRefresh', b.refreshToken);",
+									"pm.collectionVariables.set('root', b.accessToken);",
+									"pm.collectionVariables.set('rootRefresh', b.refreshToken);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-001 A built-in Standard template reproduces today's receipt and is the default",
+			"description": "Proves: REQ-091.AC1, REQ-091.AC4",
+			"item": [
+				{
+					"name": "RCT-001 01 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.builtIn, \"[0].builtIn\").to.eql(true);",
+									"  pm.expect(b?.[0]?.isDefault, \"[0].isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-001 02 GET /api/receipt-templates/default",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((Number.isInteger(b?.id))), \"id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(true);",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(true);",
+									"  pm.expect(b?.createdAt, \"createdAt\").to.be.a(\"string\");",
+									"  pm.expect(b?.updatedAt, \"updatedAt\").to.be.a(\"string\");",
+									"  pm.expect(b?.html, \"html\").to.match(new RegExp(\"size: A5 landscape[\\\\s\\\\S]*REVATHI EDUCATION ART &amp; CULTURAL TRUST[\\\\s\\\\S]*Reg\\\\.No\\\\. 46/4/2000[\\\\s\\\\S]*\\\\{\\\\{student\\\\.name\\\\}\\\\}[\\\\s\\\\S]*\\\\{\\\\{#each payments\\\\}\\\\}[\\\\s\\\\S]*\\\\{\\\\{totals\\\\.paid\\\\}\\\\}[\\\\s\\\\S]*Secretary/Clerk\", \"\"));",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-001 03 GET /api/receipt-templates/{{std}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{std}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(true);",
+									"  pm.expect(((typeof b?.html === 'string' && b?.html.toLowerCase().includes(String(\"{{receipt.printedDate}}\").toLowerCase()))), \"html matches {\\\"$contains\\\": \\\"{{receipt.printedDate}}\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-002 Templates are created, listed built-in first then by name without html, fetched, replaced and deleted",
+			"description": "Proves: REQ-090.AC1, REQ-090.AC2, REQ-090.AC3, REQ-090.AC4, REQ-090.AC5",
+			"item": [
+				{
+					"name": "RCT-002 01 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"  Festive  \",\n  \"html\": \"<!doctype html>\\n<html><head><meta charset=\\\"utf-8\\\"><style>@page { size: A4 portrait } h1 { color: #8B0000; font-family: 'Noto Serif Tamil' }</style></head>\\n<body>\\n  <h1>\\u007b\\u007bstudent.name}} — ரசீது</h1>\\n  \\u007b\\u007b#each payments}}<p>\\u007b\\u007bdate}}\\t\\u007b\\u007bcourseName}}  ₹\\u007b\\u007bamountPaid}}</p>\\u007b\\u007b/each}}\\n  <script>document.title = 'Receipt ' + window.receipt.receipt.id; if (1 < 2 && \\\"a\\\" !== 'b') console.log(`ok`);</script>\\n</body></html>\\n\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(((Number.isInteger(b?.id))), \"id matches {\\\"$type\\\": \\\"integer\\\"}\").to.be.true;",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Festive\");",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(false);",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(false);",
+									"  pm.expect(b?.createdBy, \"createdBy\").to.eql(\"root@sonata.test\");",
+									"  pm.expect(b?.updatedBy, \"updatedBy\").to.eql(\"root@sonata.test\");",
+									"  pm.expect(b?.createdAt, \"createdAt\").to.be.a(\"string\");",
+									"  pm.expect(b?.updatedAt, \"updatedAt\").to.be.a(\"string\");",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<!doctype html>\\n<html><head><meta charset=\\\"utf-8\\\"><style>@page { size: A4 portrait } h1 { color: #8B0000; font-family: 'Noto Serif Tamil' }</style></head>\\n<body>\\n  <h1>{{student.name}} — ரசீது</h1>\\n  {{#each payments}}<p>{{date}}\\t{{courseName}}  ₹{{amountPaid}}</p>{{/each}}\\n  <script>document.title = 'Receipt ' + window.receipt.receipt.id; if (1 < 2 && \\\"a\\\" !== 'b') console.log(`ok`);</script>\\n</body></html>\\n\");",
+									"});",
+									"pm.collectionVariables.set(\"festive\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 02 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"aurora\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"aurora\");",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>{{student.name}}</p>\");",
+									"});",
+									"pm.collectionVariables.set(\"aurora\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 03 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && Object.keys(y).every(k => [\"id\", \"name\", \"builtIn\", \"isDefault\", \"createdAt\", \"updatedAt\", \"createdBy\", \"updatedBy\"].includes(k))) && ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((Number.isInteger(y?.id))) && ((typeof y?.name === 'string')) && ((typeof y?.builtIn === 'boolean')) && ((typeof y?.isDefault === 'boolean')) && ((typeof y?.createdAt === 'string')) && ((typeof y?.updatedAt === 'string')) && ((((typeof y?.createdBy === 'string')) || ((y?.createdBy === null)))) && ((((typeof y?.updatedBy === 'string')) || ((y?.updatedBy === null))))))), \": every item matches {\\\"$only\\\": {\\\"id\\\": {\\\"$type\\\": \\\"integer\\\"}, \\\"name\\\": {\\\"$type\\\": \\\"string\\\"}, \\\"builtIn\\\": {\\\"$type\\\": \\\"boolean\\\"}, \\\"isDefault\\\": {\\\"$typ…\").to.be.true;",
+									"  pm.expect(b, \" length\").to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 04 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(3);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.builtIn, \"[0].builtIn\").to.eql(true);",
+									"  pm.expect(b?.[1]?.name, \"[1].name\").to.eql(\"aurora\");",
+									"  pm.expect(b?.[2]?.name, \"[2].name\").to.eql(\"Festive\");",
+									"  pm.expect(b?.[2]?.isDefault, \"[2].isDefault\").to.eql(false);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 05 GET /api/receipt-templates/{{festive}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{festive}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{festive}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"festive\"));",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Festive\");",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<!doctype html>\\n<html><head><meta charset=\\\"utf-8\\\"><style>@page { size: A4 portrait } h1 { color: #8B0000; font-family: 'Noto Serif Tamil' }</style></head>\\n<body>\\n  <h1>{{student.name}} — ரசீது</h1>\\n  {{#each payments}}<p>{{date}}\\t{{courseName}}  ₹{{amountPaid}}</p>{{/each}}\\n  <script>document.title = 'Receipt ' + window.receipt.receipt.id; if (1 < 2 && \\\"a\\\" !== 'b') console.log(`ok`);</script>\\n</body></html>\\n\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 06 PUT /api/receipt-templates/{{festive}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{festive}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{festive}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Festive 2\",\n  \"html\": \"<p>Total: ₹\\u007b\\u007btotals.paid}}</p>\\r\\n\\n   \"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"festive\"));",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Festive 2\");",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(false);",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(false);",
+									"  pm.expect(b?.updatedBy, \"updatedBy\").to.eql(\"root@sonata.test\");",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>Total: ₹{{totals.paid}}</p>\\r\\n\\n   \");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 07 GET /api/receipt-templates/{{festive}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{festive}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{festive}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Festive 2\");",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>Total: ₹{{totals.paid}}</p>\\r\\n\\n   \");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 08 DELETE /api/receipt-templates/{{aurora}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{aurora}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{aurora}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 09 GET /api/receipt-templates/{{aurora}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{aurora}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{aurora}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 10 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 11 GET /api/receipt-templates/999999",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 12 PUT /api/receipt-templates/999999",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ghost\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-002 13 DELETE /api/receipt-templates/999999",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-003 Names are required, at most 80 characters and unique ignoring case and spaces",
+			"description": "Proves: REQ-090.AC6",
+			"item": [
+				{
+					"name": "RCT-003 01 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"   \",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"name\"))), \"details includes {\\\"field\\\": \\\"name\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 02 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"name\"))), \"details includes {\\\"field\\\": \\\"name\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 03 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"name\"))), \"details includes {\\\"field\\\": \\\"name\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 04 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 05 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \" standard \",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 06 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Festive\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"festive\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 07 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"FESTIVE\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 08 PUT /api/receipt-templates/{{festive}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{festive}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{festive}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"STANDARD\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 09 PUT /api/receipt-templates/{{festive}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{festive}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{festive}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"festive\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"festive\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-003 10 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-004 The html must be a non-blank string of at most 1 MB, and nothing is saved otherwise",
+			"description": "Proves: REQ-090.AC7",
+			"item": [
+				{
+					"name": "RCT-004 01 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"No html\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 02 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Null html\",\n  \"html\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 03 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Number html\",\n  \"html\": 42\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 04 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Object html\",\n  \"html\": {\n    \"body\": \"x\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 05 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Blank html\",\n  \"html\": \" \\n\\t \"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 06 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"   \",\n  \"html\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect(b?.details, \"details length\").to.have.lengthOf(2);",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"name\"))), \"details includes {\\\"field\\\": \\\"name\\\"}\").to.be.true;",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 07 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// A body over 1 MB is built here rather than stored in the collection.",
+									"pm.request.body.raw = JSON.stringify({ name: \"Huge\", html: '<p>' + 'x'.repeat(1024 * 1024) + '</p>' });"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"  pm.expect((b?.details || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.field === \"html\"))), \"details includes {\\\"field\\\": \\\"html\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-004 08 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-005 The built-in template can't be replaced or deleted",
+			"description": "Proves: REQ-090.AC4, REQ-090.AC5",
+			"item": [
+				{
+					"name": "RCT-005 01 GET /api/receipt-templates/default",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-005 02 PUT /api/receipt-templates/{{std}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{std}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Mine\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-005 03 DELETE /api/receipt-templates/{{std}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{std}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-005 04 GET /api/receipt-templates/{{std}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{std}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{std}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(true);",
+									"  pm.expect(((typeof b?.html === 'string' && b?.html.toLowerCase().includes(String(\"Secretary/Clerk\").toLowerCase()))), \"html matches {\\\"$contains\\\": \\\"Secretary/Clerk\\\"}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-006 Exactly one template is the default, and any template can be made the default",
+			"description": "Proves: REQ-091.AC2, REQ-091.AC3, REQ-091.AC4",
+			"item": [
+				{
+					"name": "RCT-006 01 GET /api/receipt-templates/default",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.collectionVariables.set(\"std\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 02 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Gold\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"gold\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 03 PATCH /api/receipt-templates/{{gold}}/default",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{gold}}/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{gold}}",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"gold\"));",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Gold\");",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(true);",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>{{student.name}}</p>\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 04 GET /api/receipt-templates/default",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const V = (k) => pm.collectionVariables.get(k);",
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.id, \"id\").to.eql(V(\"gold\"));",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(false);",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>{{student.name}}</p>\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 05 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.isDefault, \"[0].isDefault\").to.eql(false);",
+									"  pm.expect(b?.[1]?.name, \"[1].name\").to.eql(\"Gold\");",
+									"  pm.expect(b?.[1]?.isDefault, \"[1].isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 06 PATCH /api/receipt-templates/{{gold}}/default",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{gold}}/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{gold}}",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 07 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.isDefault, \"[0].isDefault\").to.eql(false);",
+									"  pm.expect(b?.[1]?.name, \"[1].name\").to.eql(\"Gold\");",
+									"  pm.expect(b?.[1]?.isDefault, \"[1].isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 08 PATCH /api/receipt-templates/{{std}}/default",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{std}}/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{std}}",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 09 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(2);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.isDefault, \"[0].isDefault\").to.eql(true);",
+									"  pm.expect(b?.[1]?.name, \"[1].name\").to.eql(\"Gold\");",
+									"  pm.expect(b?.[1]?.isDefault, \"[1].isDefault\").to.eql(false);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 10 PATCH /api/receipt-templates/999999/default",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/999999/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"999999",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, 'standard error body').to.include.all.keys('status', 'error', 'message', 'details', 'timestamp');",
+									"  pm.expect(b.status, 'error status').to.be.a('number');",
+									"  pm.expect(b.message, 'error message').to.be.a('string').and.match(/\\S/);",
+									"  pm.expect(b.details, 'error details').to.be.an('array');",
+									"  pm.expect(b, 'error body').to.not.have.any.keys('trace', 'exception');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-006 11 GET /api/receipt-templates/default",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Standard\");",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-007 Deleting the default template makes the built-in template the default again",
+			"description": "Proves: REQ-090.AC5, REQ-091.AC3",
+			"item": [
+				{
+					"name": "RCT-007 01 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Gold\",\n  \"html\": \"<p>\\u007b\\u007bstudent.name}}</p>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set(\"gold\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-007 02 PATCH /api/receipt-templates/{{gold}}/default",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{gold}}/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{gold}}",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-007 03 DELETE /api/receipt-templates/{{gold}}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{gold}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{gold}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-007 04 GET /api/receipt-templates/default",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"default"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.name, \"name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.builtIn, \"builtIn\").to.eql(true);",
+									"  pm.expect(b?.isDefault, \"isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-007 05 GET /api/receipt-templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b, \" length\").to.have.lengthOf(1);",
+									"  pm.expect(b?.[0]?.name, \"[0].name\").to.eql(\"Standard\");",
+									"  pm.expect(b?.[0]?.isDefault, \"[0].isDefault\").to.eql(true);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-008 The html comes back exactly as saved, scripts, Tamil text and whitespace included",
+			"description": "Proves: REQ-090.AC8",
+			"item": [
+				{
+					"name": "RCT-008 01 POST /api/receipt-templates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Everything\",\n  \"html\": \"<!doctype html>\\n<html><head><meta charset=\\\"utf-8\\\"><style>@page { size: A4 portrait } h1 { color: #8B0000; font-family: 'Noto Serif Tamil' }</style></head>\\n<body>\\n  <h1>\\u007b\\u007bstudent.name}} — ரசீது</h1>\\n  \\u007b\\u007b#each payments}}<p>\\u007b\\u007bdate}}\\t\\u007b\\u007bcourseName}}  ₹\\u007b\\u007bamountPaid}}</p>\\u007b\\u007b/each}}\\n  <script>document.title = 'Receipt ' + window.receipt.receipt.id; if (1 < 2 && \\\"a\\\" !== 'b') console.log(`ok`);</script>\\n</body></html>\\n\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<!doctype html>\\n<html><head><meta charset=\\\"utf-8\\\"><style>@page { size: A4 portrait } h1 { color: #8B0000; font-family: 'Noto Serif Tamil' }</style></head>\\n<body>\\n  <h1>{{student.name}} — ரசீது</h1>\\n  {{#each payments}}<p>{{date}}\\t{{courseName}}  ₹{{amountPaid}}</p>{{/each}}\\n  <script>document.title = 'Receipt ' + window.receipt.receipt.id; if (1 < 2 && \\\"a\\\" !== 'b') console.log(`ok`);</script>\\n</body></html>\\n\");",
+									"});",
+									"pm.collectionVariables.set(\"full\", pm.response.json()?.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-008 02 GET /api/receipt-templates/{{full}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{full}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{full}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<!doctype html>\\n<html><head><meta charset=\\\"utf-8\\\"><style>@page { size: A4 portrait } h1 { color: #8B0000; font-family: 'Noto Serif Tamil' }</style></head>\\n<body>\\n  <h1>{{student.name}} — ரசீது</h1>\\n  {{#each payments}}<p>{{date}}\\t{{courseName}}  ₹{{amountPaid}}</p>{{/each}}\\n  <script>document.title = 'Receipt ' + window.receipt.receipt.id; if (1 < 2 && \\\"a\\\" !== 'b') console.log(`ok`);</script>\\n</body></html>\\n\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-008 03 PUT /api/receipt-templates/{{full}}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{full}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{full}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Everything\",\n  \"html\": \"<p>Total: ₹\\u007b\\u007btotals.paid}}</p>\\r\\n\\n   \"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>Total: ₹{{totals.paid}}</p>\\r\\n\\n   \");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-008 04 GET /api/receipt-templates/{{full}}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/receipt-templates/{{full}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"receipt-templates",
+								"{{full}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect(b?.html, \"html\").to.eql(\"<p>Total: ₹{{totals.paid}}</p>\\r\\n\\n   \");",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RCT-009 ADMIN has read and write on receipt templates, and every role lists the route",
+			"description": "Proves: REQ-092.AC2, REQ-092.AC4",
+			"item": [
+				{
+					"name": "RCT-009 01 POST /api/roles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Clerk u{{$randomUUID}}\",\n  \"routes\": [\n    {\n      \"path\": \"/api/payments/**\",\n      \"read\": true,\n      \"write\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(201);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "RCT-009 02 GET /api/roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"status\", () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"body\", () => {",
+									"  const b = pm.response.json();",
+									"  pm.expect((b || []).some(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && (y?.name === \"ADMIN\") && ((Array.isArray(y?.routes) && y?.routes.some(y1 => ((y1 !== null && typeof y1 === 'object' && !Array.isArray(y1)) && (y1?.path === \"/api/receipt-templates/**\") && (y1?.read === true) && (y1?.write === true))))))), \" includes {\\\"name\\\": \\\"ADMIN\\\", \\\"routes\\\": {\\\"$has\\\": [{\\\"path\\\": \\\"/api/receipt-templates/**\\\", \\\"read\\\": true, \\\"write\\\": true}]}}\").to.be.true;",
+									"  pm.expect((b || []).every(y => ((y !== null && typeof y === 'object' && !Array.isArray(y)) && ((y?.routes != null && ((y?.routes.length ?? Object.keys(y?.routes).length) === 12)) && (Array.isArray(y?.routes) && y?.routes.some(y1 => ((y1 !== null && typeof y1 === 'object' && !Array.isArray(y1)) && (y1?.path === \"/api/receipt-templates/**\"))))))), \": every item matches {\\\"routes\\\": {\\\"$len\\\": 12, \\\"$has\\\": [{\\\"path\\\": \\\"/api/receipt-templates/**\\\"}]}}\").to.be.true;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

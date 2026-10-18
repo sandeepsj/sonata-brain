@@ -47,7 +47,7 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
    create/edit/delete actions show when it has `write`. Read and write are independent. Update the landing-page
    logic and the no-access page (sign-up gives `routes: []`).
 3. Roles admin screen: the role body is now `{name, description, routes: [{path, read, write}]}`; GET returns
-   all 11 catalogue routes with false flags where not granted. Edit it as a table: one row per route path, two
+   all 12 catalogue routes with false flags where not granted. Edit it as a table: one row per route path, two
    checkboxes (Read, Write). Show 400 errors on the fields. Built-in ADMIN can't be deleted (409).
 4. Tokens: on 401, call POST /api/auth/refresh once with `Authorization: Bearer <refreshToken>`, retry, then go
    to login. On 403 show "You don't have permission". Role changes reach the token only at the next refresh, so
@@ -110,3 +110,42 @@ dev add a Vite proxy (`/api` → http://localhost:18080) rather than calling the
 | `docs/requirements/10-access.md` | Rules for login, routes, roles and users |
 | `docs/requirements/00-platform.md` | Error body (REQ-005), logging headers (REQ-008), API docs (REQ-009) |
 | `postman/collections/access.postman_collection.json`, `route-access.postman_collection.json` | Real request and response examples |
+
+## Prompt: receipt templates (2026-10-18)
+
+Paste this on its own once the main migration above is done.
+
+```text
+The backend (repo ~/dev/sonata-brain, branch `main`) now stores receipt templates. A template is a complete HTML
+document (CSS and <script> allowed) with Handlebars variables; this frontend fills in the variables and renders it,
+and the rendered page is the receipt. This replaces the per-element formatting plan in
+docs/receipt-templates-requirement.md (mark that file superseded) and the hard-coded layout in
+src/routes/receipt-print/+page.svelte.
+
+Read first (backend repo, read-only): ~/dev/sonata-brain/docs/frontend-handoff.md section 5,
+~/dev/sonata-brain/docs/requirements/90-receipts.md, the /api/receipt-templates operations in
+~/dev/sonata-brain/docs/api/openapi.json, and the examples in
+~/dev/sonata-brain/postman/collections/receipt-templates.postman_collection.json.
+Regenerate the API types from openapi.json.
+
+What to do:
+1. Add `/api/receipt-templates/**` ("Receipt templates") to the route list and the roles editor (12 routes now).
+2. A receipt data builder: from the student and the selected payments, build the variables object exactly as listed
+   in 90-receipts.md (amounts formatted en-IN without ₹, dates like "18 Oct 2026"). Render with the `handlebars`
+   package, and also expose the object to scripts as `window.receipt`.
+3. Render and print ONLY inside `<iframe sandbox="allow-scripts allow-modals" srcdoc=…>`, never with
+   allow-same-origin, so a template's script can't reach the token or the API. Print by injecting a
+   `window.print()` call into the iframe document.
+4. Printing (students/[id]/receipts and /receipt-print): a template picker (GET /api/receipt-templates, default
+   preselected via GET /api/receipt-templates/default), then render the chosen template in the iframe and print.
+   The output with the Standard template must look like today's receipt.
+5. A templates editor page: list, HTML code editor (CodeMirror 6, HTML mode), a variables panel (click inserts
+   {{…}} at the cursor; show {{#each payments}}…{{/each}} as a snippet), and a live preview in the sandboxed iframe
+   with sample data. Save (PUT), Save as new… (POST, asks for a name), Make default (PATCH …/default), Delete with
+   confirmation. Show write actions only with write on the route; the built-in template offers only "Save as new".
+   Show 400 `details` on the name/html fields and 409 messages as is.
+
+Check everything against a local backend (cd ~/dev/sonata-brain/postman && node run.js --keep-server RTE-open):
+print with Standard, create a template with a script and confirm it runs in the preview but can't read
+localStorage, make it default, delete it. Run the type check and build before finishing.
+```

@@ -23,7 +23,8 @@ public final class Routes {
             "/api/dues/**",
             "/api/users/**",
             "/api/roles/**",
-            "/api/logging/**");
+            "/api/logging/**",
+            "/api/receipt-templates/**");
 
     private Routes() {
     }
