@@ -2,6 +2,7 @@ package com.example.sonata_brain.service;
 
 import com.example.sonata_brain.Repository.StudentRepository;
 import com.example.sonata_brain.exception.StudentNotFoundException;
+import com.example.sonata_brain.model.AdmissionStatus;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.spec.StudentSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,10 +50,12 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<Student> searchStudents(String name, LocalDate admissionDateFrom, LocalDate admissionDateTo,
                                       String school, Integer pinCode,
-                                      String contactNo, String className, Long admissionNo) {
+                                      String contactNo, String className, Long admissionNo,
+                                      AdmissionStatus status, String courseName, LocalDateTime now) {
         return studentRepository.findAll(
             StudentSpecifications.withDynamicQuery(
-                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className, admissionNo
+                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className, admissionNo,
+                status, courseName, now
             )
         );
     }

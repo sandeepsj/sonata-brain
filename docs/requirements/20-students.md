@@ -39,3 +39,14 @@ Status: accepted · Source: existing code; admission-number search added in comm
   must match exactly.
 - **REQ-023.AC4** [baseline] `admissionDateFrom` and `admissionDateTo` are inclusive. Either can be used alone.
 - **REQ-023.AC5** [baseline] Multiple filters are combined with AND.
+
+### REQ-024 Filter student search by status and course
+Status: verified · Source: user request (2026-11-25), Students page needs Subject and Status filters
+
+- **REQ-024.AC1** [target] `GET /api/students/search` accepts `status` (`active`, `closed` or `suspended`). It must
+  match exactly. Any other value, including different letter case → 400.
+- **REQ-024.AC2** [target] `GET /api/students/search` accepts `courseName`. It keeps students who have a session in
+  that course that is active now (`dateOfDisjoining` is empty or in the future, the same rule as
+  `GET /api/student-sessions?active=true`). The name is case-sensitive. A student with
+  several such sessions is returned once. An unknown course returns `[]`, not 404.
+- **REQ-024.AC3** [target] Both combine with the other REQ-023 filters using AND.

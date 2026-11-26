@@ -195,3 +195,13 @@ Append-only. Newest entries at the bottom. Each entry gives the date, the source
   `allow-same-origin` (design, REQ-090.AC9).
 - A new catalogue route `/api/receipt-templates/**` (12 routes now). The migration grants every existing role the same
   read and write on it as on `/api/payments/**` (REQ-092.AC3).
+
+## 2026-11-25: Student search by status and course
+
+| # | What was asked or decided | Source | Requirements |
+|---|---|---|---|
+| 1 | The Students page needs Subject (course) and Status filters. The search API supports neither, so the request is logged for later. | User | REQ-024 |
+| 2 | Build it, after confirming the scope with the frontend session: only the two query parameters, same response, no paging. | User | REQ-024 |
+
+- Built the same day. Cases STU-030 to STU-033. REQ-024.AC1 now says an invalid `status` → 400, and AC2 that the
+  course name is case-sensitive and a student is returned once.

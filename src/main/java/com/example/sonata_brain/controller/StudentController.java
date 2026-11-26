@@ -1,5 +1,6 @@
 package com.example.sonata_brain.controller;
 
+import com.example.sonata_brain.model.AdmissionStatus;
 import com.example.sonata_brain.model.Student;
 import com.example.sonata_brain.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -62,10 +64,13 @@ public class StudentController {
             @RequestParam(required = false) Integer pinCode,
             @RequestParam(required = false) String contactNo,
             @RequestParam(required = false) String className,
-            @RequestParam(required = false) Long admissionNo) {
+            @RequestParam(required = false) Long admissionNo,
+            @RequestParam(required = false) AdmissionStatus status,
+            @RequestParam(required = false) String courseName) {
 
         List<Student> students = studentService.searchStudents(
-                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className, admissionNo
+                name, admissionDateFrom, admissionDateTo, school, pinCode, contactNo, className, admissionNo,
+                status, courseName, LocalDateTime.now()
         );
         return ResponseEntity.ok(students);
     }
